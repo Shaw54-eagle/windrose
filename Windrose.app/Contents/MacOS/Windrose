@@ -1,0 +1,8 @@
+#!/bin/bash
+# Windrose.app — native window if pywebview is installed, browser otherwise.
+DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+cd "$DIR" || exit 1
+if [ -x venv/bin/python ] && venv/bin/python -c "import webview" 2>/dev/null; then
+  exec venv/bin/python app_native.py
+fi
+exec bash "Start Windrose.command"

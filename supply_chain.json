@@ -1,0 +1,4979 @@
+{
+  "_note": "Curated from public filings, earnings calls, and news \u2014 not a licensed data feed. Edit freely: add nodes (ticker null for non-public entities) and edges {from, to, rel}. Arrows point supplier -> customer (money flows the other way).",
+  "networks": {
+    "semiconductors": {
+      "nodes": [
+        {
+          "id": "ASML",
+          "label": "ASML",
+          "type": "equipment"
+        },
+        {
+          "id": "AMAT",
+          "label": "Applied Materials",
+          "type": "equipment"
+        },
+        {
+          "id": "LRCX",
+          "label": "Lam Research",
+          "type": "equipment"
+        },
+        {
+          "id": "KLAC",
+          "label": "KLA",
+          "type": "equipment"
+        },
+        {
+          "id": "TSM",
+          "label": "TSMC",
+          "type": "foundry"
+        },
+        {
+          "id": "INTC",
+          "label": "Intel",
+          "type": "foundry"
+        },
+        {
+          "id": "GFS",
+          "label": "GlobalFoundries",
+          "type": "foundry"
+        },
+        {
+          "id": "SAMSUNG",
+          "label": "Samsung Foundry",
+          "type": "foundry",
+          "ticker": null
+        },
+        {
+          "id": "MU",
+          "label": "Micron",
+          "type": "memory"
+        },
+        {
+          "id": "SKHYNIX",
+          "label": "SK Hynix",
+          "type": "memory",
+          "ticker": null
+        },
+        {
+          "id": "NVDA",
+          "label": "Nvidia",
+          "type": "designer"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "type": "designer"
+        },
+        {
+          "id": "AVGO",
+          "label": "Broadcom",
+          "type": "designer"
+        },
+        {
+          "id": "QCOM",
+          "label": "Qualcomm",
+          "type": "designer"
+        },
+        {
+          "id": "MRVL",
+          "label": "Marvell",
+          "type": "designer"
+        },
+        {
+          "id": "ARM",
+          "label": "Arm",
+          "type": "ip"
+        },
+        {
+          "id": "SNPS",
+          "label": "Synopsys",
+          "type": "ip"
+        },
+        {
+          "id": "CDNS",
+          "label": "Cadence",
+          "type": "ip"
+        },
+        {
+          "id": "TXN",
+          "label": "Texas Instruments",
+          "type": "analog"
+        },
+        {
+          "id": "ADI",
+          "label": "Analog Devices",
+          "type": "analog"
+        },
+        {
+          "id": "AAPL",
+          "label": "Apple",
+          "type": "buyer"
+        },
+        {
+          "id": "MSFT",
+          "label": "Microsoft",
+          "type": "buyer"
+        },
+        {
+          "id": "GOOGL",
+          "label": "Google",
+          "type": "buyer"
+        },
+        {
+          "id": "AMZN",
+          "label": "Amazon",
+          "type": "buyer"
+        },
+        {
+          "id": "META",
+          "label": "Meta",
+          "type": "buyer"
+        },
+        {
+          "id": "TSLA",
+          "label": "Tesla",
+          "type": "buyer"
+        },
+        {
+          "id": "ZEISS",
+          "label": "Zeiss SMT",
+          "type": "equipment",
+          "ticker": null
+        },
+        {
+          "id": "ENTG",
+          "label": "Entegris",
+          "type": "equipment"
+        },
+        {
+          "id": "TER",
+          "label": "Teradyne",
+          "type": "equipment"
+        },
+        {
+          "id": "AMKR",
+          "label": "Amkor",
+          "type": "foundry"
+        },
+        {
+          "id": "UMC",
+          "label": "UMC",
+          "type": "foundry"
+        },
+        {
+          "id": "MPWR",
+          "label": "Monolithic Power",
+          "type": "analog"
+        },
+        {
+          "id": "ON",
+          "label": "onsemi",
+          "type": "analog"
+        },
+        {
+          "id": "NXPI",
+          "label": "NXP",
+          "type": "analog"
+        }
+      ],
+      "edges": [
+        {
+          "from": "ASML",
+          "to": "TSM",
+          "rel": "EUV & DUV lithography"
+        },
+        {
+          "from": "ASML",
+          "to": "INTC",
+          "rel": "EUV / High-NA tools"
+        },
+        {
+          "from": "ASML",
+          "to": "SAMSUNG",
+          "rel": "EUV lithography"
+        },
+        {
+          "from": "ASML",
+          "to": "SKHYNIX",
+          "rel": "DUV for DRAM"
+        },
+        {
+          "from": "AMAT",
+          "to": "TSM",
+          "rel": "deposition & etch"
+        },
+        {
+          "from": "AMAT",
+          "to": "INTC",
+          "rel": "process equipment"
+        },
+        {
+          "from": "AMAT",
+          "to": "MU",
+          "rel": "memory fab tools"
+        },
+        {
+          "from": "LRCX",
+          "to": "TSM",
+          "rel": "etch systems"
+        },
+        {
+          "from": "LRCX",
+          "to": "MU",
+          "rel": "NAND / DRAM etch"
+        },
+        {
+          "from": "LRCX",
+          "to": "SKHYNIX",
+          "rel": "etch systems"
+        },
+        {
+          "from": "KLAC",
+          "to": "TSM",
+          "rel": "inspection & metrology"
+        },
+        {
+          "from": "KLAC",
+          "to": "INTC",
+          "rel": "process control"
+        },
+        {
+          "from": "ARM",
+          "to": "AAPL",
+          "rel": "CPU architecture license"
+        },
+        {
+          "from": "ARM",
+          "to": "QCOM",
+          "rel": "core licenses"
+        },
+        {
+          "from": "ARM",
+          "to": "NVDA",
+          "rel": "Grace CPU cores"
+        },
+        {
+          "from": "SNPS",
+          "to": "NVDA",
+          "rel": "EDA tools"
+        },
+        {
+          "from": "SNPS",
+          "to": "AMD",
+          "rel": "EDA tools"
+        },
+        {
+          "from": "CDNS",
+          "to": "AVGO",
+          "rel": "EDA tools"
+        },
+        {
+          "from": "CDNS",
+          "to": "QCOM",
+          "rel": "EDA tools"
+        },
+        {
+          "from": "TSM",
+          "to": "NVDA",
+          "rel": "fabs GPUs / CoWoS packaging"
+        },
+        {
+          "from": "TSM",
+          "to": "AMD",
+          "rel": "fabs CPUs & GPUs"
+        },
+        {
+          "from": "TSM",
+          "to": "AAPL",
+          "rel": "fabs A- & M-series"
+        },
+        {
+          "from": "TSM",
+          "to": "AVGO",
+          "rel": "fabs custom ASICs"
+        },
+        {
+          "from": "TSM",
+          "to": "QCOM",
+          "rel": "fabs Snapdragon"
+        },
+        {
+          "from": "TSM",
+          "to": "MRVL",
+          "rel": "fabs custom silicon"
+        },
+        {
+          "from": "SAMSUNG",
+          "to": "TSLA",
+          "rel": "fabs FSD chips"
+        },
+        {
+          "from": "GFS",
+          "to": "QCOM",
+          "rel": "RF & mature nodes"
+        },
+        {
+          "from": "GFS",
+          "to": "ADI",
+          "rel": "specialty foundry"
+        },
+        {
+          "from": "MU",
+          "to": "NVDA",
+          "rel": "HBM memory"
+        },
+        {
+          "from": "SKHYNIX",
+          "to": "NVDA",
+          "rel": "HBM3E memory"
+        },
+        {
+          "from": "MU",
+          "to": "AMD",
+          "rel": "HBM for Instinct"
+        },
+        {
+          "from": "NVDA",
+          "to": "MSFT",
+          "rel": "AI GPUs"
+        },
+        {
+          "from": "NVDA",
+          "to": "GOOGL",
+          "rel": "AI GPUs"
+        },
+        {
+          "from": "NVDA",
+          "to": "AMZN",
+          "rel": "AI GPUs"
+        },
+        {
+          "from": "NVDA",
+          "to": "META",
+          "rel": "AI GPUs"
+        },
+        {
+          "from": "NVDA",
+          "to": "TSLA",
+          "rel": "training compute"
+        },
+        {
+          "from": "AMD",
+          "to": "MSFT",
+          "rel": "EPYC & Instinct"
+        },
+        {
+          "from": "AMD",
+          "to": "META",
+          "rel": "MI accelerators"
+        },
+        {
+          "from": "AVGO",
+          "to": "AAPL",
+          "rel": "RF & wireless parts"
+        },
+        {
+          "from": "AVGO",
+          "to": "GOOGL",
+          "rel": "TPU co-design"
+        },
+        {
+          "from": "AVGO",
+          "to": "META",
+          "rel": "custom AI ASICs"
+        },
+        {
+          "from": "MRVL",
+          "to": "AMZN",
+          "rel": "custom datacenter silicon"
+        },
+        {
+          "from": "QCOM",
+          "to": "AAPL",
+          "rel": "5G modems"
+        },
+        {
+          "from": "TXN",
+          "to": "TSLA",
+          "rel": "analog & power"
+        },
+        {
+          "from": "ADI",
+          "to": "AAPL",
+          "rel": "signal chain"
+        },
+        {
+          "from": "ZEISS",
+          "to": "ASML",
+          "rel": "EUV optics \u2014 sole source"
+        },
+        {
+          "from": "ENTG",
+          "to": "TSM",
+          "rel": "materials & wafer handling"
+        },
+        {
+          "from": "ENTG",
+          "to": "INTC",
+          "rel": "filtration & materials"
+        },
+        {
+          "from": "TER",
+          "to": "TSM",
+          "rel": "wafer test systems"
+        },
+        {
+          "from": "TER",
+          "to": "QCOM",
+          "rel": "SoC test"
+        },
+        {
+          "from": "AMKR",
+          "to": "AMD",
+          "rel": "OSAT packaging"
+        },
+        {
+          "from": "AMKR",
+          "to": "QCOM",
+          "rel": "packaging & test"
+        },
+        {
+          "from": "UMC",
+          "to": "QCOM",
+          "rel": "mature-node foundry"
+        },
+        {
+          "from": "UMC",
+          "to": "NXPI",
+          "rel": "specialty foundry"
+        },
+        {
+          "from": "MPWR",
+          "to": "NVDA",
+          "rel": "GPU power modules"
+        },
+        {
+          "from": "ON",
+          "to": "TSLA",
+          "rel": "SiC power devices"
+        },
+        {
+          "from": "NXPI",
+          "to": "TSLA",
+          "rel": "auto MCUs & radar"
+        },
+        {
+          "from": "AMAT",
+          "to": "SAMSUNG",
+          "rel": "process equipment"
+        },
+        {
+          "from": "KLAC",
+          "to": "SAMSUNG",
+          "rel": "process control"
+        },
+        {
+          "from": "SNPS",
+          "to": "INTC",
+          "rel": "EDA tools"
+        },
+        {
+          "from": "CDNS",
+          "to": "NVDA",
+          "rel": "EDA & IP"
+        },
+        {
+          "from": "ARM",
+          "to": "AMZN",
+          "rel": "Graviton cores"
+        },
+        {
+          "from": "MU",
+          "to": "AAPL",
+          "rel": "DRAM & NAND"
+        }
+      ]
+    },
+    "defense": {
+      "nodes": [
+        {
+          "id": "DOD",
+          "label": "US Dept of Defense",
+          "type": "customer",
+          "ticker": null
+        },
+        {
+          "id": "AIRBUS",
+          "label": "Airbus",
+          "type": "customer",
+          "ticker": null
+        },
+        {
+          "id": "UAL",
+          "label": "United Airlines",
+          "type": "airline"
+        },
+        {
+          "id": "AAL",
+          "label": "American Airlines",
+          "type": "airline"
+        },
+        {
+          "id": "LMT",
+          "label": "Lockheed Martin",
+          "type": "prime"
+        },
+        {
+          "id": "RTX",
+          "label": "RTX",
+          "type": "prime"
+        },
+        {
+          "id": "NOC",
+          "label": "Northrop Grumman",
+          "type": "prime"
+        },
+        {
+          "id": "GD",
+          "label": "General Dynamics",
+          "type": "prime"
+        },
+        {
+          "id": "BA",
+          "label": "Boeing",
+          "type": "prime"
+        },
+        {
+          "id": "HII",
+          "label": "Huntington Ingalls",
+          "type": "prime"
+        },
+        {
+          "id": "LHX",
+          "label": "L3Harris",
+          "type": "subsystems"
+        },
+        {
+          "id": "TDY",
+          "label": "Teledyne",
+          "type": "subsystems"
+        },
+        {
+          "id": "HEI",
+          "label": "HEICO",
+          "type": "subsystems"
+        },
+        {
+          "id": "CW",
+          "label": "Curtiss-Wright",
+          "type": "subsystems"
+        },
+        {
+          "id": "KTOS",
+          "label": "Kratos",
+          "type": "subsystems"
+        },
+        {
+          "id": "AVAV",
+          "label": "AeroVironment",
+          "type": "subsystems"
+        },
+        {
+          "id": "BWXT",
+          "label": "BWX Technologies",
+          "type": "supplier"
+        },
+        {
+          "id": "HWM",
+          "label": "Howmet Aerospace",
+          "type": "supplier"
+        },
+        {
+          "id": "ATI",
+          "label": "ATI Inc",
+          "type": "supplier"
+        },
+        {
+          "id": "GE",
+          "label": "GE Aerospace",
+          "type": "engines"
+        },
+        {
+          "id": "LDOS",
+          "label": "Leidos",
+          "type": "services"
+        },
+        {
+          "id": "TXT",
+          "label": "Textron",
+          "type": "prime"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD (Xilinx)",
+          "type": "supplier"
+        },
+        {
+          "id": "PLTR",
+          "label": "Palantir",
+          "type": "software"
+        },
+        {
+          "id": "ANDURIL",
+          "label": "Anduril",
+          "type": "software",
+          "ticker": null
+        },
+        {
+          "id": "SAIC",
+          "label": "SAIC",
+          "type": "services"
+        },
+        {
+          "id": "TDG",
+          "label": "TransDigm",
+          "type": "supplier"
+        },
+        {
+          "id": "SPR",
+          "label": "Spirit Aero (Boeing)",
+          "type": "supplier",
+          "ticker": null
+        },
+        {
+          "id": "MRCY",
+          "label": "Mercury Systems",
+          "type": "subsystems"
+        },
+        {
+          "id": "WWD",
+          "label": "Woodward",
+          "type": "supplier"
+        }
+      ],
+      "edges": [
+        {
+          "from": "LMT",
+          "to": "DOD",
+          "rel": "F-35, missiles, space"
+        },
+        {
+          "from": "RTX",
+          "to": "DOD",
+          "rel": "missiles, sensors, ISR"
+        },
+        {
+          "from": "NOC",
+          "to": "DOD",
+          "rel": "B-21, nuclear, space"
+        },
+        {
+          "from": "GD",
+          "to": "DOD",
+          "rel": "submarines, land systems"
+        },
+        {
+          "from": "BA",
+          "to": "DOD",
+          "rel": "defense & space units"
+        },
+        {
+          "from": "HII",
+          "to": "DOD",
+          "rel": "carriers & submarines"
+        },
+        {
+          "from": "TXT",
+          "to": "DOD",
+          "rel": "Bell V-280, ISR"
+        },
+        {
+          "from": "LDOS",
+          "to": "DOD",
+          "rel": "IT & mission services"
+        },
+        {
+          "from": "KTOS",
+          "to": "DOD",
+          "rel": "target & CCA drones"
+        },
+        {
+          "from": "AVAV",
+          "to": "DOD",
+          "rel": "Switchblade, small UAS"
+        },
+        {
+          "from": "RTX",
+          "to": "LMT",
+          "rel": "F135 engine for F-35"
+        },
+        {
+          "from": "RTX",
+          "to": "AIRBUS",
+          "rel": "GTF engines"
+        },
+        {
+          "from": "RTX",
+          "to": "BA",
+          "rel": "Collins avionics"
+        },
+        {
+          "from": "GE",
+          "to": "BA",
+          "rel": "LEAP engines (CFM)"
+        },
+        {
+          "from": "GE",
+          "to": "AIRBUS",
+          "rel": "LEAP engines (CFM)"
+        },
+        {
+          "from": "HWM",
+          "to": "GE",
+          "rel": "turbine blades"
+        },
+        {
+          "from": "HWM",
+          "to": "RTX",
+          "rel": "engine structures"
+        },
+        {
+          "from": "HWM",
+          "to": "BA",
+          "rel": "fasteners & structures"
+        },
+        {
+          "from": "ATI",
+          "to": "GE",
+          "rel": "specialty alloys"
+        },
+        {
+          "from": "ATI",
+          "to": "HWM",
+          "rel": "titanium & nickel"
+        },
+        {
+          "from": "BWXT",
+          "to": "HII",
+          "rel": "naval nuclear reactors"
+        },
+        {
+          "from": "BWXT",
+          "to": "GD",
+          "rel": "reactor components"
+        },
+        {
+          "from": "LHX",
+          "to": "LMT",
+          "rel": "comms & datalinks"
+        },
+        {
+          "from": "LHX",
+          "to": "NOC",
+          "rel": "space payloads"
+        },
+        {
+          "from": "TDY",
+          "to": "LMT",
+          "rel": "sensors & imaging"
+        },
+        {
+          "from": "TDY",
+          "to": "NOC",
+          "rel": "digital imaging"
+        },
+        {
+          "from": "CW",
+          "to": "GD",
+          "rel": "actuation systems"
+        },
+        {
+          "from": "CW",
+          "to": "HII",
+          "rel": "naval components"
+        },
+        {
+          "from": "AMD",
+          "to": "LMT",
+          "rel": "Xilinx FPGAs (radar)"
+        },
+        {
+          "from": "AMD",
+          "to": "RTX",
+          "rel": "rad-hard FPGAs"
+        },
+        {
+          "from": "HEI",
+          "to": "UAL",
+          "rel": "aftermarket parts"
+        },
+        {
+          "from": "HEI",
+          "to": "AAL",
+          "rel": "aftermarket parts"
+        },
+        {
+          "from": "BA",
+          "to": "UAL",
+          "rel": "737 & 787 fleet"
+        },
+        {
+          "from": "BA",
+          "to": "AAL",
+          "rel": "737 fleet"
+        },
+        {
+          "from": "PLTR",
+          "to": "DOD",
+          "rel": "Maven, TITAN, software"
+        },
+        {
+          "from": "ANDURIL",
+          "to": "DOD",
+          "rel": "Lattice, autonomous systems"
+        },
+        {
+          "from": "SAIC",
+          "to": "DOD",
+          "rel": "IT & engineering services"
+        },
+        {
+          "from": "TDG",
+          "to": "BA",
+          "rel": "proprietary components"
+        },
+        {
+          "from": "TDG",
+          "to": "AIRBUS",
+          "rel": "actuators & pumps"
+        },
+        {
+          "from": "SPR",
+          "to": "BA",
+          "rel": "737 fuselages"
+        },
+        {
+          "from": "SPR",
+          "to": "AIRBUS",
+          "rel": "A350 sections"
+        },
+        {
+          "from": "MRCY",
+          "to": "RTX",
+          "rel": "processing modules"
+        },
+        {
+          "from": "MRCY",
+          "to": "LMT",
+          "rel": "rugged compute"
+        },
+        {
+          "from": "WWD",
+          "to": "GE",
+          "rel": "fuel systems"
+        },
+        {
+          "from": "WWD",
+          "to": "BA",
+          "rel": "actuation & controls"
+        },
+        {
+          "from": "GE",
+          "to": "TXT",
+          "rel": "turboshafts (Bell)"
+        },
+        {
+          "from": "HWM",
+          "to": "LMT",
+          "rel": "aerostructures"
+        },
+        {
+          "from": "LHX",
+          "to": "DOD",
+          "rel": "comms & ISR"
+        },
+        {
+          "from": "CW",
+          "to": "BA",
+          "rel": "defense actuation"
+        },
+        {
+          "from": "AMD",
+          "to": "NOC",
+          "rel": "rad-hard FPGAs"
+        }
+      ]
+    },
+    "ai-datacenter": {
+      "nodes": [
+        {
+          "id": "NVDA",
+          "label": "Nvidia",
+          "type": "chips"
+        },
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "type": "chips"
+        },
+        {
+          "id": "AVGO",
+          "label": "Broadcom",
+          "type": "chips"
+        },
+        {
+          "id": "MU",
+          "label": "Micron",
+          "type": "chips"
+        },
+        {
+          "id": "ANET",
+          "label": "Arista Networks",
+          "type": "network"
+        },
+        {
+          "id": "SMCI",
+          "label": "Supermicro",
+          "type": "servers"
+        },
+        {
+          "id": "DELL",
+          "label": "Dell",
+          "type": "servers"
+        },
+        {
+          "id": "HPE",
+          "label": "HPE",
+          "type": "servers"
+        },
+        {
+          "id": "VRT",
+          "label": "Vertiv",
+          "type": "power"
+        },
+        {
+          "id": "ETN",
+          "label": "Eaton",
+          "type": "power"
+        },
+        {
+          "id": "CEG",
+          "label": "Constellation Energy",
+          "type": "energy"
+        },
+        {
+          "id": "VST",
+          "label": "Vistra",
+          "type": "energy"
+        },
+        {
+          "id": "MSFT",
+          "label": "Microsoft",
+          "type": "cloud"
+        },
+        {
+          "id": "GOOGL",
+          "label": "Google",
+          "type": "cloud"
+        },
+        {
+          "id": "AMZN",
+          "label": "Amazon",
+          "type": "cloud"
+        },
+        {
+          "id": "META",
+          "label": "Meta",
+          "type": "cloud"
+        },
+        {
+          "id": "ORCL",
+          "label": "Oracle",
+          "type": "cloud"
+        },
+        {
+          "id": "OPENAI",
+          "label": "OpenAI",
+          "type": "ai-lab",
+          "ticker": null
+        },
+        {
+          "id": "ANTHROPIC",
+          "label": "Anthropic",
+          "type": "ai-lab",
+          "ticker": null
+        },
+        {
+          "id": "TSM",
+          "label": "TSMC",
+          "type": "chips"
+        },
+        {
+          "id": "COHR",
+          "label": "Coherent",
+          "type": "network"
+        },
+        {
+          "id": "ALAB",
+          "label": "Astera Labs",
+          "type": "network"
+        },
+        {
+          "id": "CRWV",
+          "label": "CoreWeave",
+          "type": "cloud"
+        },
+        {
+          "id": "GEV",
+          "label": "GE Vernova",
+          "type": "power"
+        },
+        {
+          "id": "PWR",
+          "label": "Quanta Services",
+          "type": "power"
+        }
+      ],
+      "edges": [
+        {
+          "from": "NVDA",
+          "to": "MSFT",
+          "rel": "H100/GB200 clusters"
+        },
+        {
+          "from": "NVDA",
+          "to": "GOOGL",
+          "rel": "GPU instances"
+        },
+        {
+          "from": "NVDA",
+          "to": "AMZN",
+          "rel": "GPU instances"
+        },
+        {
+          "from": "NVDA",
+          "to": "META",
+          "rel": "training clusters"
+        },
+        {
+          "from": "NVDA",
+          "to": "ORCL",
+          "rel": "OCI superclusters"
+        },
+        {
+          "from": "NVDA",
+          "to": "SMCI",
+          "rel": "GPUs for servers"
+        },
+        {
+          "from": "NVDA",
+          "to": "DELL",
+          "rel": "GPUs for servers"
+        },
+        {
+          "from": "AMD",
+          "to": "MSFT",
+          "rel": "MI300 accelerators"
+        },
+        {
+          "from": "AMD",
+          "to": "META",
+          "rel": "MI accelerators"
+        },
+        {
+          "from": "AMD",
+          "to": "ORCL",
+          "rel": "MI instances"
+        },
+        {
+          "from": "MU",
+          "to": "NVDA",
+          "rel": "HBM3E memory"
+        },
+        {
+          "from": "MU",
+          "to": "AMD",
+          "rel": "HBM memory"
+        },
+        {
+          "from": "AVGO",
+          "to": "GOOGL",
+          "rel": "TPU co-design"
+        },
+        {
+          "from": "AVGO",
+          "to": "META",
+          "rel": "custom AI ASICs"
+        },
+        {
+          "from": "AVGO",
+          "to": "ANET",
+          "rel": "switch silicon"
+        },
+        {
+          "from": "ANET",
+          "to": "MSFT",
+          "rel": "AI network fabric"
+        },
+        {
+          "from": "ANET",
+          "to": "META",
+          "rel": "datacenter switching"
+        },
+        {
+          "from": "SMCI",
+          "to": "MSFT",
+          "rel": "AI server racks"
+        },
+        {
+          "from": "SMCI",
+          "to": "META",
+          "rel": "server racks"
+        },
+        {
+          "from": "DELL",
+          "to": "MSFT",
+          "rel": "AI servers"
+        },
+        {
+          "from": "HPE",
+          "to": "AMZN",
+          "rel": "compute infrastructure"
+        },
+        {
+          "from": "VRT",
+          "to": "MSFT",
+          "rel": "cooling & power"
+        },
+        {
+          "from": "VRT",
+          "to": "AMZN",
+          "rel": "liquid cooling"
+        },
+        {
+          "from": "ETN",
+          "to": "GOOGL",
+          "rel": "power distribution"
+        },
+        {
+          "from": "ETN",
+          "to": "MSFT",
+          "rel": "electrical gear"
+        },
+        {
+          "from": "CEG",
+          "to": "MSFT",
+          "rel": "nuclear PPA (Three Mile Island)"
+        },
+        {
+          "from": "VST",
+          "to": "AMZN",
+          "rel": "nuclear-adjacent power"
+        },
+        {
+          "from": "MSFT",
+          "to": "OPENAI",
+          "rel": "Azure compute"
+        },
+        {
+          "from": "AMZN",
+          "to": "ANTHROPIC",
+          "rel": "Trainium & AWS compute"
+        },
+        {
+          "from": "GOOGL",
+          "to": "ANTHROPIC",
+          "rel": "TPU compute"
+        },
+        {
+          "from": "NVDA",
+          "to": "OPENAI",
+          "rel": "GPU supply deals"
+        },
+        {
+          "from": "TSM",
+          "to": "NVDA",
+          "rel": "CoWoS advanced packaging"
+        },
+        {
+          "from": "TSM",
+          "to": "AMD",
+          "rel": "chiplet fabrication"
+        },
+        {
+          "from": "COHR",
+          "to": "NVDA",
+          "rel": "optical transceivers"
+        },
+        {
+          "from": "COHR",
+          "to": "MSFT",
+          "rel": "800G datacenter optics"
+        },
+        {
+          "from": "ALAB",
+          "to": "NVDA",
+          "rel": "PCIe/CXL connectivity"
+        },
+        {
+          "from": "ALAB",
+          "to": "AMZN",
+          "rel": "retimers for AI servers"
+        },
+        {
+          "from": "NVDA",
+          "to": "CRWV",
+          "rel": "priority GPU supply"
+        },
+        {
+          "from": "CRWV",
+          "to": "MSFT",
+          "rel": "contracted GPU capacity"
+        },
+        {
+          "from": "CRWV",
+          "to": "OPENAI",
+          "rel": "multi-year compute deal"
+        },
+        {
+          "from": "GEV",
+          "to": "MSFT",
+          "rel": "turbines & grid gear"
+        },
+        {
+          "from": "GEV",
+          "to": "AMZN",
+          "rel": "power equipment"
+        },
+        {
+          "from": "PWR",
+          "to": "AMZN",
+          "rel": "electrical infrastructure build"
+        },
+        {
+          "from": "ANET",
+          "to": "GOOGL",
+          "rel": "DC switching"
+        },
+        {
+          "from": "VRT",
+          "to": "META",
+          "rel": "cooling systems"
+        },
+        {
+          "from": "DELL",
+          "to": "META",
+          "rel": "AI servers"
+        },
+        {
+          "from": "ALAB",
+          "to": "MSFT",
+          "rel": "connectivity"
+        }
+      ]
+    },
+    "space": {
+      "nodes": [
+        {
+          "id": "NASA",
+          "label": "NASA",
+          "type": "agency",
+          "ticker": null
+        },
+        {
+          "id": "USSF",
+          "label": "US Space Force",
+          "type": "agency",
+          "ticker": null
+        },
+        {
+          "id": "SPACEX",
+          "label": "SpaceX",
+          "type": "launch",
+          "ticker": null
+        },
+        {
+          "id": "RKLB",
+          "label": "Rocket Lab",
+          "type": "launch"
+        },
+        {
+          "id": "LMT",
+          "label": "Lockheed Martin",
+          "type": "prime"
+        },
+        {
+          "id": "NOC",
+          "label": "Northrop Grumman",
+          "type": "prime"
+        },
+        {
+          "id": "BA",
+          "label": "Boeing",
+          "type": "prime"
+        },
+        {
+          "id": "LHX",
+          "label": "L3Harris (Aerojet)",
+          "type": "propulsion"
+        },
+        {
+          "id": "ASTS",
+          "label": "AST SpaceMobile",
+          "type": "sats"
+        },
+        {
+          "id": "IRDM",
+          "label": "Iridium",
+          "type": "sats"
+        },
+        {
+          "id": "VSAT",
+          "label": "Viasat",
+          "type": "sats"
+        },
+        {
+          "id": "PL",
+          "label": "Planet Labs",
+          "type": "sats"
+        },
+        {
+          "id": "RDW",
+          "label": "Redwire",
+          "type": "components"
+        },
+        {
+          "id": "LUNR",
+          "label": "Intuitive Machines",
+          "type": "sats"
+        },
+        {
+          "id": "T",
+          "label": "AT&T",
+          "type": "customer"
+        },
+        {
+          "id": "VZ",
+          "label": "Verizon",
+          "type": "customer"
+        },
+        {
+          "id": "BKSY",
+          "label": "BlackSky",
+          "type": "sats"
+        },
+        {
+          "id": "RTX",
+          "label": "RTX",
+          "type": "prime"
+        },
+        {
+          "id": "TDY",
+          "label": "Teledyne",
+          "type": "components"
+        }
+      ],
+      "edges": [
+        {
+          "from": "SPACEX",
+          "to": "NASA",
+          "rel": "crew, cargo, HLS"
+        },
+        {
+          "from": "SPACEX",
+          "to": "USSF",
+          "rel": "NSSL launches"
+        },
+        {
+          "from": "RKLB",
+          "to": "NASA",
+          "rel": "Electron launches"
+        },
+        {
+          "from": "RKLB",
+          "to": "USSF",
+          "rel": "HASTE & responsive launch"
+        },
+        {
+          "from": "LMT",
+          "to": "USSF",
+          "rel": "GPS III satellites"
+        },
+        {
+          "from": "LMT",
+          "to": "NASA",
+          "rel": "Orion capsule"
+        },
+        {
+          "from": "NOC",
+          "to": "NASA",
+          "rel": "Cygnus, JWST heritage"
+        },
+        {
+          "from": "NOC",
+          "to": "USSF",
+          "rel": "missile-warning sats"
+        },
+        {
+          "from": "BA",
+          "to": "NASA",
+          "rel": "SLS core stage, Starliner"
+        },
+        {
+          "from": "LHX",
+          "to": "LMT",
+          "rel": "Aerojet propulsion"
+        },
+        {
+          "from": "LHX",
+          "to": "NOC",
+          "rel": "solid rocket motors"
+        },
+        {
+          "from": "LHX",
+          "to": "BA",
+          "rel": "propulsion systems"
+        },
+        {
+          "from": "LHX",
+          "to": "USSF",
+          "rel": "tracking-layer sats"
+        },
+        {
+          "from": "RDW",
+          "to": "NASA",
+          "rel": "solar arrays & structures"
+        },
+        {
+          "from": "RDW",
+          "to": "NOC",
+          "rel": "space components"
+        },
+        {
+          "from": "LUNR",
+          "to": "NASA",
+          "rel": "CLPS lunar landers"
+        },
+        {
+          "from": "PL",
+          "to": "USSF",
+          "rel": "imagery contracts"
+        },
+        {
+          "from": "IRDM",
+          "to": "USSF",
+          "rel": "satcom services"
+        },
+        {
+          "from": "VSAT",
+          "to": "USSF",
+          "rel": "military satcom"
+        },
+        {
+          "from": "ASTS",
+          "to": "T",
+          "rel": "direct-to-cell partnership"
+        },
+        {
+          "from": "ASTS",
+          "to": "VZ",
+          "rel": "direct-to-cell partnership"
+        },
+        {
+          "from": "SPACEX",
+          "to": "T",
+          "rel": "Starlink direct-to-cell rival"
+        },
+        {
+          "from": "BKSY",
+          "to": "USSF",
+          "rel": "tactical imagery"
+        },
+        {
+          "from": "RTX",
+          "to": "USSF",
+          "rel": "missile-warning sensors"
+        },
+        {
+          "from": "TDY",
+          "to": "NASA",
+          "rel": "imaging instruments"
+        },
+        {
+          "from": "TDY",
+          "to": "PL",
+          "rel": "sensor payloads"
+        },
+        {
+          "from": "RKLB",
+          "to": "PL",
+          "rel": "Electron launches"
+        },
+        {
+          "from": "SPACEX",
+          "to": "PL",
+          "rel": "rideshare launches"
+        },
+        {
+          "from": "RDW",
+          "to": "LMT",
+          "rel": "space components"
+        }
+      ]
+    },
+    "aero-commercial": {
+      "nodes": [
+        {
+          "id": "BA",
+          "label": "Boeing",
+          "type": "airframer"
+        },
+        {
+          "id": "AIRBUS",
+          "label": "Airbus",
+          "type": "airframer",
+          "ticker": null
+        },
+        {
+          "id": "GE",
+          "label": "GE Aerospace",
+          "type": "engines"
+        },
+        {
+          "id": "RTX",
+          "label": "RTX (Pratt)",
+          "type": "engines"
+        },
+        {
+          "id": "SAFRAN",
+          "label": "Safran",
+          "type": "engines",
+          "ticker": null
+        },
+        {
+          "id": "SPR",
+          "label": "Spirit Aero (Boeing)",
+          "type": "structures",
+          "ticker": null
+        },
+        {
+          "id": "HWM",
+          "label": "Howmet",
+          "type": "structures"
+        },
+        {
+          "id": "TDG",
+          "label": "TransDigm",
+          "type": "components"
+        },
+        {
+          "id": "HEI",
+          "label": "HEICO",
+          "type": "components"
+        },
+        {
+          "id": "CW",
+          "label": "Curtiss-Wright",
+          "type": "components"
+        },
+        {
+          "id": "WWD",
+          "label": "Woodward",
+          "type": "components"
+        },
+        {
+          "id": "UAL",
+          "label": "United",
+          "type": "airline"
+        },
+        {
+          "id": "DAL",
+          "label": "Delta",
+          "type": "airline"
+        },
+        {
+          "id": "AAL",
+          "label": "American",
+          "type": "airline"
+        },
+        {
+          "id": "LUV",
+          "label": "Southwest",
+          "type": "airline"
+        },
+        {
+          "id": "AL",
+          "label": "Air Lease",
+          "type": "lessor"
+        }
+      ],
+      "edges": [
+        {
+          "from": "GE",
+          "to": "BA",
+          "rel": "LEAP & GEnx engines"
+        },
+        {
+          "from": "GE",
+          "to": "AIRBUS",
+          "rel": "LEAP engines (CFM)"
+        },
+        {
+          "from": "SAFRAN",
+          "to": "GE",
+          "rel": "CFM 50/50 JV partner"
+        },
+        {
+          "from": "RTX",
+          "to": "AIRBUS",
+          "rel": "GTF engines"
+        },
+        {
+          "from": "SPR",
+          "to": "BA",
+          "rel": "737 fuselages"
+        },
+        {
+          "from": "SPR",
+          "to": "AIRBUS",
+          "rel": "A350 sections"
+        },
+        {
+          "from": "HWM",
+          "to": "GE",
+          "rel": "turbine blades"
+        },
+        {
+          "from": "HWM",
+          "to": "SAFRAN",
+          "rel": "engine structures"
+        },
+        {
+          "from": "HWM",
+          "to": "BA",
+          "rel": "fasteners"
+        },
+        {
+          "from": "TDG",
+          "to": "BA",
+          "rel": "proprietary parts"
+        },
+        {
+          "from": "TDG",
+          "to": "AIRBUS",
+          "rel": "actuators & pumps"
+        },
+        {
+          "from": "HEI",
+          "to": "UAL",
+          "rel": "PMA aftermarket parts"
+        },
+        {
+          "from": "HEI",
+          "to": "DAL",
+          "rel": "repair & parts"
+        },
+        {
+          "from": "CW",
+          "to": "BA",
+          "rel": "actuation systems"
+        },
+        {
+          "from": "WWD",
+          "to": "GE",
+          "rel": "fuel systems"
+        },
+        {
+          "from": "BA",
+          "to": "UAL",
+          "rel": "737 & 787 fleet"
+        },
+        {
+          "from": "BA",
+          "to": "AAL",
+          "rel": "737 fleet"
+        },
+        {
+          "from": "BA",
+          "to": "LUV",
+          "rel": "737 \u2014 sole type"
+        },
+        {
+          "from": "BA",
+          "to": "DAL",
+          "rel": "widebodies"
+        },
+        {
+          "from": "AIRBUS",
+          "to": "DAL",
+          "rel": "A321neo, A350"
+        },
+        {
+          "from": "AIRBUS",
+          "to": "UAL",
+          "rel": "A321neo order book"
+        },
+        {
+          "from": "AIRBUS",
+          "to": "AAL",
+          "rel": "A321 fleet"
+        },
+        {
+          "from": "AL",
+          "to": "DAL",
+          "rel": "leased aircraft"
+        },
+        {
+          "from": "AL",
+          "to": "UAL",
+          "rel": "leased aircraft"
+        },
+        {
+          "from": "HEI",
+          "to": "AAL",
+          "rel": "aftermarket parts"
+        },
+        {
+          "from": "WWD",
+          "to": "RTX",
+          "rel": "fuel controls"
+        },
+        {
+          "from": "AL",
+          "to": "AAL",
+          "rel": "leased aircraft"
+        }
+      ]
+    },
+    "grid-energy": {
+      "nodes": [
+        {
+          "id": "GEV",
+          "label": "GE Vernova",
+          "type": "equipment"
+        },
+        {
+          "id": "ETN",
+          "label": "Eaton",
+          "type": "equipment"
+        },
+        {
+          "id": "HUBB",
+          "label": "Hubbell",
+          "type": "equipment"
+        },
+        {
+          "id": "CAT",
+          "label": "Caterpillar",
+          "type": "equipment"
+        },
+        {
+          "id": "PWR",
+          "label": "Quanta Services",
+          "type": "builder"
+        },
+        {
+          "id": "VST",
+          "label": "Vistra",
+          "type": "generator"
+        },
+        {
+          "id": "CEG",
+          "label": "Constellation",
+          "type": "generator"
+        },
+        {
+          "id": "NEE",
+          "label": "NextEra",
+          "type": "generator"
+        },
+        {
+          "id": "FSLR",
+          "label": "First Solar",
+          "type": "equipment"
+        },
+        {
+          "id": "TSLA",
+          "label": "Tesla Energy",
+          "type": "equipment"
+        },
+        {
+          "id": "MSFT",
+          "label": "Microsoft",
+          "type": "load"
+        },
+        {
+          "id": "AMZN",
+          "label": "Amazon",
+          "type": "load"
+        },
+        {
+          "id": "GOOGL",
+          "label": "Google",
+          "type": "load"
+        },
+        {
+          "id": "META",
+          "label": "Meta",
+          "type": "load"
+        }
+      ],
+      "edges": [
+        {
+          "from": "GEV",
+          "to": "NEE",
+          "rel": "turbines & grid equipment"
+        },
+        {
+          "from": "GEV",
+          "to": "VST",
+          "rel": "gas turbines"
+        },
+        {
+          "from": "ETN",
+          "to": "MSFT",
+          "rel": "switchgear & UPS"
+        },
+        {
+          "from": "ETN",
+          "to": "GOOGL",
+          "rel": "power distribution"
+        },
+        {
+          "from": "HUBB",
+          "to": "NEE",
+          "rel": "grid components"
+        },
+        {
+          "from": "CAT",
+          "to": "MSFT",
+          "rel": "backup generation"
+        },
+        {
+          "from": "CAT",
+          "to": "AMZN",
+          "rel": "gensets"
+        },
+        {
+          "from": "PWR",
+          "to": "NEE",
+          "rel": "transmission construction"
+        },
+        {
+          "from": "PWR",
+          "to": "VST",
+          "rel": "grid buildout"
+        },
+        {
+          "from": "FSLR",
+          "to": "NEE",
+          "rel": "solar modules"
+        },
+        {
+          "from": "TSLA",
+          "to": "NEE",
+          "rel": "Megapack storage"
+        },
+        {
+          "from": "CEG",
+          "to": "MSFT",
+          "rel": "nuclear PPA (Three Mile Island)"
+        },
+        {
+          "from": "VST",
+          "to": "AMZN",
+          "rel": "nuclear-adjacent supply"
+        },
+        {
+          "from": "NEE",
+          "to": "GOOGL",
+          "rel": "renewable PPAs"
+        },
+        {
+          "from": "NEE",
+          "to": "META",
+          "rel": "solar PPAs"
+        },
+        {
+          "from": "ETN",
+          "to": "AMZN",
+          "rel": "power distribution"
+        },
+        {
+          "from": "HUBB",
+          "to": "VST",
+          "rel": "grid components"
+        },
+        {
+          "from": "GEV",
+          "to": "CEG",
+          "rel": "turbine services"
+        }
+      ]
+    },
+    "autos-ev": {
+      "nodes": [
+        {
+          "id": "ALB",
+          "label": "Albemarle",
+          "type": "materials"
+        },
+        {
+          "id": "SQM",
+          "label": "SQM",
+          "type": "materials"
+        },
+        {
+          "id": "PANASONIC",
+          "label": "Panasonic Energy",
+          "type": "cells",
+          "ticker": null
+        },
+        {
+          "id": "LGES",
+          "label": "LG Energy",
+          "type": "cells",
+          "ticker": null
+        },
+        {
+          "id": "CATL",
+          "label": "CATL",
+          "type": "cells",
+          "ticker": null
+        },
+        {
+          "id": "ON",
+          "label": "onsemi",
+          "type": "chips"
+        },
+        {
+          "id": "NXPI",
+          "label": "NXP",
+          "type": "chips"
+        },
+        {
+          "id": "MBLY",
+          "label": "Mobileye",
+          "type": "chips"
+        },
+        {
+          "id": "APTV",
+          "label": "Aptiv",
+          "type": "parts"
+        },
+        {
+          "id": "MGA",
+          "label": "Magna",
+          "type": "parts"
+        },
+        {
+          "id": "BWA",
+          "label": "BorgWarner",
+          "type": "parts"
+        },
+        {
+          "id": "TSLA",
+          "label": "Tesla",
+          "type": "oem"
+        },
+        {
+          "id": "GM",
+          "label": "GM",
+          "type": "oem"
+        },
+        {
+          "id": "F",
+          "label": "Ford",
+          "type": "oem"
+        },
+        {
+          "id": "RIVN",
+          "label": "Rivian",
+          "type": "oem"
+        }
+      ],
+      "edges": [
+        {
+          "from": "ALB",
+          "to": "TSLA",
+          "rel": "lithium hydroxide contracts"
+        },
+        {
+          "from": "ALB",
+          "to": "PANASONIC",
+          "rel": "lithium supply"
+        },
+        {
+          "from": "SQM",
+          "to": "LGES",
+          "rel": "lithium contracts"
+        },
+        {
+          "from": "PANASONIC",
+          "to": "TSLA",
+          "rel": "2170 cells (Nevada)"
+        },
+        {
+          "from": "LGES",
+          "to": "GM",
+          "rel": "Ultium JV cells"
+        },
+        {
+          "from": "LGES",
+          "to": "RIVN",
+          "rel": "2170 cells"
+        },
+        {
+          "from": "CATL",
+          "to": "TSLA",
+          "rel": "LFP cells (Shanghai)"
+        },
+        {
+          "from": "CATL",
+          "to": "F",
+          "rel": "LFP licensing (BlueOval)"
+        },
+        {
+          "from": "ON",
+          "to": "TSLA",
+          "rel": "SiC power devices"
+        },
+        {
+          "from": "NXPI",
+          "to": "GM",
+          "rel": "MCUs & radar"
+        },
+        {
+          "from": "NXPI",
+          "to": "F",
+          "rel": "auto processors"
+        },
+        {
+          "from": "MBLY",
+          "to": "F",
+          "rel": "ADAS vision (EyeQ)"
+        },
+        {
+          "from": "APTV",
+          "to": "GM",
+          "rel": "wiring & ADAS"
+        },
+        {
+          "from": "APTV",
+          "to": "F",
+          "rel": "electrical architecture"
+        },
+        {
+          "from": "MGA",
+          "to": "GM",
+          "rel": "body & powertrain"
+        },
+        {
+          "from": "BWA",
+          "to": "F",
+          "rel": "eMotors & drivetrain"
+        }
+      ]
+    },
+    "banks-payments": {
+      "nodes": [
+        {
+          "id": "V",
+          "label": "Visa",
+          "type": "network"
+        },
+        {
+          "id": "MA",
+          "label": "Mastercard",
+          "type": "network"
+        },
+        {
+          "id": "AXP",
+          "label": "Amex",
+          "type": "network"
+        },
+        {
+          "id": "JPM",
+          "label": "JPMorgan",
+          "type": "bank"
+        },
+        {
+          "id": "BAC",
+          "label": "Bank of America",
+          "type": "bank"
+        },
+        {
+          "id": "C",
+          "label": "Citi",
+          "type": "bank"
+        },
+        {
+          "id": "WFC",
+          "label": "Wells Fargo",
+          "type": "bank"
+        },
+        {
+          "id": "GS",
+          "label": "Goldman Sachs",
+          "type": "bank"
+        },
+        {
+          "id": "PYPL",
+          "label": "PayPal",
+          "type": "fintech"
+        },
+        {
+          "id": "XYZ",
+          "label": "Block (Square)",
+          "type": "fintech"
+        },
+        {
+          "id": "FI",
+          "label": "Fiserv",
+          "type": "processor"
+        },
+        {
+          "id": "FIS",
+          "label": "FIS",
+          "type": "processor"
+        },
+        {
+          "id": "ICE",
+          "label": "ICE / NYSE",
+          "type": "exchange"
+        },
+        {
+          "id": "CME",
+          "label": "CME Group",
+          "type": "exchange"
+        },
+        {
+          "id": "SPGI",
+          "label": "S&P Global",
+          "type": "data"
+        },
+        {
+          "id": "AAPL",
+          "label": "Apple",
+          "type": "bigtech"
+        },
+        {
+          "id": "MERCHANTS",
+          "label": "Merchants",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "V",
+          "to": "JPM",
+          "rel": "card network rails"
+        },
+        {
+          "from": "V",
+          "to": "BAC",
+          "rel": "issuing network"
+        },
+        {
+          "from": "V",
+          "to": "PYPL",
+          "rel": "rails for wallets"
+        },
+        {
+          "from": "V",
+          "to": "XYZ",
+          "rel": "acquiring rails"
+        },
+        {
+          "from": "MA",
+          "to": "C",
+          "rel": "card network rails"
+        },
+        {
+          "from": "MA",
+          "to": "WFC",
+          "rel": "issuing network"
+        },
+        {
+          "from": "MA",
+          "to": "GS",
+          "rel": "Apple Card network"
+        },
+        {
+          "from": "GS",
+          "to": "AAPL",
+          "rel": "Apple Card issuing"
+        },
+        {
+          "from": "FI",
+          "to": "BAC",
+          "rel": "core processing"
+        },
+        {
+          "from": "FIS",
+          "to": "WFC",
+          "rel": "core banking systems"
+        },
+        {
+          "from": "AXP",
+          "to": "MERCHANTS",
+          "rel": "closed-loop network"
+        },
+        {
+          "from": "JPM",
+          "to": "MERCHANTS",
+          "rel": "acquiring (Paymentech)"
+        },
+        {
+          "from": "XYZ",
+          "to": "MERCHANTS",
+          "rel": "POS & acquiring"
+        },
+        {
+          "from": "PYPL",
+          "to": "MERCHANTS",
+          "rel": "checkout & Braintree"
+        },
+        {
+          "from": "ICE",
+          "to": "JPM",
+          "rel": "listings, data, clearing"
+        },
+        {
+          "from": "CME",
+          "to": "GS",
+          "rel": "derivatives clearing"
+        },
+        {
+          "from": "SPGI",
+          "to": "JPM",
+          "rel": "ratings & indices"
+        }
+      ]
+    },
+    "pharma": {
+      "nodes": [
+        {
+          "id": "LLY",
+          "label": "Eli Lilly",
+          "type": "pharma"
+        },
+        {
+          "id": "NVO",
+          "label": "Novo Nordisk",
+          "type": "pharma"
+        },
+        {
+          "id": "PFE",
+          "label": "Pfizer",
+          "type": "pharma"
+        },
+        {
+          "id": "MRK",
+          "label": "Merck",
+          "type": "pharma"
+        },
+        {
+          "id": "ABBV",
+          "label": "AbbVie",
+          "type": "pharma"
+        },
+        {
+          "id": "MRNA",
+          "label": "Moderna",
+          "type": "pharma"
+        },
+        {
+          "id": "TMO",
+          "label": "Thermo Fisher",
+          "type": "tools"
+        },
+        {
+          "id": "DHR",
+          "label": "Danaher",
+          "type": "tools"
+        },
+        {
+          "id": "WST",
+          "label": "West Pharma",
+          "type": "tools"
+        },
+        {
+          "id": "LONZA",
+          "label": "Lonza",
+          "type": "cdmo",
+          "ticker": null
+        },
+        {
+          "id": "CTLT",
+          "label": "Catalent (Novo)",
+          "type": "cdmo",
+          "ticker": null
+        },
+        {
+          "id": "MCK",
+          "label": "McKesson",
+          "type": "distributor"
+        },
+        {
+          "id": "COR",
+          "label": "Cencora",
+          "type": "distributor"
+        },
+        {
+          "id": "CAH",
+          "label": "Cardinal Health",
+          "type": "distributor"
+        },
+        {
+          "id": "CVS",
+          "label": "CVS Health",
+          "type": "pharmacy"
+        },
+        {
+          "id": "WBA",
+          "label": "Walgreens",
+          "type": "pharmacy"
+        }
+      ],
+      "edges": [
+        {
+          "from": "TMO",
+          "to": "LLY",
+          "rel": "bioprocessing & CDMO"
+        },
+        {
+          "from": "TMO",
+          "to": "PFE",
+          "rel": "reagents & manufacturing"
+        },
+        {
+          "from": "DHR",
+          "to": "MRK",
+          "rel": "bioprocessing (Cytiva)"
+        },
+        {
+          "from": "DHR",
+          "to": "MRNA",
+          "rel": "filtration & chromatography"
+        },
+        {
+          "from": "WST",
+          "to": "LLY",
+          "rel": "injector components (GLP-1)"
+        },
+        {
+          "from": "WST",
+          "to": "NVO",
+          "rel": "pen cartridge systems"
+        },
+        {
+          "from": "LONZA",
+          "to": "MRNA",
+          "rel": "drug substance CDMO"
+        },
+        {
+          "from": "CTLT",
+          "to": "NVO",
+          "rel": "fill-finish (acquired 2024)"
+        },
+        {
+          "from": "LLY",
+          "to": "MCK",
+          "rel": "distribution"
+        },
+        {
+          "from": "PFE",
+          "to": "COR",
+          "rel": "distribution"
+        },
+        {
+          "from": "MRK",
+          "to": "CAH",
+          "rel": "distribution"
+        },
+        {
+          "from": "ABBV",
+          "to": "MCK",
+          "rel": "immunology portfolio"
+        },
+        {
+          "from": "MCK",
+          "to": "CVS",
+          "rel": "pharmacy supply"
+        },
+        {
+          "from": "COR",
+          "to": "WBA",
+          "rel": "pharmacy supply (core)"
+        },
+        {
+          "from": "CAH",
+          "to": "CVS",
+          "rel": "medical & pharma supply"
+        }
+      ]
+    },
+    "oil-gas": {
+      "nodes": [
+        {
+          "id": "SLB",
+          "label": "SLB",
+          "type": "services"
+        },
+        {
+          "id": "HAL",
+          "label": "Halliburton",
+          "type": "services"
+        },
+        {
+          "id": "BKR",
+          "label": "Baker Hughes",
+          "type": "services"
+        },
+        {
+          "id": "XOM",
+          "label": "ExxonMobil",
+          "type": "producer"
+        },
+        {
+          "id": "CVX",
+          "label": "Chevron",
+          "type": "producer"
+        },
+        {
+          "id": "COP",
+          "label": "ConocoPhillips",
+          "type": "producer"
+        },
+        {
+          "id": "EOG",
+          "label": "EOG",
+          "type": "producer"
+        },
+        {
+          "id": "OXY",
+          "label": "Occidental",
+          "type": "producer"
+        },
+        {
+          "id": "KMI",
+          "label": "Kinder Morgan",
+          "type": "midstream"
+        },
+        {
+          "id": "WMB",
+          "label": "Williams",
+          "type": "midstream"
+        },
+        {
+          "id": "ET",
+          "label": "Energy Transfer",
+          "type": "midstream"
+        },
+        {
+          "id": "LNG",
+          "label": "Cheniere",
+          "type": "lng"
+        },
+        {
+          "id": "PSX",
+          "label": "Phillips 66",
+          "type": "refiner"
+        },
+        {
+          "id": "VLO",
+          "label": "Valero",
+          "type": "refiner"
+        },
+        {
+          "id": "MPC",
+          "label": "Marathon",
+          "type": "refiner"
+        },
+        {
+          "id": "EUROPE",
+          "label": "European buyers",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "SLB",
+          "to": "XOM",
+          "rel": "oilfield services"
+        },
+        {
+          "from": "SLB",
+          "to": "CVX",
+          "rel": "drilling & completions"
+        },
+        {
+          "from": "HAL",
+          "to": "OXY",
+          "rel": "fracking services"
+        },
+        {
+          "from": "HAL",
+          "to": "EOG",
+          "rel": "completions"
+        },
+        {
+          "from": "BKR",
+          "to": "LNG",
+          "rel": "LNG turbines & tech"
+        },
+        {
+          "from": "BKR",
+          "to": "XOM",
+          "rel": "turbomachinery"
+        },
+        {
+          "from": "KMI",
+          "to": "PSX",
+          "rel": "gas & products transport"
+        },
+        {
+          "from": "WMB",
+          "to": "LNG",
+          "rel": "gas gathering"
+        },
+        {
+          "from": "ET",
+          "to": "LNG",
+          "rel": "feedgas pipelines"
+        },
+        {
+          "from": "EOG",
+          "to": "VLO",
+          "rel": "crude supply"
+        },
+        {
+          "from": "OXY",
+          "to": "MPC",
+          "rel": "crude supply"
+        },
+        {
+          "from": "COP",
+          "to": "LNG",
+          "rel": "gas supply agreements"
+        },
+        {
+          "from": "LNG",
+          "to": "EUROPE",
+          "rel": "LNG cargoes"
+        },
+        {
+          "from": "XOM",
+          "to": "EUROPE",
+          "rel": "LNG (Golden Pass)"
+        }
+      ]
+    },
+    "retail-logistics": {
+      "nodes": [
+        {
+          "id": "MAERSK",
+          "label": "Maersk",
+          "type": "ocean",
+          "ticker": null
+        },
+        {
+          "id": "UNP",
+          "label": "Union Pacific",
+          "type": "rail"
+        },
+        {
+          "id": "CSX",
+          "label": "CSX",
+          "type": "rail"
+        },
+        {
+          "id": "NSC",
+          "label": "Norfolk Southern",
+          "type": "rail"
+        },
+        {
+          "id": "UPS",
+          "label": "UPS",
+          "type": "parcel"
+        },
+        {
+          "id": "FDX",
+          "label": "FedEx",
+          "type": "parcel"
+        },
+        {
+          "id": "ODFL",
+          "label": "Old Dominion",
+          "type": "parcel"
+        },
+        {
+          "id": "JBHT",
+          "label": "J.B. Hunt",
+          "type": "parcel"
+        },
+        {
+          "id": "PLD",
+          "label": "Prologis",
+          "type": "warehouse"
+        },
+        {
+          "id": "WMT",
+          "label": "Walmart",
+          "type": "retail"
+        },
+        {
+          "id": "COST",
+          "label": "Costco",
+          "type": "retail"
+        },
+        {
+          "id": "TGT",
+          "label": "Target",
+          "type": "retail"
+        },
+        {
+          "id": "AMZN",
+          "label": "Amazon",
+          "type": "retail"
+        },
+        {
+          "id": "HD",
+          "label": "Home Depot",
+          "type": "retail"
+        },
+        {
+          "id": "LOW",
+          "label": "Lowe's",
+          "type": "retail"
+        }
+      ],
+      "edges": [
+        {
+          "from": "MAERSK",
+          "to": "WMT",
+          "rel": "ocean freight"
+        },
+        {
+          "from": "MAERSK",
+          "to": "TGT",
+          "rel": "import containers"
+        },
+        {
+          "from": "MAERSK",
+          "to": "COST",
+          "rel": "import containers"
+        },
+        {
+          "from": "UNP",
+          "to": "WMT",
+          "rel": "intermodal rail"
+        },
+        {
+          "from": "UNP",
+          "to": "JBHT",
+          "rel": "intermodal partnership"
+        },
+        {
+          "from": "CSX",
+          "to": "HD",
+          "rel": "intermodal (east)"
+        },
+        {
+          "from": "NSC",
+          "to": "LOW",
+          "rel": "rail freight"
+        },
+        {
+          "from": "JBHT",
+          "to": "WMT",
+          "rel": "dedicated trucking"
+        },
+        {
+          "from": "ODFL",
+          "to": "HD",
+          "rel": "LTL freight"
+        },
+        {
+          "from": "UPS",
+          "to": "AMZN",
+          "rel": "parcel (shrinking share)"
+        },
+        {
+          "from": "UPS",
+          "to": "WMT",
+          "rel": "parcel & returns"
+        },
+        {
+          "from": "FDX",
+          "to": "TGT",
+          "rel": "parcel delivery"
+        },
+        {
+          "from": "PLD",
+          "to": "AMZN",
+          "rel": "warehouse leases (top tenant)"
+        },
+        {
+          "from": "PLD",
+          "to": "FDX",
+          "rel": "logistics facilities"
+        }
+      ]
+    },
+    "media-streaming": {
+      "nodes": [
+        {
+          "id": "NFL",
+          "label": "NFL",
+          "type": "rights",
+          "ticker": null
+        },
+        {
+          "id": "NBA",
+          "label": "NBA",
+          "type": "rights",
+          "ticker": null
+        },
+        {
+          "id": "DIS",
+          "label": "Disney / ESPN",
+          "type": "streamer"
+        },
+        {
+          "id": "NFLX",
+          "label": "Netflix",
+          "type": "streamer"
+        },
+        {
+          "id": "WBD",
+          "label": "Warner Bros. Discovery",
+          "type": "streamer"
+        },
+        {
+          "id": "PSKY",
+          "label": "Paramount Skydance",
+          "type": "streamer"
+        },
+        {
+          "id": "CMCSA",
+          "label": "Comcast / NBCU",
+          "type": "streamer"
+        },
+        {
+          "id": "AAPL",
+          "label": "Apple TV+",
+          "type": "streamer"
+        },
+        {
+          "id": "AMZN",
+          "label": "Amazon Prime",
+          "type": "streamer"
+        },
+        {
+          "id": "SONY",
+          "label": "Sony Pictures",
+          "type": "studio"
+        },
+        {
+          "id": "TTD",
+          "label": "The Trade Desk",
+          "type": "ads"
+        },
+        {
+          "id": "AMC",
+          "label": "AMC Theatres",
+          "type": "theater"
+        },
+        {
+          "id": "CNK",
+          "label": "Cinemark",
+          "type": "theater"
+        }
+      ],
+      "edges": [
+        {
+          "from": "NFL",
+          "to": "CMCSA",
+          "rel": "Sunday Night Football"
+        },
+        {
+          "from": "NFL",
+          "to": "DIS",
+          "rel": "Monday Night (ESPN)"
+        },
+        {
+          "from": "NFL",
+          "to": "AMZN",
+          "rel": "Thursday Night exclusive"
+        },
+        {
+          "from": "NBA",
+          "to": "DIS",
+          "rel": "national rights"
+        },
+        {
+          "from": "NBA",
+          "to": "AMZN",
+          "rel": "streaming package"
+        },
+        {
+          "from": "NBA",
+          "to": "CMCSA",
+          "rel": "NBC package"
+        },
+        {
+          "from": "SONY",
+          "to": "NFLX",
+          "rel": "licensed films & series"
+        },
+        {
+          "from": "SONY",
+          "to": "AMZN",
+          "rel": "content licensing"
+        },
+        {
+          "from": "AMZN",
+          "to": "DIS",
+          "rel": "AWS streaming infrastructure"
+        },
+        {
+          "from": "TTD",
+          "to": "NFLX",
+          "rel": "programmatic ad demand"
+        },
+        {
+          "from": "TTD",
+          "to": "DIS",
+          "rel": "ad platform integration"
+        },
+        {
+          "from": "DIS",
+          "to": "AMC",
+          "rel": "theatrical windows"
+        },
+        {
+          "from": "DIS",
+          "to": "CNK",
+          "rel": "theatrical windows"
+        },
+        {
+          "from": "WBD",
+          "to": "AMC",
+          "rel": "theatrical slate"
+        }
+      ]
+    },
+    "homebuild-materials": {
+      "nodes": [
+        {
+          "id": "WY",
+          "label": "Weyerhaeuser",
+          "type": "materials"
+        },
+        {
+          "id": "VMC",
+          "label": "Vulcan Materials",
+          "type": "materials"
+        },
+        {
+          "id": "MLM",
+          "label": "Martin Marietta",
+          "type": "materials"
+        },
+        {
+          "id": "OC",
+          "label": "Owens Corning",
+          "type": "materials"
+        },
+        {
+          "id": "SHW",
+          "label": "Sherwin-Williams",
+          "type": "materials"
+        },
+        {
+          "id": "MAS",
+          "label": "Masco",
+          "type": "materials"
+        },
+        {
+          "id": "MHK",
+          "label": "Mohawk",
+          "type": "materials"
+        },
+        {
+          "id": "CARR",
+          "label": "Carrier",
+          "type": "hvac"
+        },
+        {
+          "id": "BLDR",
+          "label": "Builders FirstSource",
+          "type": "distribution"
+        },
+        {
+          "id": "DHI",
+          "label": "D.R. Horton",
+          "type": "builder"
+        },
+        {
+          "id": "LEN",
+          "label": "Lennar",
+          "type": "builder"
+        },
+        {
+          "id": "PHM",
+          "label": "PulteGroup",
+          "type": "builder"
+        },
+        {
+          "id": "NVR",
+          "label": "NVR",
+          "type": "builder"
+        },
+        {
+          "id": "TOL",
+          "label": "Toll Brothers",
+          "type": "builder"
+        },
+        {
+          "id": "HD",
+          "label": "Home Depot",
+          "type": "retail"
+        },
+        {
+          "id": "LOW",
+          "label": "Lowe's",
+          "type": "retail"
+        }
+      ],
+      "edges": [
+        {
+          "from": "WY",
+          "to": "BLDR",
+          "rel": "lumber supply"
+        },
+        {
+          "from": "WY",
+          "to": "HD",
+          "rel": "lumber & panels"
+        },
+        {
+          "from": "BLDR",
+          "to": "DHI",
+          "rel": "framing & millwork"
+        },
+        {
+          "from": "BLDR",
+          "to": "LEN",
+          "rel": "building products"
+        },
+        {
+          "from": "BLDR",
+          "to": "PHM",
+          "rel": "components & trusses"
+        },
+        {
+          "from": "VMC",
+          "to": "LEN",
+          "rel": "aggregates & concrete"
+        },
+        {
+          "from": "MLM",
+          "to": "DHI",
+          "rel": "aggregates"
+        },
+        {
+          "from": "OC",
+          "to": "DHI",
+          "rel": "insulation & roofing"
+        },
+        {
+          "from": "OC",
+          "to": "TOL",
+          "rel": "insulation"
+        },
+        {
+          "from": "SHW",
+          "to": "NVR",
+          "rel": "coatings"
+        },
+        {
+          "from": "SHW",
+          "to": "HD",
+          "rel": "paint (HGTV line)"
+        },
+        {
+          "from": "MAS",
+          "to": "HD",
+          "rel": "Behr paint (exclusive)"
+        },
+        {
+          "from": "MAS",
+          "to": "LOW",
+          "rel": "faucets & fixtures"
+        },
+        {
+          "from": "MHK",
+          "to": "LOW",
+          "rel": "flooring"
+        },
+        {
+          "from": "MHK",
+          "to": "LEN",
+          "rel": "builder flooring"
+        },
+        {
+          "from": "CARR",
+          "to": "DHI",
+          "rel": "HVAC systems"
+        }
+      ]
+    },
+    "agri-food": {
+      "nodes": [
+        {
+          "id": "DE",
+          "label": "John Deere",
+          "type": "equipment"
+        },
+        {
+          "id": "AGCO",
+          "label": "AGCO",
+          "type": "equipment"
+        },
+        {
+          "id": "CF",
+          "label": "CF Industries",
+          "type": "inputs"
+        },
+        {
+          "id": "MOS",
+          "label": "Mosaic",
+          "type": "inputs"
+        },
+        {
+          "id": "NTR",
+          "label": "Nutrien",
+          "type": "inputs"
+        },
+        {
+          "id": "FARMERS",
+          "label": "US farmers",
+          "type": "grower",
+          "ticker": null
+        },
+        {
+          "id": "ADM",
+          "label": "ADM",
+          "type": "processor"
+        },
+        {
+          "id": "BG",
+          "label": "Bunge",
+          "type": "processor"
+        },
+        {
+          "id": "CARGILL",
+          "label": "Cargill",
+          "type": "processor",
+          "ticker": null
+        },
+        {
+          "id": "TSN",
+          "label": "Tyson",
+          "type": "protein"
+        },
+        {
+          "id": "KHC",
+          "label": "Kraft Heinz",
+          "type": "brands"
+        },
+        {
+          "id": "GIS",
+          "label": "General Mills",
+          "type": "brands"
+        },
+        {
+          "id": "MDLZ",
+          "label": "Mondelez",
+          "type": "brands"
+        },
+        {
+          "id": "KO",
+          "label": "Coca-Cola",
+          "type": "brands"
+        },
+        {
+          "id": "PEP",
+          "label": "PepsiCo",
+          "type": "brands"
+        },
+        {
+          "id": "KR",
+          "label": "Kroger",
+          "type": "retail"
+        },
+        {
+          "id": "WMT",
+          "label": "Walmart",
+          "type": "retail"
+        },
+        {
+          "id": "MCD",
+          "label": "McDonald's",
+          "type": "restaurant"
+        }
+      ],
+      "edges": [
+        {
+          "from": "DE",
+          "to": "FARMERS",
+          "rel": "tractors & combines"
+        },
+        {
+          "from": "AGCO",
+          "to": "FARMERS",
+          "rel": "equipment (Fendt, Massey)"
+        },
+        {
+          "from": "CF",
+          "to": "FARMERS",
+          "rel": "nitrogen fertilizer"
+        },
+        {
+          "from": "MOS",
+          "to": "FARMERS",
+          "rel": "potash & phosphate"
+        },
+        {
+          "from": "NTR",
+          "to": "FARMERS",
+          "rel": "crop inputs & retail"
+        },
+        {
+          "from": "FARMERS",
+          "to": "ADM",
+          "rel": "grain & oilseeds"
+        },
+        {
+          "from": "FARMERS",
+          "to": "BG",
+          "rel": "soybeans"
+        },
+        {
+          "from": "FARMERS",
+          "to": "CARGILL",
+          "rel": "grain marketing"
+        },
+        {
+          "from": "ADM",
+          "to": "TSN",
+          "rel": "feed ingredients"
+        },
+        {
+          "from": "ADM",
+          "to": "KO",
+          "rel": "sweeteners (HFCS)"
+        },
+        {
+          "from": "BG",
+          "to": "MDLZ",
+          "rel": "edible oils"
+        },
+        {
+          "from": "CARGILL",
+          "to": "MCD",
+          "rel": "beef supply"
+        },
+        {
+          "from": "TSN",
+          "to": "MCD",
+          "rel": "chicken supply"
+        },
+        {
+          "from": "TSN",
+          "to": "KR",
+          "rel": "protein case"
+        },
+        {
+          "from": "GIS",
+          "to": "KR",
+          "rel": "cereal & brands"
+        },
+        {
+          "from": "MDLZ",
+          "to": "WMT",
+          "rel": "snacks"
+        },
+        {
+          "from": "KHC",
+          "to": "WMT",
+          "rel": "packaged foods"
+        },
+        {
+          "from": "KO",
+          "to": "MCD",
+          "rel": "fountain exclusive"
+        },
+        {
+          "from": "PEP",
+          "to": "KR",
+          "rel": "snacks & beverages"
+        }
+      ]
+    },
+    "telecom-towers": {
+      "nodes": [
+        {
+          "id": "AMT",
+          "label": "American Tower",
+          "type": "towers"
+        },
+        {
+          "id": "CCI",
+          "label": "Crown Castle",
+          "type": "towers"
+        },
+        {
+          "id": "SBAC",
+          "label": "SBA Comm",
+          "type": "towers"
+        },
+        {
+          "id": "ERIC",
+          "label": "Ericsson",
+          "type": "equipment"
+        },
+        {
+          "id": "NOK",
+          "label": "Nokia",
+          "type": "equipment"
+        },
+        {
+          "id": "CSCO",
+          "label": "Cisco",
+          "type": "equipment"
+        },
+        {
+          "id": "AAPL",
+          "label": "Apple",
+          "type": "devices"
+        },
+        {
+          "id": "TMUS",
+          "label": "T-Mobile",
+          "type": "carrier"
+        },
+        {
+          "id": "VZ",
+          "label": "Verizon",
+          "type": "carrier"
+        },
+        {
+          "id": "T",
+          "label": "AT&T",
+          "type": "carrier"
+        }
+      ],
+      "edges": [
+        {
+          "from": "AMT",
+          "to": "TMUS",
+          "rel": "tower leases"
+        },
+        {
+          "from": "AMT",
+          "to": "VZ",
+          "rel": "tower leases"
+        },
+        {
+          "from": "AMT",
+          "to": "T",
+          "rel": "tower leases"
+        },
+        {
+          "from": "CCI",
+          "to": "TMUS",
+          "rel": "towers & small cells"
+        },
+        {
+          "from": "CCI",
+          "to": "VZ",
+          "rel": "fiber & small cells"
+        },
+        {
+          "from": "SBAC",
+          "to": "T",
+          "rel": "tower leases"
+        },
+        {
+          "from": "ERIC",
+          "to": "TMUS",
+          "rel": "5G RAN"
+        },
+        {
+          "from": "ERIC",
+          "to": "T",
+          "rel": "network overhaul (2023 win)"
+        },
+        {
+          "from": "NOK",
+          "to": "TMUS",
+          "rel": "RAN share"
+        },
+        {
+          "from": "CSCO",
+          "to": "VZ",
+          "rel": "core routing"
+        },
+        {
+          "from": "AAPL",
+          "to": "TMUS",
+          "rel": "iPhone supply"
+        },
+        {
+          "from": "AAPL",
+          "to": "VZ",
+          "rel": "iPhone supply"
+        },
+        {
+          "from": "AAPL",
+          "to": "T",
+          "rel": "iPhone supply"
+        }
+      ]
+    },
+    "insurance": {
+      "nodes": [
+        {
+          "id": "MMC",
+          "label": "Marsh McLennan",
+          "type": "broker"
+        },
+        {
+          "id": "AON",
+          "label": "Aon",
+          "type": "broker"
+        },
+        {
+          "id": "AJG",
+          "label": "Gallagher",
+          "type": "broker"
+        },
+        {
+          "id": "PGR",
+          "label": "Progressive",
+          "type": "insurer"
+        },
+        {
+          "id": "ALL",
+          "label": "Allstate",
+          "type": "insurer"
+        },
+        {
+          "id": "TRV",
+          "label": "Travelers",
+          "type": "insurer"
+        },
+        {
+          "id": "CB",
+          "label": "Chubb",
+          "type": "insurer"
+        },
+        {
+          "id": "BRK",
+          "label": "Berkshire (GEICO/Re)",
+          "type": "insurer"
+        },
+        {
+          "id": "RNR",
+          "label": "RenaissanceRe",
+          "type": "reinsurer"
+        },
+        {
+          "id": "EG",
+          "label": "Everest Group",
+          "type": "reinsurer"
+        },
+        {
+          "id": "VRSK",
+          "label": "Verisk",
+          "type": "data"
+        },
+        {
+          "id": "MCO",
+          "label": "Moody's",
+          "type": "data"
+        },
+        {
+          "id": "DRIVERS",
+          "label": "US drivers",
+          "type": "customer",
+          "ticker": null
+        },
+        {
+          "id": "BUSINESSES",
+          "label": "Businesses",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "MMC",
+          "to": "CB",
+          "rel": "commercial placement"
+        },
+        {
+          "from": "AON",
+          "to": "TRV",
+          "rel": "brokerage & placement"
+        },
+        {
+          "from": "AJG",
+          "to": "ALL",
+          "rel": "mid-market distribution"
+        },
+        {
+          "from": "RNR",
+          "to": "ALL",
+          "rel": "catastrophe reinsurance"
+        },
+        {
+          "from": "EG",
+          "to": "TRV",
+          "rel": "reinsurance treaties"
+        },
+        {
+          "from": "BRK",
+          "to": "TRV",
+          "rel": "reinsurance capacity"
+        },
+        {
+          "from": "VRSK",
+          "to": "PGR",
+          "rel": "claims & risk analytics"
+        },
+        {
+          "from": "VRSK",
+          "to": "ALL",
+          "rel": "underwriting data"
+        },
+        {
+          "from": "VRSK",
+          "to": "TRV",
+          "rel": "catastrophe models"
+        },
+        {
+          "from": "MCO",
+          "to": "PGR",
+          "rel": "financial strength ratings"
+        },
+        {
+          "from": "MCO",
+          "to": "CB",
+          "rel": "credit ratings"
+        },
+        {
+          "from": "PGR",
+          "to": "DRIVERS",
+          "rel": "auto policies"
+        },
+        {
+          "from": "ALL",
+          "to": "DRIVERS",
+          "rel": "auto & home"
+        },
+        {
+          "from": "BRK",
+          "to": "DRIVERS",
+          "rel": "GEICO auto"
+        },
+        {
+          "from": "CB",
+          "to": "BUSINESSES",
+          "rel": "commercial lines"
+        },
+        {
+          "from": "TRV",
+          "to": "BUSINESSES",
+          "rel": "business insurance"
+        }
+      ]
+    },
+    "crypto-exchanges": {
+      "nodes": [
+        {
+          "id": "BITMAIN",
+          "label": "Bitmain",
+          "type": "hardware",
+          "ticker": null
+        },
+        {
+          "id": "MARA",
+          "label": "MARA",
+          "type": "miner"
+        },
+        {
+          "id": "RIOT",
+          "label": "Riot",
+          "type": "miner"
+        },
+        {
+          "id": "CLSK",
+          "label": "CleanSpark",
+          "type": "miner"
+        },
+        {
+          "id": "COIN",
+          "label": "Coinbase",
+          "type": "exchange"
+        },
+        {
+          "id": "HOOD",
+          "label": "Robinhood",
+          "type": "exchange"
+        },
+        {
+          "id": "CME",
+          "label": "CME Group",
+          "type": "exchange"
+        },
+        {
+          "id": "CRCL",
+          "label": "Circle (USDC)",
+          "type": "stablecoin"
+        },
+        {
+          "id": "MSTR",
+          "label": "Strategy",
+          "type": "treasury"
+        },
+        {
+          "id": "BLK",
+          "label": "BlackRock (IBIT)",
+          "type": "asset-mgr"
+        },
+        {
+          "id": "INVESTORS",
+          "label": "Investors",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "BITMAIN",
+          "to": "MARA",
+          "rel": "ASIC mining rigs"
+        },
+        {
+          "from": "BITMAIN",
+          "to": "RIOT",
+          "rel": "ASIC mining rigs"
+        },
+        {
+          "from": "BITMAIN",
+          "to": "CLSK",
+          "rel": "ASIC fleet"
+        },
+        {
+          "from": "MARA",
+          "to": "COIN",
+          "rel": "BTC sales via prime"
+        },
+        {
+          "from": "CRCL",
+          "to": "COIN",
+          "rel": "USDC partnership (rev share)"
+        },
+        {
+          "from": "COIN",
+          "to": "BLK",
+          "rel": "IBIT custody"
+        },
+        {
+          "from": "COIN",
+          "to": "MSTR",
+          "rel": "OTC execution"
+        },
+        {
+          "from": "COIN",
+          "to": "INVESTORS",
+          "rel": "retail & institutional trading"
+        },
+        {
+          "from": "HOOD",
+          "to": "INVESTORS",
+          "rel": "retail crypto access"
+        },
+        {
+          "from": "CME",
+          "to": "INVESTORS",
+          "rel": "BTC & ETH futures"
+        },
+        {
+          "from": "BLK",
+          "to": "INVESTORS",
+          "rel": "spot ETF (IBIT)"
+        }
+      ]
+    },
+    "datacenter-infra": {
+      "nodes": [
+        {
+          "id": "EQIX",
+          "label": "Equinix",
+          "type": "reit"
+        },
+        {
+          "id": "DLR",
+          "label": "Digital Realty",
+          "type": "reit"
+        },
+        {
+          "id": "IRM",
+          "label": "Iron Mountain",
+          "type": "reit"
+        },
+        {
+          "id": "CORZ",
+          "label": "Core Scientific",
+          "type": "reit"
+        },
+        {
+          "id": "CRWV",
+          "label": "CoreWeave",
+          "type": "cloud"
+        },
+        {
+          "id": "MSFT",
+          "label": "Microsoft",
+          "type": "tenant"
+        },
+        {
+          "id": "AMZN",
+          "label": "Amazon",
+          "type": "tenant"
+        },
+        {
+          "id": "GOOGL",
+          "label": "Google",
+          "type": "tenant"
+        },
+        {
+          "id": "META",
+          "label": "Meta",
+          "type": "tenant"
+        },
+        {
+          "id": "ORCL",
+          "label": "Oracle",
+          "type": "tenant"
+        }
+      ],
+      "edges": [
+        {
+          "from": "EQIX",
+          "to": "MSFT",
+          "rel": "cloud on-ramps & colo"
+        },
+        {
+          "from": "EQIX",
+          "to": "AMZN",
+          "rel": "interconnection fabric"
+        },
+        {
+          "from": "EQIX",
+          "to": "GOOGL",
+          "rel": "peering & colo"
+        },
+        {
+          "from": "DLR",
+          "to": "ORCL",
+          "rel": "hyperscale leases"
+        },
+        {
+          "from": "DLR",
+          "to": "META",
+          "rel": "wholesale capacity"
+        },
+        {
+          "from": "DLR",
+          "to": "MSFT",
+          "rel": "data center leases"
+        },
+        {
+          "from": "IRM",
+          "to": "MSFT",
+          "rel": "colo capacity"
+        },
+        {
+          "from": "CORZ",
+          "to": "CRWV",
+          "rel": "GPU hosting contracts"
+        },
+        {
+          "from": "CRWV",
+          "to": "MSFT",
+          "rel": "contracted GPU capacity"
+        }
+      ]
+    },
+    "gaming": {
+      "nodes": [
+        {
+          "id": "AMD",
+          "label": "AMD",
+          "type": "chips"
+        },
+        {
+          "id": "NVDA",
+          "label": "Nvidia",
+          "type": "chips"
+        },
+        {
+          "id": "U",
+          "label": "Unity",
+          "type": "engine"
+        },
+        {
+          "id": "EA",
+          "label": "EA",
+          "type": "publisher"
+        },
+        {
+          "id": "TTWO",
+          "label": "Take-Two",
+          "type": "publisher"
+        },
+        {
+          "id": "RBLX",
+          "label": "Roblox",
+          "type": "platform"
+        },
+        {
+          "id": "MSFT",
+          "label": "Microsoft (Xbox)",
+          "type": "platform"
+        },
+        {
+          "id": "SONY",
+          "label": "Sony (PlayStation)",
+          "type": "platform"
+        },
+        {
+          "id": "NTDOY",
+          "label": "Nintendo",
+          "type": "platform"
+        },
+        {
+          "id": "VALVE",
+          "label": "Valve (Steam)",
+          "type": "platform",
+          "ticker": null
+        },
+        {
+          "id": "DEVELOPERS",
+          "label": "Game studios",
+          "type": "customer",
+          "ticker": null
+        },
+        {
+          "id": "GAMERS",
+          "label": "Players",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "AMD",
+          "to": "SONY",
+          "rel": "PS5 semi-custom APUs"
+        },
+        {
+          "from": "AMD",
+          "to": "MSFT",
+          "rel": "Xbox Series APUs"
+        },
+        {
+          "from": "NVDA",
+          "to": "NTDOY",
+          "rel": "Switch Tegra chips"
+        },
+        {
+          "from": "U",
+          "to": "DEVELOPERS",
+          "rel": "engine licensing"
+        },
+        {
+          "from": "EA",
+          "to": "SONY",
+          "rel": "titles & platform royalties"
+        },
+        {
+          "from": "EA",
+          "to": "MSFT",
+          "rel": "titles & Game Pass deals"
+        },
+        {
+          "from": "EA",
+          "to": "VALVE",
+          "rel": "Steam releases"
+        },
+        {
+          "from": "TTWO",
+          "to": "SONY",
+          "rel": "GTA & 2K titles"
+        },
+        {
+          "from": "TTWO",
+          "to": "VALVE",
+          "rel": "PC distribution"
+        },
+        {
+          "from": "SONY",
+          "to": "GAMERS",
+          "rel": "PS5 & PS Plus"
+        },
+        {
+          "from": "MSFT",
+          "to": "GAMERS",
+          "rel": "Xbox & Game Pass"
+        },
+        {
+          "from": "NTDOY",
+          "to": "GAMERS",
+          "rel": "Switch ecosystem"
+        },
+        {
+          "from": "RBLX",
+          "to": "GAMERS",
+          "rel": "UGC platform"
+        },
+        {
+          "from": "VALVE",
+          "to": "GAMERS",
+          "rel": "Steam storefront"
+        }
+      ]
+    },
+    "apparel-luxury": {
+      "nodes": [
+        {
+          "id": "FACTORIES",
+          "label": "Contract factories (Asia)",
+          "type": "manufacturing",
+          "ticker": null
+        },
+        {
+          "id": "NKE",
+          "label": "Nike",
+          "type": "brand"
+        },
+        {
+          "id": "LULU",
+          "label": "Lululemon",
+          "type": "brand"
+        },
+        {
+          "id": "DECK",
+          "label": "Deckers (Hoka/UGG)",
+          "type": "brand"
+        },
+        {
+          "id": "ONON",
+          "label": "On Holding",
+          "type": "brand"
+        },
+        {
+          "id": "RL",
+          "label": "Ralph Lauren",
+          "type": "luxury"
+        },
+        {
+          "id": "TPR",
+          "label": "Tapestry (Coach)",
+          "type": "luxury"
+        },
+        {
+          "id": "CPRI",
+          "label": "Capri (Kors)",
+          "type": "luxury"
+        },
+        {
+          "id": "EL",
+          "label": "Est\u00e9e Lauder",
+          "type": "luxury"
+        },
+        {
+          "id": "LVMH",
+          "label": "LVMH",
+          "type": "luxury",
+          "ticker": null
+        },
+        {
+          "id": "FL",
+          "label": "Foot Locker",
+          "type": "retail"
+        },
+        {
+          "id": "DKS",
+          "label": "Dick's",
+          "type": "retail"
+        },
+        {
+          "id": "TJX",
+          "label": "TJX (off-price)",
+          "type": "retail"
+        },
+        {
+          "id": "M",
+          "label": "Macy's",
+          "type": "retail"
+        },
+        {
+          "id": "AMZN",
+          "label": "Amazon",
+          "type": "retail"
+        },
+        {
+          "id": "CONSUMERS",
+          "label": "Consumers",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "FACTORIES",
+          "to": "NKE",
+          "rel": "contract mfg (Vietnam, Indonesia)"
+        },
+        {
+          "from": "FACTORIES",
+          "to": "LULU",
+          "rel": "technical apparel mfg"
+        },
+        {
+          "from": "FACTORIES",
+          "to": "DECK",
+          "rel": "footwear manufacturing"
+        },
+        {
+          "from": "FACTORIES",
+          "to": "ONON",
+          "rel": "footwear manufacturing"
+        },
+        {
+          "from": "NKE",
+          "to": "FL",
+          "rel": "wholesale (rebuilt 2024)"
+        },
+        {
+          "from": "NKE",
+          "to": "DKS",
+          "rel": "wholesale & house of sport"
+        },
+        {
+          "from": "NKE",
+          "to": "AMZN",
+          "rel": "marketplace return (2025)"
+        },
+        {
+          "from": "DECK",
+          "to": "DKS",
+          "rel": "Hoka wholesale"
+        },
+        {
+          "from": "ONON",
+          "to": "DKS",
+          "rel": "run specialty channel"
+        },
+        {
+          "from": "LULU",
+          "to": "CONSUMERS",
+          "rel": "DTC-first model"
+        },
+        {
+          "from": "RL",
+          "to": "M",
+          "rel": "department wholesale"
+        },
+        {
+          "from": "RL",
+          "to": "TJX",
+          "rel": "off-price channel"
+        },
+        {
+          "from": "TPR",
+          "to": "M",
+          "rel": "handbag wholesale"
+        },
+        {
+          "from": "TPR",
+          "to": "TJX",
+          "rel": "outlet & off-price"
+        },
+        {
+          "from": "CPRI",
+          "to": "M",
+          "rel": "Michael Kors wholesale"
+        },
+        {
+          "from": "EL",
+          "to": "M",
+          "rel": "beauty counters"
+        },
+        {
+          "from": "EL",
+          "to": "AMZN",
+          "rel": "Premium Beauty store"
+        },
+        {
+          "from": "LVMH",
+          "to": "CONSUMERS",
+          "rel": "maisons, DTC only"
+        },
+        {
+          "from": "FL",
+          "to": "CONSUMERS",
+          "rel": "sneaker retail"
+        },
+        {
+          "from": "TJX",
+          "to": "CONSUMERS",
+          "rel": "treasure hunt"
+        }
+      ]
+    },
+    "waste-industrial": {
+      "nodes": [
+        {
+          "id": "WM",
+          "label": "Waste Management",
+          "type": "hauler"
+        },
+        {
+          "id": "RSG",
+          "label": "Republic Services",
+          "type": "hauler"
+        },
+        {
+          "id": "WCN",
+          "label": "Waste Connections",
+          "type": "hauler"
+        },
+        {
+          "id": "CLH",
+          "label": "Clean Harbors",
+          "type": "hauler"
+        },
+        {
+          "id": "URI",
+          "label": "United Rentals",
+          "type": "services"
+        },
+        {
+          "id": "FAST",
+          "label": "Fastenal",
+          "type": "mro"
+        },
+        {
+          "id": "GWW",
+          "label": "Grainger",
+          "type": "mro"
+        },
+        {
+          "id": "CTAS",
+          "label": "Cintas",
+          "type": "services"
+        },
+        {
+          "id": "ROL",
+          "label": "Rollins",
+          "type": "services"
+        },
+        {
+          "id": "PWR",
+          "label": "Quanta Services",
+          "type": "customer"
+        },
+        {
+          "id": "BUSINESSES",
+          "label": "Businesses",
+          "type": "customer",
+          "ticker": null
+        },
+        {
+          "id": "MUNIS",
+          "label": "Municipalities",
+          "type": "customer",
+          "ticker": null
+        },
+        {
+          "id": "CONSTRUCTION",
+          "label": "Construction",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "WM",
+          "to": "MUNIS",
+          "rel": "residential collection"
+        },
+        {
+          "from": "WM",
+          "to": "BUSINESSES",
+          "rel": "commercial & landfill"
+        },
+        {
+          "from": "RSG",
+          "to": "MUNIS",
+          "rel": "municipal contracts"
+        },
+        {
+          "from": "RSG",
+          "to": "BUSINESSES",
+          "rel": "commercial collection"
+        },
+        {
+          "from": "WCN",
+          "to": "BUSINESSES",
+          "rel": "exclusive-market collection"
+        },
+        {
+          "from": "CLH",
+          "to": "BUSINESSES",
+          "rel": "hazardous waste disposal"
+        },
+        {
+          "from": "URI",
+          "to": "CONSTRUCTION",
+          "rel": "equipment rental"
+        },
+        {
+          "from": "URI",
+          "to": "PWR",
+          "rel": "fleet rental"
+        },
+        {
+          "from": "FAST",
+          "to": "BUSINESSES",
+          "rel": "fasteners & vending"
+        },
+        {
+          "from": "FAST",
+          "to": "CONSTRUCTION",
+          "rel": "jobsite supply"
+        },
+        {
+          "from": "GWW",
+          "to": "BUSINESSES",
+          "rel": "MRO distribution"
+        },
+        {
+          "from": "CTAS",
+          "to": "BUSINESSES",
+          "rel": "uniforms & first aid"
+        },
+        {
+          "from": "ROL",
+          "to": "BUSINESSES",
+          "rel": "pest control (Orkin)"
+        }
+      ]
+    },
+    "healthcare": {
+      "nodes": [
+        {
+          "id": "MDT",
+          "label": "Medtronic",
+          "type": "devices"
+        },
+        {
+          "id": "SYK",
+          "label": "Stryker",
+          "type": "devices"
+        },
+        {
+          "id": "ISRG",
+          "label": "Intuitive Surgical",
+          "type": "devices"
+        },
+        {
+          "id": "BSX",
+          "label": "Boston Scientific",
+          "type": "devices"
+        },
+        {
+          "id": "BDX",
+          "label": "BD",
+          "type": "devices"
+        },
+        {
+          "id": "HCA",
+          "label": "HCA Healthcare",
+          "type": "hospitals"
+        },
+        {
+          "id": "THC",
+          "label": "Tenet",
+          "type": "hospitals"
+        },
+        {
+          "id": "UHS",
+          "label": "Universal Health",
+          "type": "hospitals"
+        },
+        {
+          "id": "UNH",
+          "label": "UnitedHealth",
+          "type": "payer"
+        },
+        {
+          "id": "CI",
+          "label": "Cigna",
+          "type": "payer"
+        },
+        {
+          "id": "ELV",
+          "label": "Elevance",
+          "type": "payer"
+        },
+        {
+          "id": "HUM",
+          "label": "Humana",
+          "type": "payer"
+        },
+        {
+          "id": "CVS",
+          "label": "CVS (Aetna)",
+          "type": "payer"
+        },
+        {
+          "id": "PATIENTS",
+          "label": "Patients",
+          "type": "customer",
+          "ticker": null
+        },
+        {
+          "id": "EMPLOYERS",
+          "label": "Employers",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "MDT",
+          "to": "HCA",
+          "rel": "cardiac & surgical devices"
+        },
+        {
+          "from": "SYK",
+          "to": "HCA",
+          "rel": "orthopedics & beds"
+        },
+        {
+          "from": "SYK",
+          "to": "THC",
+          "rel": "surgical equipment"
+        },
+        {
+          "from": "ISRG",
+          "to": "HCA",
+          "rel": "da Vinci robots"
+        },
+        {
+          "from": "BSX",
+          "to": "THC",
+          "rel": "cardiology devices"
+        },
+        {
+          "from": "BDX",
+          "to": "UHS",
+          "rel": "medical supplies"
+        },
+        {
+          "from": "HCA",
+          "to": "UNH",
+          "rel": "network contracts"
+        },
+        {
+          "from": "HCA",
+          "to": "CI",
+          "rel": "in-network rates"
+        },
+        {
+          "from": "THC",
+          "to": "ELV",
+          "rel": "network contracts"
+        },
+        {
+          "from": "UHS",
+          "to": "HUM",
+          "rel": "behavioral network"
+        },
+        {
+          "from": "UNH",
+          "to": "EMPLOYERS",
+          "rel": "group plans"
+        },
+        {
+          "from": "CI",
+          "to": "EMPLOYERS",
+          "rel": "self-funded admin"
+        },
+        {
+          "from": "ELV",
+          "to": "PATIENTS",
+          "rel": "Blue plans"
+        },
+        {
+          "from": "HUM",
+          "to": "PATIENTS",
+          "rel": "Medicare Advantage"
+        },
+        {
+          "from": "CVS",
+          "to": "PATIENTS",
+          "rel": "Aetna plans + pharmacy"
+        },
+        {
+          "from": "UNH",
+          "to": "PATIENTS",
+          "rel": "coverage (49M members)"
+        }
+      ]
+    },
+    "hotels-travel": {
+      "nodes": [
+        {
+          "id": "MAR",
+          "label": "Marriott",
+          "type": "hotel"
+        },
+        {
+          "id": "HLT",
+          "label": "Hilton",
+          "type": "hotel"
+        },
+        {
+          "id": "H",
+          "label": "Hyatt",
+          "type": "hotel"
+        },
+        {
+          "id": "OWNERS",
+          "label": "Franchise owners",
+          "type": "manufacturing",
+          "ticker": null
+        },
+        {
+          "id": "BKNG",
+          "label": "Booking",
+          "type": "ota"
+        },
+        {
+          "id": "ABNB",
+          "label": "Airbnb",
+          "type": "ota"
+        },
+        {
+          "id": "EXPE",
+          "label": "Expedia",
+          "type": "ota"
+        },
+        {
+          "id": "HOSTS",
+          "label": "Hosts",
+          "type": "manufacturing",
+          "ticker": null
+        },
+        {
+          "id": "DAL",
+          "label": "Delta",
+          "type": "airline"
+        },
+        {
+          "id": "UAL",
+          "label": "United",
+          "type": "airline"
+        },
+        {
+          "id": "RCL",
+          "label": "Royal Caribbean",
+          "type": "cruise"
+        },
+        {
+          "id": "CCL",
+          "label": "Carnival",
+          "type": "cruise"
+        },
+        {
+          "id": "TRAVELERS",
+          "label": "Travelers",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "OWNERS",
+          "to": "MAR",
+          "rel": "franchise fees & rooms"
+        },
+        {
+          "from": "OWNERS",
+          "to": "HLT",
+          "rel": "franchise fees & rooms"
+        },
+        {
+          "from": "OWNERS",
+          "to": "H",
+          "rel": "managed properties"
+        },
+        {
+          "from": "HOSTS",
+          "to": "ABNB",
+          "rel": "listings supply"
+        },
+        {
+          "from": "MAR",
+          "to": "BKNG",
+          "rel": "inventory (rate parity)"
+        },
+        {
+          "from": "HLT",
+          "to": "EXPE",
+          "rel": "OTA distribution"
+        },
+        {
+          "from": "MAR",
+          "to": "TRAVELERS",
+          "rel": "Bonvoy direct"
+        },
+        {
+          "from": "HLT",
+          "to": "TRAVELERS",
+          "rel": "Honors direct"
+        },
+        {
+          "from": "BKNG",
+          "to": "TRAVELERS",
+          "rel": "agency bookings"
+        },
+        {
+          "from": "ABNB",
+          "to": "TRAVELERS",
+          "rel": "stays & experiences"
+        },
+        {
+          "from": "EXPE",
+          "to": "TRAVELERS",
+          "rel": "packages"
+        },
+        {
+          "from": "DAL",
+          "to": "TRAVELERS",
+          "rel": "seats & SkyMiles"
+        },
+        {
+          "from": "UAL",
+          "to": "TRAVELERS",
+          "rel": "seats & MileagePlus"
+        },
+        {
+          "from": "RCL",
+          "to": "TRAVELERS",
+          "rel": "cruises"
+        },
+        {
+          "from": "CCL",
+          "to": "TRAVELERS",
+          "rel": "cruises"
+        },
+        {
+          "from": "UAL",
+          "to": "MAR",
+          "rel": "loyalty partnerships"
+        }
+      ]
+    },
+    "shipping-ports": {
+      "nodes": [
+        {
+          "id": "MAERSK",
+          "label": "Maersk",
+          "type": "ocean",
+          "ticker": null
+        },
+        {
+          "id": "MSC",
+          "label": "MSC",
+          "type": "ocean",
+          "ticker": null
+        },
+        {
+          "id": "ZIM",
+          "label": "ZIM",
+          "type": "ocean"
+        },
+        {
+          "id": "MATX",
+          "label": "Matson",
+          "type": "ocean"
+        },
+        {
+          "id": "GSL",
+          "label": "Global Ship Lease",
+          "type": "lessor"
+        },
+        {
+          "id": "DAC",
+          "label": "Danaos",
+          "type": "lessor"
+        },
+        {
+          "id": "ZPMC",
+          "label": "ZPMC (cranes)",
+          "type": "equipment",
+          "ticker": null
+        },
+        {
+          "id": "PORTS",
+          "label": "US ports (LA/LB, NY-NJ)",
+          "type": "ports",
+          "ticker": null
+        },
+        {
+          "id": "UNP",
+          "label": "Union Pacific",
+          "type": "rail"
+        },
+        {
+          "id": "CSX",
+          "label": "CSX",
+          "type": "rail"
+        },
+        {
+          "id": "EXPD",
+          "label": "Expeditors",
+          "type": "broker"
+        },
+        {
+          "id": "CHRW",
+          "label": "C.H. Robinson",
+          "type": "broker"
+        },
+        {
+          "id": "WMT",
+          "label": "Walmart",
+          "type": "retail"
+        },
+        {
+          "id": "TGT",
+          "label": "Target",
+          "type": "retail"
+        },
+        {
+          "id": "HD",
+          "label": "Home Depot",
+          "type": "retail"
+        }
+      ],
+      "edges": [
+        {
+          "from": "GSL",
+          "to": "MAERSK",
+          "rel": "vessel charters"
+        },
+        {
+          "from": "DAC",
+          "to": "MSC",
+          "rel": "container ship charters"
+        },
+        {
+          "from": "ZPMC",
+          "to": "PORTS",
+          "rel": "ship-to-shore cranes"
+        },
+        {
+          "from": "MAERSK",
+          "to": "PORTS",
+          "rel": "terminals (APM)"
+        },
+        {
+          "from": "MSC",
+          "to": "PORTS",
+          "rel": "terminals (TiL)"
+        },
+        {
+          "from": "ZIM",
+          "to": "WMT",
+          "rel": "transpacific capacity"
+        },
+        {
+          "from": "MATX",
+          "to": "TGT",
+          "rel": "expedited China service"
+        },
+        {
+          "from": "PORTS",
+          "to": "UNP",
+          "rel": "on-dock rail"
+        },
+        {
+          "from": "PORTS",
+          "to": "CSX",
+          "rel": "intermodal interchange"
+        },
+        {
+          "from": "EXPD",
+          "to": "HD",
+          "rel": "customs & forwarding"
+        },
+        {
+          "from": "CHRW",
+          "to": "TGT",
+          "rel": "freight brokerage"
+        },
+        {
+          "from": "MAERSK",
+          "to": "WMT",
+          "rel": "ocean freight"
+        }
+      ]
+    },
+    "real-estate": {
+      "nodes": [
+        {
+          "id": "BXP",
+          "label": "BXP (office)",
+          "type": "reit"
+        },
+        {
+          "id": "SPG",
+          "label": "Simon Property",
+          "type": "reit"
+        },
+        {
+          "id": "O",
+          "label": "Realty Income",
+          "type": "reit"
+        },
+        {
+          "id": "AVB",
+          "label": "AvalonBay",
+          "type": "reit"
+        },
+        {
+          "id": "EQR",
+          "label": "Equity Residential",
+          "type": "reit"
+        },
+        {
+          "id": "WELL",
+          "label": "Welltower",
+          "type": "reit"
+        },
+        {
+          "id": "VTR",
+          "label": "Ventas",
+          "type": "reit"
+        },
+        {
+          "id": "PSA",
+          "label": "Public Storage",
+          "type": "reit"
+        },
+        {
+          "id": "DG",
+          "label": "Dollar General",
+          "type": "tenant"
+        },
+        {
+          "id": "WBA",
+          "label": "Walgreens",
+          "type": "tenant"
+        },
+        {
+          "id": "BKD",
+          "label": "Brookdale",
+          "type": "tenant"
+        },
+        {
+          "id": "GOOGL",
+          "label": "Google",
+          "type": "tenant"
+        },
+        {
+          "id": "WFC",
+          "label": "Wells Fargo",
+          "type": "lender"
+        },
+        {
+          "id": "RETAILERS",
+          "label": "Mall retailers",
+          "type": "customer",
+          "ticker": null
+        },
+        {
+          "id": "RENTERS",
+          "label": "Renters",
+          "type": "customer",
+          "ticker": null
+        },
+        {
+          "id": "BUSINESSES",
+          "label": "Businesses",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "SPG",
+          "to": "RETAILERS",
+          "rel": "mall leases"
+        },
+        {
+          "from": "O",
+          "to": "WBA",
+          "rel": "net-lease stores"
+        },
+        {
+          "from": "O",
+          "to": "DG",
+          "rel": "net-lease stores"
+        },
+        {
+          "from": "AVB",
+          "to": "RENTERS",
+          "rel": "apartments"
+        },
+        {
+          "from": "EQR",
+          "to": "RENTERS",
+          "rel": "apartments"
+        },
+        {
+          "from": "PSA",
+          "to": "RENTERS",
+          "rel": "self-storage"
+        },
+        {
+          "from": "VTR",
+          "to": "BKD",
+          "rel": "senior housing leases"
+        },
+        {
+          "from": "WELL",
+          "to": "BKD",
+          "rel": "RIDEA operating"
+        },
+        {
+          "from": "BXP",
+          "to": "GOOGL",
+          "rel": "office leases"
+        },
+        {
+          "from": "BXP",
+          "to": "BUSINESSES",
+          "rel": "Class A offices"
+        },
+        {
+          "from": "WFC",
+          "to": "BXP",
+          "rel": "CRE lending"
+        },
+        {
+          "from": "WFC",
+          "to": "SPG",
+          "rel": "credit facilities"
+        }
+      ]
+    },
+    "chemicals-materials": {
+      "nodes": [
+        {
+          "id": "LIN",
+          "label": "Linde",
+          "type": "gases"
+        },
+        {
+          "id": "APD",
+          "label": "Air Products",
+          "type": "gases"
+        },
+        {
+          "id": "DOW",
+          "label": "Dow",
+          "type": "chemicals"
+        },
+        {
+          "id": "DD",
+          "label": "DuPont",
+          "type": "chemicals"
+        },
+        {
+          "id": "LYB",
+          "label": "LyondellBasell",
+          "type": "chemicals"
+        },
+        {
+          "id": "PPG",
+          "label": "PPG",
+          "type": "coatings"
+        },
+        {
+          "id": "FCX",
+          "label": "Freeport (copper)",
+          "type": "mining"
+        },
+        {
+          "id": "NUE",
+          "label": "Nucor",
+          "type": "steel"
+        },
+        {
+          "id": "STLD",
+          "label": "Steel Dynamics",
+          "type": "steel"
+        },
+        {
+          "id": "CLF",
+          "label": "Cleveland-Cliffs",
+          "type": "steel"
+        },
+        {
+          "id": "ECL",
+          "label": "Ecolab",
+          "type": "specialty"
+        },
+        {
+          "id": "PG",
+          "label": "P&G",
+          "type": "consumer"
+        },
+        {
+          "id": "TSM",
+          "label": "TSMC",
+          "type": "buyer"
+        },
+        {
+          "id": "INTC",
+          "label": "Intel",
+          "type": "buyer"
+        },
+        {
+          "id": "F",
+          "label": "Ford",
+          "type": "buyer"
+        },
+        {
+          "id": "TSLA",
+          "label": "Tesla",
+          "type": "buyer"
+        },
+        {
+          "id": "MCD",
+          "label": "McDonald's",
+          "type": "buyer"
+        },
+        {
+          "id": "HCA",
+          "label": "HCA",
+          "type": "buyer"
+        },
+        {
+          "id": "WMT",
+          "label": "Walmart",
+          "type": "buyer"
+        },
+        {
+          "id": "CONSTRUCTION",
+          "label": "Construction",
+          "type": "customer",
+          "ticker": null
+        }
+      ],
+      "edges": [
+        {
+          "from": "LIN",
+          "to": "TSM",
+          "rel": "ultra-pure gases"
+        },
+        {
+          "from": "APD",
+          "to": "INTC",
+          "rel": "fab gases"
+        },
+        {
+          "from": "DD",
+          "to": "TSM",
+          "rel": "CMP pads & photoresists"
+        },
+        {
+          "from": "DOW",
+          "to": "PPG",
+          "rel": "resins & intermediates"
+        },
+        {
+          "from": "PPG",
+          "to": "F",
+          "rel": "auto coatings"
+        },
+        {
+          "from": "LYB",
+          "to": "PG",
+          "rel": "packaging resins"
+        },
+        {
+          "from": "PG",
+          "to": "WMT",
+          "rel": "consumer brands"
+        },
+        {
+          "from": "FCX",
+          "to": "TSLA",
+          "rel": "copper for EVs"
+        },
+        {
+          "from": "NUE",
+          "to": "CONSTRUCTION",
+          "rel": "structural steel"
+        },
+        {
+          "from": "STLD",
+          "to": "F",
+          "rel": "flat-rolled steel"
+        },
+        {
+          "from": "CLF",
+          "to": "F",
+          "rel": "auto sheet steel"
+        },
+        {
+          "from": "ECL",
+          "to": "MCD",
+          "rel": "sanitation & hygiene"
+        },
+        {
+          "from": "ECL",
+          "to": "HCA",
+          "rel": "hospital hygiene"
+        }
+      ]
+    }
+  }
+}

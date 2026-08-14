@@ -1,0 +1,25 @@
+# ---- secrets ------------------------------------------------------------
+.env
+
+# ---- your data (private, never committed) --------------------------------
+# These are created on first run and belong to whoever is running Windrose.
+holdings.json
+journal.json
+alerts.json
+settings.json
+.tutorial_seen
+.lan_pin
+
+# ---- python -------------------------------------------------------------
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# ---- os / editor --------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

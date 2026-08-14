@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Windrose — how it works</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script>try{var p=localStorage.getItem("ledger-theme");if(["paper","graphite"].indexOf(p)<0)p="auto";var t=p==="auto"?(matchMedia("(prefers-color-scheme: light)").matches?"paper":"graphite"):p;document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="graphite"}</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="mark">▌</span> WINDROSE <span class="sub">HOW IT WORKS</span></div>
+  <div class="spacer"></div>
+  <a class="learnlink" href="/">← back to the console</a>
+</header>
+
+<div class="tut">
+
+  <nav class="toc" id="toc">
+    <a href="#what">What this is</a>
+    <a href="#live">Where the numbers come from</a>
+    <a href="#charts">Reading the charts</a>
+    <a href="#perstock">The per-stock numbers</a>
+    <a href="#score">The conditions score</a>
+    <a href="#portfolio-risk">Portfolio risk</a>
+    <a href="#models">The workbench, model by model</a>
+    <a href="#limits">Where all of this lies to you</a>
+    <a href="#code">The code, if you want to dig</a>
+  </nav>
+
+  <main class="prose">
+
+    <div id="firstrun" class="firstrun" style="display:none">
+      <b>First launch.</b> This page opens once so the dashboard never has to explain itself twice — skim it or read it
+      properly, then head to the console below. It stays one click away (the <span class="mono">learn</span> pill, top
+      bar) whenever a number stops making sense.
+      <a class="cta" href="/">Open the console →</a>
+    </div>
+
+    <h1>Every number on that dashboard, explained.</h1>
+    <p class="sub">Where each one comes from, what it's actually good for, and where it will mislead you if you let it.
+    Wherever possible the examples below aren't examples — they're pulled live from your positions right now.
+    When a section has a slider, drag it. The fastest way to understand a number is to break it.</p>
+
+    <h2 id="what">What this is (and deliberately isn't)</h2>
+
+    <p>Windrose watches. It doesn't trade. That's not a missing feature — it's the design. The first version of this
+    project let a language model place orders on a schedule, and the problem with that isn't that models are dumb;
+    it's that they're <em>confident</em>. A thing that sounds sure of itself, attached to a buy button, is how money
+    disappears politely. So the buy button is gone. Everything on the screen exists to inform a decision that you
+    make, on your broker, on purpose.</p>
+
+    <p>The second design rule: every number is deterministic. Not "the AI thinks," not "the model feels" — computed,
+    from price history and reported financials, using formulas you can check by hand. Where a number depends on an
+    assumption (a discount rate, a leverage ratio), the assumption is a slider on the screen, not a value buried in
+    code. If you can't see what's feeding a number, the number is decoration. Nothing here is decoration.</p>
+
+    <p>Third rule: the dashboard tells you what <em>is</em>, and occasionally what <em>was</em>. It never tells you
+    what <em>will be</em>. Anything that looks like a forecast — analyst targets, implied growth, Monte Carlo cones —
+    is labeled with exactly how much it doesn't know.</p>
+
+    <h2 id="live">Where the numbers come from, second to second</h2>
+
+    <p>The pill in the top bar is the heartbeat. Green and pulsing (<span class="mono">live · alpaca iex</span>) means
+    a background thread on your machine is asking Alpaca for fresh prices about every two seconds, and the page is
+    repainting every one and a half. Amber (<span class="mono">delayed · yfinance</span>) means no Alpaca keys are
+    set, so you're on Yahoo-sourced quotes that lag by minutes. Red means nothing is answering — usually your
+    internet, occasionally a rate limit.</p>
+
+    <p>Now the honest part. Alpaca's free feed is IEX — a real exchange, real trades, but a small slice of total US
+    volume, low single digits. In a calm market the last IEX print and the "real" consolidated price are pennies
+    apart. In a fast market they can drift. For watching your own book this is fine. For scalping it is not, and
+    nothing about this dashboard is built for scalping, so we're square.</p>
+
+    <p>The futures strip is a different animal. Real-time CME futures data costs real money, and no free feed carries
+    it. So ES, NQ, YM, oil, and gold up there are the genuine contracts, delayed roughly fifteen minutes. They answer
+    "what's the overnight mood" and "is the market open somewhere doing something" — they do not answer "what is the
+    S&amp;P doing this second." The VIX is an index, not a future, and comes on the same delay.</p>
+
+    <p>News comes from Finnhub: a general market wire plus stories tagged to each of your holdings from the last week.
+    Analyst ratings, price targets, and next-earnings dates come from Yahoo's consensus data and refresh about every
+    half hour, which is plenty — analysts don't change their minds by the minute, whatever the headlines imply.</p>
+
+    <p>Everything is cached at a sane rhythm: prices every ~2s, futures 20s, the analysis engine 45s, news 3 minutes,
+    fundamentals an hour. If a source dies, its panel goes quiet and everything else keeps running. A dashboard that
+    falls over because one API hiccuped is a dashboard you'll stop trusting.</p>
+
+    <h2 id="charts">Reading the charts the way they're drawn</h2>
+
+    <p>Each holding card draws a year of daily closes. The bright line is price. The amber line is the 20-day simple
+    moving average; the grey one is the 50-day. A moving average is exactly what it says: the plain average of the
+    last N closes, dragged forward one day at a time. That's all. Its whole job is to be slower than price — a
+    memory the market has to fight against.</p>
+
+    <p>Price above a rising average means the recent past keeps getting repriced upward; below a falling one, the
+    opposite. When the 20 crosses above the 50 people call it a golden cross; the reverse, a death cross. The names
+    oversell it. A crossover is a lagging summary of what already happened — useful for describing a trend, expensive
+    if you treat it as a starting gun, because by the time the slow line agrees, a chunk of the move is gone. You'll
+    see exactly how expensive in the <a href="#models">Strategy Lab</a>.</p>
+
+    <p>The little sparklines in the holdings table are the same year compressed to a gesture — green if it ends higher
+    than it started, red otherwise. They're there for shape recognition, nothing more.</p>
+
+    <h2 id="perstock">The per-stock numbers, one at a time</h2>
+
+    <h3>RSI — how one-sided has the tape been</h3>
+    <p>RSI answers a single question: of all the daily movement in the last 14 sessions, what share of it was upward?
+    Everything up: 100. Everything down: 0. An even split: 50. Wilder's smoothing makes recent days count a bit more,
+    and that's genuinely the whole machine.</p>
+    <p>The folklore says 70 is "overbought" and 30 is "oversold," as if those were laws. They're habits. A strong
+    stock can sit above 70 for months while the pullback you're waiting for never arrives. Read RSI as a description
+    of how lopsided the recent tape has been — and notice that <em>extreme</em> readings in either direction mean the
+    move is stretched, which cuts both ways.</p>
+
+    <div class="demo" id="demo-rsi">
+      <div class="dt">Drag it — RSI is just the balance of up-moves</div>
+      <div class="ctlrow">
+        <div class="ctl"><label>share of recent movement that was upward <b id="rsi-lab">55%</b></label>
+        <input type="range" id="rsi-in" min="0" max="100" step="1" value="55"></div>
+      </div>
+      <div class="bars">
+        <div class="brow"><span>RSI</span><div class="btrack"><div class="bfill" id="rsi-bar" style="width:55%"></div></div><span id="rsi-out">55</span></div>
+      </div>
+      <div class="out" id="rsi-zone">reads as: neutral</div>
+    </div>
+
+    <details><summary>the exact math</summary><div>
+      <div class="frm">avgGain = Wilder-smoothed mean of up-moves (14d)
+avgLoss = Wilder-smoothed mean of down-moves (14d)
+RSI     = 100 × avgGain / (avgGain + avgLoss)</div>
+      Wilder smoothing: each day, new_avg = (13 × old_avg + today) / 14 — an exponential average with a slow decay,
+      so a monster day fades over weeks instead of dropping off a cliff on day 15.
+    </div></details>
+
+    <h3>MACD — is the trend speeding up or tiring</h3>
+    <p>Take a fast exponential average of price (12 days), subtract a slow one (26): that difference is momentum with
+    the units stripped away. Smooth <em>that</em> (9 days) and look at whether the gap between the two is widening or
+    shrinking. The dashboard reduces the whole apparatus to one honest word: <span class="mono">rising</span> —
+    trend gaining energy — or <span class="mono">fading</span>. It's a second derivative in a trench coat. Treat it
+    as texture, not signal.</p>
+
+    <h3>Momentum — 5, 20, 60 days</h3>
+    <p>Plain percentage change over roughly a week, a month, and a quarter. No smoothing, no cleverness. Three windows
+    because one lies: a stock can be up on the month and bleeding on the week, and you want to see both at once.</p>
+
+    <h3>Volatility — the price of holding it</h3>
+    <p>Take daily log-returns for the last month, measure how much they scatter, scale to a year. The result reads
+    like "<span class="n">29%</span>/yr" and means: if the recent behavior kept up, a one-standard-deviation year
+    moves the price about that much, either direction. The rough day-to-day translation is annualized ÷ 16 — a 32%
+    stock wobbles about 2% on an ordinary day, before anything actually happens.</p>
+    <p>The card shows the EWMA version — RiskMetrics-style, recent days weighted heavier — so when a name suddenly
+    turns violent, the number turns violent with it instead of averaging the storm away. That's also why your book's
+    "current regime" volatility and its "1-year average" volatility can disagree: when current is higher, the recent
+    market is rougher than the year as a whole.</p>
+
+    <h3>ATR, Bollinger %b — the same idea in price units</h3>
+    <p>ATR is the average true daily range in dollars — what a normal day's swing physically looks like — useful for
+    sizing what "noise" means for a given name. Bollinger %b asks where price sits inside a two-standard-deviation
+    envelope of its last 20 days: 0.5 is mid-band and calm; hugging 0 or 1 means stretched relative to its own recent
+    self. Stretched is a state, not a verdict — rubber bands snap back, and they also break.</p>
+
+    <h3>Relative strength vs SPY — the only fair fight</h3>
+    <p>Your stock being up 4% in a month means one thing if the index did 1% and something much worse if the index did
+    9%. The vs-SPY figure is simply your holding's return minus SPY's over the same window. Positive: it's earning its
+    place. Persistently negative: you're paying opportunity cost to hold a laggard, and the market is patient about
+    collecting.</p>
+
+    <h3>Max drawdown, Sharpe, 52-week position</h3>
+    <p>Max drawdown is the deepest peak-to-trough fall in the window — the worst experience an owner actually had, and
+    the number that best predicts whether <em>you'll</em> hold through it, because you already know how the last one
+    felt. Sharpe is annualized return divided by annualized volatility: pain-adjusted performance. Above 1 is good,
+    negative means you took risk and got punished for it. And the 52-week position is just where price sits between
+    its yearly low (0%) and high (100%) — cheap-looking near the bottom is sometimes cheap and sometimes broken, and
+    the number can't tell you which.</p>
+
+    <div class="demo" id="demo-dd">
+      <div class="dt">Why drawdowns matter more than they look — the recovery is bigger than the fall</div>
+      <div class="ctlrow">
+        <div class="ctl"><label>drawdown <b id="dd-lab">−20%</b></label>
+        <input type="range" id="dd-in" min="1" max="90" step="1" value="20"></div>
+      </div>
+      <div class="bars">
+        <div class="brow"><span>the fall</span><div class="btrack"><div class="bfill red" id="dd-bar1" style="width:20%"></div></div><span id="dd-o1">−20%</span></div>
+        <div class="brow"><span>gain to get back</span><div class="btrack"><div class="bfill green" id="dd-bar2" style="width:25%"></div></div><span id="dd-o2">+25%</span></div>
+      </div>
+      <div class="out" id="dd-read">Lose 20%, and you need +25% just to be whole. The asymmetry is arithmetic, not opinion — and it's the entire case for caring about risk before return.</div>
+    </div>
+
+    <h2 id="score">The conditions score — a sort key wearing a suit</h2>
+
+    <p>Every holding card carries a 0–100 score. Here is everything it is: five sub-scores — trend, momentum,
+    strength vs SPY, risk, and stretch — each computed from rules you can read in <span class="mono">analysis.py</span>,
+    blended with fixed weights (25 / 25 / 20 / 15 / 15). The sub-scores are printed right under the bar so you can see
+    <em>why</em> a number is what it is, not just what it is.</p>
+
+    <p>Here is everything it is not: a prediction, a recommendation, or a substitute for reading the card. Compressing
+    five dimensions into one number loses information on purpose — that's what makes it useful for sorting and
+    dangerous for deciding. High score means "conditions currently look orderly by these five lenses." Markets take
+    special pleasure in punishing orderly.</p>
+
+    <p id="score-live-line">Right now your strongest card by this measure is <span class="n" data-live="best-sym">—</span>
+    at <span class="n" data-live="best-score">—</span>, and the weakest is <span class="neg-n" data-live="worst-sym">—</span>
+    at <span class="neg-n" data-live="worst-score">—</span> — go look at their sub-scores and you'll see the shape of the
+    difference immediately.</p>
+
+    <h2 id="portfolio-risk">Portfolio risk — the panel that earns the rent</h2>
+
+    <p>Everything above describes single names. This panel describes the thing you actually own: the combination. And
+    combinations behave in ways the pieces don't advertise.</p>
+
+    <h3>Effective holdings — how many bets is this, really</h3>
+    <p>You hold <span class="n" data-live="n-pos">—</span> positions. You do not hold
+    <span data-live="n-pos-2">—</span> bets. Square each position's weight, add them up, take the reciprocal — that's
+    the Herfindahl trick — and you get the number of <em>equal-sized</em> positions your book behaves like. Yours
+    right now: <span class="n" data-live="eff-n">—</span>. The gap between those two numbers is concentration, and
+    concentration is a decision you're making whether or not you made it on purpose.</p>
+
+    <h3>Correlation — when two tickers are one trade</h3>
+    <p>Correlation measures whether two holdings move on the same days, from −1 (mirror images) to +1 (the same
+    thing twice). It's the quiet killer of diversification: ten tickers that all catch the same flu are one bet with
+    ten names. <span data-live="pair-line">—</span></p>
+
+    <div class="demo" id="demo-corr">
+      <div class="dt">The free lunch, and where it stops — preloaded with your two most-correlated holdings</div>
+      <div class="ctlrow">
+        <div class="ctl"><label>weight in <b id="c-n1">A</b> <b id="c-wlab">50%</b></label>
+        <input type="range" id="c-w" min="0" max="100" step="1" value="50"></div>
+        <div class="ctl"><label>correlation <b id="c-rlab">0.60</b></label>
+        <input type="range" id="c-r" min="-100" max="100" step="5" value="60"></div>
+      </div>
+      <div class="bars">
+        <div class="brow"><span>avg of the two vols</span><div class="btrack"><div class="bfill amber" id="c-bar1"></div></div><span id="c-o1">—</span></div>
+        <div class="brow"><span>combined vol</span><div class="btrack"><div class="bfill" id="c-bar2"></div></div><span id="c-o2">—</span></div>
+      </div>
+      <div class="out" id="c-read">—</div>
+    </div>
+
+    <details><summary>the exact math</summary><div>
+      <div class="frm">σ_p² = w²σ₁² + (1−w)²σ₂² + 2·w·(1−w)·ρ·σ₁·σ₂</div>
+      The whole benefit of diversification lives in that last term. At ρ = 1 the combined volatility is just the
+      weighted average — zero benefit. Every step below 1 is risk that cancels instead of adding. Negative ρ is the
+      good stuff and nearly impossible to find between two long equity positions.
+    </div></details>
+
+    <h3>Weight vs risk contribution — where the money is vs what moves it</h3>
+    <p>The paired bars are the panel's centerpiece. The violet bar is a position's share of your dollars. The amber
+    bar is its share of your <em>risk</em> — computed from the covariance matrix, so it accounts for both how violent
+    a name is and how much it drags the others with it. They are almost never the same number.
+    <span data-live="rc-line">—</span> A small position in something wild can quietly matter more than a large
+    position in something sleepy. This is the math that makes that visible.</p>
+
+    <h3>Beta and the diversification ratio</h3>
+    <p>Beta regresses your whole book against SPY: at 1.0 you're a passenger on the index, above it you're the index
+    with the volume turned up, below it you march to something else. Yours: <span class="n" data-live="beta">—</span>.
+    A low beta is not the same as low risk — it can also mean your risk is <em>idiosyncratic</em>, concentrated in
+    stories the index doesn't share. The diversification ratio (<span class="n" data-live="div-ratio">—</span>×) says
+    how much cancellation you're getting: it's the weighted average of your holdings' individual volatilities divided
+    by the portfolio's actual volatility. At 1.0, nothing offsets anything.</p>
+
+    <h3>VaR and CVaR — a bad day, in dollars</h3>
+    <p>Value-at-Risk is a sentence pretending to be a number. The sentence: "on 19 days out of 20, you won't lose more
+    than this." The dashboard computes it two ways on purpose. The bell-curve version assumes returns are normally
+    distributed. The historical version doesn't assume anything — it sorts the days your book actually lived through
+    and reads the 5th percentile straight off the record. When historical is uglier than the bell curve
+    (<span data-live="var-compare">—</span>), your returns have fat tails: finance-speak for
+    "the bad days are worse than a bell curve promises," which is true of almost everything worth owning.</p>
+    <p>VaR's famous flaw is that it says nothing about the day you blow through it. That's CVaR — the average of the
+    tail. Not "how bad is the line," but "when the line breaks, how bad is it out there." Yours is below, drawn on
+    your actual distribution. Drag the confidence slider and watch how fast the tail gets expensive.</p>
+
+    <div class="demo" id="demo-var">
+      <div class="dt">Your book's real daily returns — the last year, one bar per outcome bucket</div>
+      <div class="ctlrow">
+        <div class="ctl"><label>confidence <b id="v-lab">95%</b></label>
+        <input type="range" id="v-in" min="80" max="99" step="1" value="95"></div>
+      </div>
+      <canvas class="tchart" id="v-hist"></canvas>
+      <div class="out" id="v-read">—</div>
+    </div>
+
+    <h2 id="models">The workbench, model by model</h2>
+
+    <h3>Reverse DCF — the only honest DCF</h3>
+    <p>A normal DCF asks you to guess growth for ten years, then pretends the resulting "fair value" is a discovery
+    instead of an echo of your guess. This one runs the machine backwards: it takes the price as given and solves for
+    the growth rate that would justify it. Then it puts that number next to what the company has <em>actually</em>
+    grown free cash flow at, and leaves the room. The judgment — "is the implied number believable?" — is yours,
+    because that judgment is the entire investment decision and no model should be allowed to launder it for you.</p>
+    <p>The sensitivity grid exists because the answer is hostage to two assumptions: the discount rate (what return
+    you demand for tying up money in this) and terminal growth (what the business does forever after year ten).
+    Small changes in either move the implied growth a lot. That's not a flaw in the grid — that's the grid telling
+    you how soft the ground is under <em>every</em> DCF you've ever seen.</p>
+
+    <div class="demo" id="demo-tv">
+      <div class="dt">Why DCFs are hostage to the "forever" part — share of value sitting in the terminal</div>
+      <div class="ctlrow">
+        <div class="ctl"><label>discount rate <b id="tv-rlab">9%</b></label>
+        <input type="range" id="tv-r" min="6" max="15" step="0.5" value="9"></div>
+        <div class="ctl"><label>terminal growth <b id="tv-glab">2.5%</b></label>
+        <input type="range" id="tv-g" min="0" max="4.5" step="0.25" value="2.5"></div>
+      </div>
+      <div class="bars">
+        <div class="brow"><span>years 1–10</span><div class="btrack"><div class="bfill green" id="tv-b1"></div></div><span id="tv-o1">—</span></div>
+        <div class="brow"><span>the "forever" part</span><div class="btrack"><div class="bfill amber" id="tv-b2"></div></div><span id="tv-o2">—</span></div>
+      </div>
+      <div class="out" id="tv-read">—</div>
+    </div>
+
+    <h3>Comps — priced against the neighbors</h3>
+    <p>Multiples are shorthand: P/E is years of current earnings you're paying for; EV/EBITDA is the same idea with
+    debt counted and accounting noise reduced; FCF yield is the cash the business throws off per dollar of price. The
+    comps tab pulls a live peer list, computes the medians (excluding "nm" garbage — negative or absurd multiples,
+    the way any comps sheet would), and shows what your company would be worth <em>if</em> the market paid it the
+    peer-median multiple.</p>
+    <p>That "if" is load-bearing. Persistent gaps usually have reasons — margin, growth, backlog quality, balance
+    sheet — and a peer list is an opinion wearing a spreadsheet. When the implied values sprawl, the tab says so out
+    loud, because the honest reading of a wide comps range is "this peer set is telling you about itself."</p>
+
+    <h3>3-Statement — where accounting meets cash</h3>
+    <p>Three views of one machine. The income statement is the story: revenue in, costs out, profit "earned" — in
+    quotes because it's an opinion shaped by accrual rules. The balance sheet is the photograph: what's owned and owed
+    at one instant. The cash flow statement is the polygraph: what actually moved through the bank account. The line
+    the tab draws for you — net income becoming operating cash becoming free cash flow after capex — is the single
+    most underrated check in investing. Profits are a claim. Cash is a fact. Companies where the claim and the fact
+    diverge for years in a row are telling you something, rarely something good.</p>
+
+    <h3>LBO — the house-flipper's trick, priced</h3>
+    <p>Every leveraged buyout is a mortgage story. Buy the asset with a slice of your own money and a pile of borrowed
+    money; let the asset's own cash flow pay the loan down; sell. All the appreciation — and all the paydown — lands
+    on your slice. The tab prices whether that trick works <em>here, at this price</em>: entry premium, leverage, cost
+    of debt, EBITDA growth, exit multiple, all sliders. The verdict is an IRR next to the ~20% a sponsor would demand.
+    When it can't get there at the defaults, the model isn't saying the company is bad — it's saying the market
+    already charged you for the good news.</p>
+
+    <div class="demo" id="demo-lev">
+      <div class="dt">Leverage doesn't create returns — it multiplies whatever was there</div>
+      <div class="ctlrow">
+        <div class="ctl"><label>asset return over the hold <b id="lv-alab">+30%</b></label>
+        <input type="range" id="lv-a" min="-40" max="80" step="5" value="30"></div>
+        <div class="ctl"><label>bought with debt <b id="lv-dlab">60%</b></label>
+        <input type="range" id="lv-d" min="0" max="85" step="5" value="60"></div>
+      </div>
+      <div class="out" id="lv-read">—</div>
+    </div>
+
+    <h3>M&amp;A — accretion is bookkeeping, not value</h3>
+    <p>The accretion/dilution tab does the arithmetic a banker does in the first hour: new shares issued for the stock
+    portion, after-tax interest on the borrowed cash portion, two income streams combined, synergies if you're feeling
+    generous — does earnings-per-share go up or down? It matters because boards and markets react to it. But hold the
+    thought loosely: EPS accretion is a bookkeeping outcome. Overpaying with expensive stock can look "accretive" while
+    torching value; a brilliant deal can screen dilutive in year one. The tab hands you the arithmetic frame and the
+    breakeven synergies number. The verdict it deliberately doesn't hand you.</p>
+
+    <h3>Monte Carlo — a thousand rhymes, no forecast</h3>
+    <p>Take your book's actual daily returns — the real joint history, so the correlations and the fat tails come
+    along for free. Shuffle days with replacement into two thousand alternate years. Stack the endings into a
+    distribution. That's the whole method, and it's called bootstrapping: no bell curve assumed anywhere, seeded so
+    you get identical output on every run.</p>
+    <p>Read the cone as "the range of futures consistent with the past repeating in a different order" — nothing
+    more. It cannot see a regime change, a war, a product failure. What it's genuinely good for is calibrating your
+    stomach: if the 5th-percentile ending, in dollars, is a number you can't live with, the time to know that is now,
+    while it's hypothetical.</p>
+
+    <h3>Stress — the rear-view mirror, used honestly</h3>
+    <p>The stress tab replays named storms — the COVID crash, the 2022 rate shock, SVB week, the August-24 vol spike —
+    against <em>today's</em> weights, and shows SPY beside your book for scale. Where a holding didn't exist yet, it
+    says so and renormalizes instead of quietly pretending. The next storm will be different; that's not the point.
+    The point is a floor of realism under "how bad can a bad month look," from months that actually happened.</p>
+
+    <h3>Strategy Lab — watching the machines lose</h3>
+    <p>The lab backtests three famous mechanical strategies against buy-and-hold: the 50/200 moving-average cross
+    (trend following), 12-month momentum with the last month skipped (the academic classic), and RSI(2) mean-reversion
+    (buy panic, sell relief). Signals execute the <em>next</em> day, every position flip pays five basis points, and
+    the table shows time-in-market — because a strategy that's in cash half the time and merely ties buy-and-hold is
+    quietly winning on risk.</p>
+    <p>And a warning that belongs in bold anywhere backtests appear: every backtest overfits by existence. These
+    strategies are famous <em>because</em> they worked in the past — that's survivorship in the idea market. Real
+    costs run worse than five basis points. The past happened once; the future samples from a wider set. The lab
+    exists so you can watch the mechanics — see the trend filter skip a crash and then miss the rebound — not so you
+    can pick a winner. If one of these tables ever convinces you to trade, reread this paragraph first.</p>
+
+    <h2 id="limits">Where all of this lies to you</h2>
+
+    <p>A tools page that doesn't disclose its failure modes is a sales page. So: prices are IEX, a thin slice of the
+    tape. Futures run fifteen minutes behind. Yahoo's fundamentals are mostly right and occasionally stale or oddly
+    mapped, which is why the workbench echoes its inputs — check them against a filing before betting on a model
+    output. Analyst targets are opinions with a famous optimism bias. Volatility, correlation, beta are all computed
+    from a window, and windows end; correlations especially have a habit of converging on 1.0 during exactly the
+    crises you diversified for. Every risk number here describes the past. The market is under no obligation to
+    resemble it.</p>
+
+    <p>And the one that matters most: nothing on this dashboard knows about your income, your taxes, your timeline,
+    or what losing this money would actually do to your life. That context is the majority of every real decision,
+    and it lives with you, not in the code.</p>
+
+    <h2 id="code">The code, if you want to dig</h2>
+
+    <p>The project is deliberately small and boring — the good kind of boring. No framework, no build step, no
+    database. If you can read Python and squint at JavaScript, you can own every line of this.</p>
+
+    <table class="filemap">
+      <tr><th>file</th><th>what it owns</th><th>read this first</th></tr>
+      <tr><td>app.py</td><td>the Flask server, every /api route, the .env loader, holdings persistence</td><td><span class="mono">api_analysis()</span> — the whole data flow in one function</td></tr>
+      <tr><td>market.py</td><td>every conversation with the outside world: Alpaca, Yahoo, Finnhub; all caching and fallbacks</td><td><span class="mono">start_live_poller()</span> — the 2-second heartbeat</td></tr>
+      <tr><td>analysis.py</td><td>indicators, the conditions score, and the portfolio risk engine (VaR, CVaR, risk contribution)</td><td><span class="mono">portfolio()</span> — the panel that earns the rent</td></tr>
+      <tr><td>models.py</td><td>the workbench: reverse DCF, comps, LBO, M&amp;A, statements, Monte Carlo, stress</td><td><span class="mono">reverse_dcf()</span> — forty lines, the whole philosophy</td></tr>
+      <tr><td>extras.py</td><td>wave two: dividends &amp; total return, the SPY shadow book, the what-if sandbox, journal, earnings strip, CSV, the chain graph</td><td><span class="mono">benchmark()</span> — the argument-proof benchmark</td></tr>
+      <tr><td>alerts.py</td><td>edge-triggered alert rules: fire once on crossing, re-arm when the condition clears</td><td><span class="mono">_condition()</span> — every rule in one place</td></tr>
+      <tr><td>strategies.py</td><td>the backtester: signals, next-day execution, costs, stats</td><td><span class="mono">_positions()</span> — where look-ahead bias goes to die</td></tr>
+      <tr><td>static/app.js</td><td>polling loops, every renderer, the canvas charts</td><td><span class="mono">pollLive()</span> — why cells flash</td></tr>
+      <tr><td>static/tutorial.js</td><td>this page: live-number injection and the demos</td><td>—</td></tr>
+    </table>
+
+    <p>The single best exercise if you want to trust the numbers: pick one — say, a holding's 14-day RSI — and recompute it by hand
+    from the last 15 closes. Twenty minutes with a spreadsheet, and the dashboard stops being a black box forever.
+    Every number here can survive that audit. That was the point.</p>
+
+    <p style="margin-top:34px"><a class="cta" href="/">Open the console →</a></p>
+
+  </main>
+</div>
+
+<script src="/static/tutorial.js"></script>
+</body>
+</html>

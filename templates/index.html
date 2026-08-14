@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d11">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Windrose">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/static/icons/icon-180.png">
+  <title>Windrose</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script>try{var p=localStorage.getItem("ledger-theme");if(["paper","graphite"].indexOf(p)<0)p="auto";var t=p==="auto"?(matchMedia("(prefers-color-scheme: light)").matches?"paper":"graphite"):p;document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="graphite"}</script>
+</head>
+<body>
+
+  <div class="stickyhead">
+  <header class="topbar">
+    <div class="brand"><img class="mark" src="/static/icons/icon-192.png" alt=""><span class="wm">WINDROSE</span> <span class="sub" id="brandsub">V4.3</span></div>
+    <div class="spacer"></div>
+    <div class="newswrap">
+      <button class="learnlink" id="newsbtn" title="market wire">news</button>
+      <div class="newsdd" id="newsdd"></div>
+    </div>
+    <a class="learnlink" href="/api/export.csv" title="export holdings + metrics">⤓ csv</a>
+    <a class="learnlink" href="/tutorial">learn</a>
+    <button class="learnlink" id="modepill" title="switch experience mode (s)">advanced</button>
+    <button class="learnlink" id="settingsbtn" title="settings & personalisation">⚙</button>
+    <button class="learnlink" id="layoutbtn" title="rearrange panels — drag them where you want">⠿ layout</button>
+    <button class="learnlink" id="layoutreset" title="back to the default arrangement" style="display:none">reset</button>
+    <select id="themesel" class="themesel" title="theme — auto follows your Mac's appearance">
+      <option value="auto">auto</option>
+      <option value="graphite">graphite</option>
+      <option value="paper">paper</option>
+    </select>
+    <span class="heartbeat" id="heartbeat" title="connecting…"><span class="dot" id="livedot"></span></span>
+    <div class="mkt closed" id="mkt">— —</div>
+    <div class="clock num" id="clock">--:--:--</div>
+  </header>
+
+  <div class="futures" id="futures">
+    <div class="fut"><span class="fl">loading strip…</span></div>
+  </div>
+  </div>
+
+  <div class="earnstrip" id="earnstrip"></div>
+
+  <main class="wrap">
+    <div class="layout" id="layout">
+
+      <!-- HOLDINGS -->
+      <section class="card panel" data-panel="holdings" data-defcol="left">
+        <h2><span class="drag" draggable="true" title="drag to move this panel">⠿</span> Holdings
+          <a class="qlink" href="/tutorial#live">?</a> <span class="meta" id="holdmeta"></span></h2>
+        <table class="hold">
+          <thead>
+            <tr>
+              <th class="l">Sym</th><th class="l chart-th"></th><th>Price</th><th>Day</th>
+              <th>Shares</th><th>Value</th><th>P/L $</th><th>P/L %</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="holdbody">
+            <tr><td colspan="9" class="empty">No positions yet — add one below.</td></tr>
+          </tbody>
+        </table>
+        <div class="addform">
+          <input class="sym" id="in-sym" placeholder="TICKER" maxlength="6" autocomplete="off">
+          <input class="qty num" id="in-shares" placeholder="shares" inputmode="decimal" autocomplete="off">
+          <input class="qty num" id="in-cost" placeholder="cost / sh" inputmode="decimal" autocomplete="off">
+          <input class="qty num" id="in-date" placeholder="acquired" title="optional — YYYY-MM-DD; unlocks total return + exact benchmark" autocomplete="off">
+          <button id="addbtn">Add / update</button>
+        </div>
+        <div class="hint">0 shares = watch only · ✎ edits a row · acquired date (optional) unlocks dividends-included P/L and the exact SPY comparison.</div>
+      </section>
+
+      <!-- PORTFOLIO RISK -->
+      <section class="card panel" data-panel="risk" data-defcol="right">
+        <h2><span class="drag" draggable="true">⠿</span> Portfolio · Risk
+          <a class="qlink" href="/tutorial#portfolio-risk">?</a> <span class="meta" id="anmeta"></span></h2>
+        <div id="portfolio"><div class="empty">Add a sized position to see portfolio risk.</div></div>
+        <div id="factors" class="advonly"></div>
+      </section>
+
+      <!-- BENCHMARK -->
+      <section class="card panel" data-panel="benchmark" data-defcol="left">
+        <h2><span class="drag" draggable="true">⠿</span> vs SPY</h2>
+        <div id="benchmark"><div class="empty">Loading…</div></div>
+      </section>
+
+      <!-- WHAT-IF SANDBOX -->
+      <section class="card panel" data-panel="sandbox" data-adv="1" data-defcol="right">
+        <h2><span class="drag" draggable="true">⠿</span> What-if <span class="meta">hypothetical only — nothing is saved</span></h2>
+        <div id="sandbox"><div class="empty">Loading…</div></div>
+      </section>
+
+      <!-- ALERTS -->
+      <section class="card panel" data-panel="alerts" data-defcol="left">
+        <h2><span class="drag" draggable="true">⠿</span> Alerts <span class="meta" id="alertmeta"></span></h2>
+        <div id="alertsbody"><div class="empty">Loading…</div></div>
+      </section>
+
+      <!-- JOURNAL -->
+      <section class="card panel" data-panel="journal" data-defcol="right">
+        <h2><span class="drag" draggable="true">⠿</span> Decision journal <span class="meta" id="jmeta"></span></h2>
+        <div id="journal"><div class="empty">Loading…</div></div>
+      </section>
+
+      <!-- PER-HOLDING -->
+      <section class="card panel" data-panel="perholding" data-adv="1" data-defcol="full">
+        <h2><span class="drag" draggable="true">⠿</span> Per-holding
+          <a class="qlink" href="/tutorial#perstock">?</a>
+          <span class="meta scorenote">score = weighted state of trend / momentum / vs-SPY / risk / stretch — descriptive, not a recommendation</span></h2>
+        <div class="cards" id="stocks"><div class="empty">Per-holding breakdown appears here.</div></div>
+      </section>
+
+      <!-- WORKBENCH -->
+      <section class="card panel modelcard" data-panel="workbench" data-adv="1" data-defcol="full">
+        <h2 class="wb-title"><span class="drag" draggable="true">⠿</span> Workbench <a class="qlink" href="/tutorial#models">?</a></h2>
+        <div class="modelbar">
+          <div class="modeltabs" id="modeltabs">
+            <button data-tab="rdcf" class="on">Reverse DCF</button>
+            <button data-tab="comps">Comps</button>
+            <button data-tab="stmts">3-Statement</button>
+            <button data-tab="lbo">LBO</button>
+            <button data-tab="mna">M&amp;A</button>
+            <button data-tab="mc">Monte Carlo</button>
+            <button data-tab="stress">Stress</button>
+            <button data-tab="lab">Strategy Lab</button>
+          </div>
+          <div class="modelsel" id="modelsel"></div>
+        </div>
+        <div class="modelctl" id="modelctl"></div>
+        <div class="modelbody" id="modelbody"><div class="empty">Loading…</div></div>
+      </section>
+
+      <!-- SUPPLY CHAIN -->
+      <section class="card panel" data-panel="chain" data-defcol="full">
+        <h2><span class="drag" draggable="true">⠿</span> Supply chain <span class="meta">arrows: supplier → customer</span></h2>
+        <div class="chainbar">
+          <select id="chainnet" class="themesel"></select>
+          <input id="chainsearch" class="chainsearch" placeholder="find…" spellcheck="false">
+          <span class="chainlegend" id="chainlegend"></span>
+          <button class="learnlink advonly" id="chainlabels" title="paint the relationship captions on the map">🏷 labels</button>
+          <button class="learnlink advonly" id="chainpath" title="trace the route between two companies — click this, then click two nodes">⇄ path</button>
+          <button class="learnlink advonly" id="chainbook" title="light up everything your holdings touch directly">◉ book</button>
+          <button class="learnlink advonly" id="chainexport" title="save this view as a PNG">⬇ png</button>
+          <button class="learnlink" id="chainmax" title="expand the map">⤢</button>
+          <span class="meta" id="chainhint">drag nodes · drag background to pan · scroll to zoom · hover for relationships</span>
+        </div>
+        <canvas id="chaincanvas" class="chaincanvas"></canvas>
+        <div class="chaininfo" id="chaininfo"></div>
+        <div id="chaincard" style="display:none"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="welcome" class="ovl" style="display:none"></div>
+  <div id="settings" class="ovl" style="display:none"></div>
+  <div id="shortcuts" class="ovl" style="display:none"></div>
+
+  <div id="tourbox" style="display:none"></div>
+  <div id="tourcard" style="display:none"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
