@@ -103,7 +103,7 @@ else
 fi
 echo ""
 echo "   Then open  http://127.0.0.1:7070"
-echo "   Your portfolio starts empty — add your first position in the"
-echo "   Holdings panel, or click \"load a sample book\" to look around."
+echo "   It opens with five example holdings so nothing is blank."
+echo "   Delete any row with the x and add your own."
 echo "  ────────────────────────────────────────────"
 echo ""
