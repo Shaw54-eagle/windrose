@@ -1,0 +1,20 @@
+name: Idea or request
+description: Suggest something Windrose should do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to figure out?
+      description: The question you're asking of your portfolio — not the feature.
+    validations: { required: true }
+  - type: textarea
+    id: idea
+    attributes:
+      label: How might Windrose answer it?
+  - type: checkboxes
+    id: chain
+    attributes:
+      label: Supply chain map
+      options:
+        - label: This is about adding or correcting companies in supply_chain.json

@@ -17,7 +17,7 @@ from flask import Flask, jsonify, request, send_from_directory, redirect, Respon
 
 APP_NAME = "Windrose"
 APP_TAGLINE = "know where you actually stand"
-APP_VERSION = "4.3"
+APP_VERSION = "4.7"
 LEDGER_VERSION = APP_VERSION      # legacy alias
 BASE = Path(__file__).resolve().parent
 HOLDINGS_FILE = BASE / "holdings.json"
@@ -741,6 +741,8 @@ DEFAULT_SETTINGS = {
     "density": "comfortable",
     "hidden": [],            # panels the user switched off
     "title": "",             # optional name for this dashboard
+    "auto_update": True,     # fast-forward from GitHub when the launcher starts
+    "desktop_notifications": True,   # OS popups when no browser tab is open
 }
 
 
@@ -759,6 +761,36 @@ def save_settings(s: dict) -> None:
         SETTINGS_FILE.write_text(json.dumps(s, indent=2))
     except Exception as e:
         print(f"[settings] could not save: {e}")
+
+
+@app.route("/api/diagnostics")
+def api_diagnostics():
+    """Facts that help reproduce a bug — and nothing else.
+
+    Deliberately excluded: tickers, share counts, cost bases, journal text,
+    alert rules, API keys, file paths, hostname. Whether a key is *configured*
+    is a yes/no; the key itself never leaves the machine.
+    """
+    import platform, sys as _sys
+    s = load_settings()
+    holdings = load_holdings()
+    return jsonify({
+        "version": APP_VERSION,
+        "python": platform.python_version(),
+        "platform": f"{platform.system()} {platform.release()} ({platform.machine()})",
+        "mode": s.get("mode") or "unset",
+        "install": "git" if (BASE / ".git").exists() else "zip",
+        "data_source": "alpaca" if M.have_alpaca() else "yfinance-delayed",
+        "news_configured": bool(M.have_finnhub()),
+        "position_count": len(holdings),
+    })
+
+
+@app.route("/api/update/check")
+def api_update_check():
+    """Is a newer version published? Never installs — see the launcher."""
+    import updater
+    return jsonify(updater.check(APP_VERSION, force=request.args.get("force") == "1"))
 
 
 @app.route("/api/settings", methods=["GET", "POST"])
@@ -906,6 +938,10 @@ def start_background():
     M.start_live_poller(holding_symbols, interval=2.0)
     M.start_stream(holding_symbols)
     import threading as _t
+    try:
+        AL.DESKTOP_NOTIFY = bool(load_settings().get("desktop_notifications", True))
+    except Exception:
+        pass
     _t.Thread(target=_alerts_loop, daemon=True, name="alerts").start()
 
 

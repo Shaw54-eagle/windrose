@@ -1,0 +1,45 @@
+name: Bug report
+description: Something in Windrose is broken or wrong
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please don't paste your holdings, API keys, or
+        journal entries — they aren't needed to fix anything.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect instead?
+    validations: { required: true }
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the supply chain panel
+        2. Click a company
+        3. ...
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The number in the top bar, e.g. V4.4
+    validations: { required: true }
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [macOS, Windows, Linux]
+    validations: { required: true }
+  - type: textarea
+    id: terminal
+    attributes:
+      label: Terminal output (optional)
+      description: Anything red in the window Windrose is running in.
+      render: shell

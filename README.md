@@ -81,6 +81,59 @@ tour on first run.
 
 ---
 
+## One panel at a time
+
+Every panel header has a `⤢`. Click it and that panel becomes the only thing on
+screen, filling the window. Shrink the browser window afterwards and you have a
+small tile — Alerts, say, or Holdings — to park in a corner while you work.
+`Esc` or **← all panels** brings the dashboard back, and the choice survives a
+reload so you can park it once and forget it.
+
+## Alerts and notifications
+
+Alerts fire in the browser on **macOS, Windows and Linux** — it's the standard
+Web Notifications API, so Chrome, Edge, Firefox and Safari all behave the same.
+Click **Enable desktop notifications** in the Alerts panel once and allow the
+prompt. If you previously blocked them, the panel tells you where to undo that
+for your specific browser, because browsers never re-prompt once denied.
+
+Windrose also notifies through the operating system itself when no tab is open
+(`osascript` on macOS, toast notifications on Windows, `notify-send` on Linux).
+That's opt-out: set `"desktop_notifications": false` in `settings.json`.
+
+## Feedback and contributing
+
+Found a bug or want something added? [Open an issue](https://github.com/Shaw54-eagle/windrose/issues).
+There's a **Report a problem** button in Settings (⚙) that opens one with your
+version and platform already filled in — it never includes your holdings, keys,
+or journal.
+
+Pull requests are welcome, especially for `supply_chain.json`: corrections to
+relationships, missing suppliers, whole industries that aren't mapped yet. The
+format is documented above and the file is plain JSON.
+
+## Updates
+
+Windrose keeps itself current if you installed it with `git clone`. Each launch
+it fetches the published version and fast-forwards — then starts. The rules it
+will not break:
+
+- **fast-forward only.** It never merges, rebases, or resets. If your copy has
+  diverged, it says so and leaves it alone.
+- **your edits win.** Uncommitted changes to tracked files stop the update
+  cold. Extending `supply_chain.json` will not get you overwritten.
+- **your data is untouchable.** `.env`, holdings, journal, alerts and settings
+  are git-ignored, so an update cannot reach them.
+- **failure is harmless.** Offline, unreachable, or anything unexpected — the
+  app just starts on the version you already have.
+
+The header shows an `↑ v4.4` pill when something newer is published. Restart to
+take it. To turn the whole thing off, set `"auto_update": false` in
+`settings.json`, or launch with `WINDROSE_NO_UPDATE=1`.
+
+Installed from a zip instead of a clone? Nothing is downloaded automatically —
+the pill links you to the repo so you can grab it yourself.
+
 ## Your data
 
 Windrose stores everything in plain files next to the code:

@@ -27,6 +27,12 @@ if curl -s --max-time 1 http://127.0.0.1:7070/api/status >/dev/null 2>&1; then
 fi
 
 # One-time setup: private Python environment inside this folder.
+# Pull the latest published version first (fast-forward only, never destructive).
+if [ -f update.sh ]; then
+  . ./update.sh
+  windrose_update
+fi
+
 # A virtualenv hardcodes its own absolute path, so renaming or moving the
 # folder breaks every script inside venv/bin. The interpreter itself still
 # works, so we always call pip through it — and if even that is broken

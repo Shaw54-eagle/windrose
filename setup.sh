@@ -52,7 +52,8 @@ echo ""
 if [ -f .env ]; then
   echo "  ✓ .env already exists — leaving your keys alone."
 else
-  cp .env.example .env
+  : # .env is written from scratch below — copying the example would
+     # leave placeholder values that read as real keys
   echo "  Windrose works right now with no keys at all (delayed prices via Yahoo)."
   echo "  Two optional free keys unlock extras:"
   echo "    · Finnhub  → news headlines + analyst outlook   https://finnhub.io/register"

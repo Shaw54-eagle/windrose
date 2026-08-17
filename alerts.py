@@ -128,6 +128,10 @@ def _condition(rule: dict, quotes: dict, stocks: dict, port: dict) -> bool | Non
     return None
 
 
+# Set from settings.json at startup — desktop popups are opt-out.
+DESKTOP_NOTIFY = True
+
+
 def evaluate(quotes: dict, stocks_list: list[dict], port_extra: dict):
     """One evaluation pass. Called every few seconds from the app's loop."""
     rules = load()
@@ -158,6 +162,14 @@ def evaluate(quotes: dict, stocks_list: list[dict], port_extra: dict):
             FIRED.append(evt)
             r["last_fired"] = time.strftime("%Y-%m-%d %H:%M")
             dirty = True
+            # Desktop notification as well, so a fired alert is still seen when
+            # no browser tab is open. Never allowed to break the alert loop.
+            if DESKTOP_NOTIFY:
+                try:
+                    import notify
+                    notify.send(f"Windrose — {evt['symbol']}", evt["text"])
+                except Exception:
+                    pass
         _STATE[r["id"]] = cond
     if dirty:
         with _LOCK:

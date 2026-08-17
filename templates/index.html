@@ -21,7 +21,7 @@
 
   <div class="stickyhead">
   <header class="topbar">
-    <div class="brand"><img class="mark" src="/static/icons/icon-192.png" alt=""><span class="wm">WINDROSE</span> <span class="sub" id="brandsub">V4.3</span></div>
+    <div class="brand"><img class="mark" src="/static/icons/icon-192.png" alt=""><span class="wm">WINDROSE</span> <span class="sub" id="brandsub">V4.7</span></div>
     <div class="spacer"></div>
     <div class="newswrap">
       <button class="learnlink" id="newsbtn" title="market wire">news</button>
@@ -30,6 +30,8 @@
     <a class="learnlink" href="/api/export.csv" title="export holdings + metrics">⤓ csv</a>
     <a class="learnlink" href="/tutorial">learn</a>
     <button class="learnlink" id="modepill" title="switch experience mode (s)">advanced</button>
+    <a class="learnlink updpill" id="updpill" style="display:none" target="_blank" rel="noopener"
+       title="a newer version is published">↑ update</a>
     <button class="learnlink" id="settingsbtn" title="settings & personalisation">⚙</button>
     <button class="learnlink" id="layoutbtn" title="rearrange panels — drag them where you want">⠿ layout</button>
     <button class="learnlink" id="layoutreset" title="back to the default arrangement" style="display:none">reset</button>
@@ -160,6 +162,11 @@
     </div>
   </main>
 
+  <div id="solobar" style="display:none">
+    <button class="soloback">← all panels</button>
+    <span class="solowhat"></span>
+    <span class="solohint">Esc to go back · shrink this window and park it anywhere</span>
+  </div>
   <div id="welcome" class="ovl" style="display:none"></div>
   <div id="settings" class="ovl" style="display:none"></div>
   <div id="shortcuts" class="ovl" style="display:none"></div>

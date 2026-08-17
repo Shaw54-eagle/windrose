@@ -588,7 +588,9 @@ window.addEventListener("resize", () => {
 (async function init() {
   initLayout();
   await loadHoldings();
-  await loadSettings(); initChrome();
+  await loadSettings(); initChrome(); initSolo();
+  setTimeout(checkForUpdate, 4000);
+  setInterval(checkForUpdate, 6 * 3600 * 1000);
   pollStatus(); pollFutures(); loadAnalysis(); loadSpark(); initMarketWire();
   loadDividends(); loadBenchmark(); loadSandbox(); loadAlerts(); loadJournal(); loadEarnings(); initChain();
   startStream();
@@ -1311,6 +1313,27 @@ const METRIC_LABELS = {
   port_drawdown: "portfolio drawdown from 1y peak exceeds %",
 };
 
+function notifBtnLabel() {
+  if (!("Notification" in window)) return "Notifications unsupported";
+  if (Notification.permission === "granted") return "\u2713 Desktop notifications on";
+  if (Notification.permission === "denied") return "Notifications blocked";
+  return "Enable desktop notifications";
+}
+
+function notifUnblockHint() {
+  const ua = navigator.userAgent;
+  const where = /Firefox/.test(ua)
+    ? "click the padlock in the address bar, then Clear permission"
+    : /Edg\//.test(ua)
+      ? "click the padlock in the address bar, then Permissions for this site, and allow Notifications"
+      : (/Safari/.test(ua) && !/Chrome/.test(ua))
+        ? "Safari menu, then Settings, Websites, Notifications, and allow 127.0.0.1"
+        : "click the padlock (or info icon) in the address bar, then Site settings, and allow Notifications";
+  return "This browser is blocking notifications for this page. To fix it, " + where +
+         ", then reload. Windrose can also notify you through your operating system " +
+         "even when no tab is open.";
+}
+
 async function loadAlerts() {
   const el = $("alertsbody");
   try {
@@ -1324,8 +1347,9 @@ async function loadAlerts() {
         <input class="val" id="al-val" placeholder="value" inputmode="decimal">
         <input class="note" id="al-note" placeholder="note to self (optional)">
         <button id="al-add">Add alert</button>
-        <button id="al-notif" class="notifbtn">${("Notification" in window && Notification.permission === "granted") ? "✓ Mac notifications on" : "Enable Mac notifications"}</button>
+        <button id="al-notif" class="notifbtn">${notifBtnLabel()}</button>
       </div>
+      <div class="nothint" id="al-nothint" style="display:none"></div>
       <div id="al-rules">${d.rules.length ? d.rules.map(alertRuleHtml).join("") : '<div class="empty">No alerts yet. Watching without staring starts here.</div>'}</div>
       <div class="al-fired" id="al-fired">${(d.recent || []).slice(-6).reverse().map(e =>
         `<div class="al-evt"><span class="when">${e.when}</span>${e.text}</div>`).join("")}</div>`;
@@ -1334,9 +1358,25 @@ async function loadAlerts() {
     });
     $("al-add").addEventListener("click", addAlert);
     $("al-notif").addEventListener("click", async () => {
-      if (!("Notification" in window)) return;
+      if (!("Notification" in window)) {
+        $("al-notif").textContent = "Not supported in this browser";
+        return;
+      }
+      // A denied browser never prompts again, so asking is pointless —
+      // point at the real switch instead.
+      if (Notification.permission === "denied") {
+        $("al-notif").textContent = "Blocked — see below";
+        const h = $("al-nothint");
+        if (h) { h.textContent = notifUnblockHint(); h.style.display = ""; }
+        return;
+      }
       const p = await Notification.requestPermission();
-      $("al-notif").textContent = p === "granted" ? "✓ Mac notifications on" : "Notifications blocked";
+      $("al-notif").textContent = notifBtnLabel();
+      const h = $("al-nothint");
+      if (p === "denied" && h) { h.textContent = notifUnblockHint(); h.style.display = ""; }
+      if (p === "granted") {
+        try { new Notification("Windrose", { body: "Notifications are on — alerts will appear here." }); } catch (e) {}
+      }
     });
     el.querySelectorAll("[data-aldel]").forEach(b =>
       b.addEventListener("click", async () => { await fetch("/api/alerts/" + b.dataset.aldel, { method: "DELETE" }); loadAlerts(); }));
@@ -2348,6 +2388,92 @@ const PANEL_LABELS = {
 
 const ADV_PANELS = ["perholding", "workbench", "sandbox"];
 
+async function checkForUpdate() {
+  try {
+    const d = await (await fetch("/api/update/check")).json();
+    const pill = $("updpill");
+    if (!pill || !d.update_available) return;
+    pill.style.display = "";
+    pill.href = d.url;
+    pill.textContent = `↑ v${d.latest}`;
+    pill.title = d.method === "git"
+      ? `Version ${d.latest} is out (you have ${d.current}). Restart Windrose and it updates itself.`
+      : `Version ${d.latest} is out (you have ${d.current}). Click to download the latest.`;
+  } catch (e) {}
+}
+
+/* ======================================================================== */
+/*  SOLO A PANEL — one panel, full window. Shrink the browser window after   */
+/*  and you have a small always-visible tile to park in a corner.            */
+/* ======================================================================== */
+
+const SOLO_KEY = "windrose-solo";
+
+function soloPanel(id) {
+  const panel = document.querySelector(`[data-panel="${id}"]`);
+  if (!panel) return;
+  document.querySelectorAll(".panel.soloed").forEach(p => p.classList.remove("soloed"));
+  panel.classList.add("soloed");
+  document.body.classList.add("solo");
+  const bar = $("solobar");
+  if (bar) {
+    bar.style.display = "";
+    const label = (PANEL_LABELS && PANEL_LABELS[id]) || id;
+    bar.querySelector(".solowhat").textContent = label;
+  }
+  try { localStorage.setItem(SOLO_KEY, id); } catch (e) {}
+  window.scrollTo(0, 0);
+  // canvases size themselves to their container, so nudge them after the reflow
+  setTimeout(() => {
+    if (typeof chainDraw === "function") chainDraw();
+    if (typeof drawCharts === "function") drawCharts();
+    if (typeof drawSparklines === "function") drawSparklines();
+  }, 60);
+}
+
+function unsolo() {
+  document.querySelectorAll(".panel.soloed").forEach(p => p.classList.remove("soloed"));
+  document.body.classList.remove("solo");
+  const bar = $("solobar");
+  if (bar) bar.style.display = "none";
+  try { localStorage.removeItem(SOLO_KEY); } catch (e) {}
+  setTimeout(() => {
+    if (typeof chainDraw === "function") chainDraw();
+    if (typeof drawCharts === "function") drawCharts();
+    if (typeof drawSparklines === "function") drawSparklines();
+  }, 60);
+}
+
+function initSolo() {
+  // a ⤢ on every panel header
+  document.querySelectorAll(".panel[data-panel]").forEach(p => {
+    const h = p.querySelector("h2");
+    if (!h || h.querySelector(".solobtn")) return;
+    const b = document.createElement("button");
+    b.className = "solobtn";
+    b.textContent = "⤢";
+    b.title = "show only this panel (Esc to come back)";
+    b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      p.classList.contains("soloed") ? unsolo() : soloPanel(p.dataset.panel);
+    });
+    h.appendChild(b);
+  });
+
+  const bar = $("solobar");
+  if (bar) bar.querySelector(".soloback").addEventListener("click", unsolo);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && document.body.classList.contains("solo")) unsolo();
+  });
+
+  // reopen where they left off — the point is parking it and leaving it
+  try {
+    const saved = localStorage.getItem(SOLO_KEY);
+    if (saved && document.querySelector(`[data-panel="${saved}"]`)) soloPanel(saved);
+  } catch (e) {}
+}
+
 async function loadSettings() {
   try {
     const s = await (await fetch("/api/settings")).json();
@@ -2438,6 +2564,23 @@ function showWelcome() {
 
 /* ---------- settings drawer --------------------------------------------- */
 
+const REPO_URL = "https://github.com/Shaw54-eagle/windrose";
+
+async function reportProblem() {
+  let diag = {};
+  try { diag = await (await fetch("/api/diagnostics")).json(); } catch (e) {}
+  const lines = Object.entries(diag).map(([k, v]) => `- ${k}: ${v}`).join("\n");
+  const body = [
+    "**What happened?**", "", "",
+    "**What did you expect instead?**", "", "",
+    "**Steps to reproduce**", "1. ", "2. ", "",
+    "---", "<details><summary>Environment</summary>", "", lines, "", "</details>",
+  ].join("\n");
+  const url = `${REPO_URL}/issues/new?title=${encodeURIComponent("[bug] ")}`
+    + `&body=${encodeURIComponent(body)}&labels=bug`;
+  window.open(url, "_blank", "noopener");
+}
+
 function showSettings() {
   const el = $("settings");
   const panels = Object.keys(PANEL_LABELS);
@@ -2446,6 +2589,13 @@ function showSettings() {
       <span class="close" id="setclose">×</span>
       <h3>Settings</h3>
       <p class="lede">All of this is stored on this machine, in settings.json.</p>
+
+      <div class="setrow">
+        <div class="lab"><b>Something wrong?</b>
+          <span>Opens a GitHub issue with your version and platform filled in —
+                never your holdings, keys or notes.</span></div>
+        <button class="segbtn" id="setreport">Report a problem</button>
+      </div>
 
       <div class="setrow">
         <div class="lab"><b>Experience</b>
@@ -2532,6 +2682,8 @@ function showSettings() {
     cb.checked ? hidden.delete(p) : hidden.add(p);
     saveSettings({ hidden: [...hidden] });
   }));
+  const rep = $("setreport");
+  if (rep) rep.addEventListener("click", reportProblem);
   $("setclose").addEventListener("click", () => { el.style.display = "none"; });
   el.addEventListener("click", e => { if (e.target === el) el.style.display = "none"; });
   $("setshortcuts").addEventListener("click", () => { el.style.display = "none"; showShortcuts(); });

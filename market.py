@@ -25,9 +25,25 @@ except Exception:
 
 ALPACA_DATA = "https://data.alpaca.markets/v2"
 
-def _alpaca_key():    return os.getenv("ALPACA_KEY", "")
-def _alpaca_secret(): return os.getenv("ALPACA_SECRET", "")
-def _finnhub_key():   return os.getenv("FINNHUB_KEY", "")
+# .env.example ships with placeholder values, and some launchers copy it
+# verbatim. A placeholder must read as "no key" — otherwise the app believes
+# it has credentials and hammers the API with 401s forever.
+_PLACEHOLDERS = {
+    "", "your_alpaca_key_here", "your_alpaca_secret_here", "your_finnhub_key_here",
+    "your_key_here", "changeme", "xxx", "none", "null", "todo",
+}
+
+
+def _clean(name: str) -> str:
+    v = (os.getenv(name, "") or "").strip().strip('"').strip("'")
+    if v.lower() in _PLACEHOLDERS or v.lower().startswith("your_"):
+        return ""
+    return v
+
+
+def _alpaca_key():    return _clean("ALPACA_KEY")
+def _alpaca_secret(): return _clean("ALPACA_SECRET")
+def _finnhub_key():   return _clean("FINNHUB_KEY")
 
 FUTURES = [
     ("ES=F", "S&P 500", "ES"),
@@ -56,7 +72,13 @@ def _cache_put(key, value, ttl):
     _cache[key] = (time.time() + ttl, value)
 
 
+_ALPACA_DISABLED = False     # flipped after repeated auth rejections
+_AUTH_FAILS = 0
+
+
 def have_alpaca() -> bool:
+    if _ALPACA_DISABLED:
+        return False
     return bool(_alpaca_key() and _alpaca_secret())
 
 
@@ -187,7 +209,24 @@ def start_live_poller(get_symbols, interval: float = 2.0):
                                     _LIVE[s] = q
                         _bump()
             except Exception as e:
-                print(f"[live poller] {type(e).__name__}: {e}")
+                # Credentials that exist but don't work (wrong, revoked, or a
+                # data plan that doesn't cover this feed) would otherwise log a
+                # 401 every couple of seconds for the life of the process.
+                # Say it once, fall back to delayed quotes, stop asking.
+                global _ALPACA_DISABLED, _AUTH_FAILS
+                status = getattr(getattr(e, "response", None), "status_code", None)
+                if status in (401, 403):
+                    _AUTH_FAILS += 1
+                    if _AUTH_FAILS >= 3 and not _ALPACA_DISABLED:
+                        _ALPACA_DISABLED = True
+                        print("\n  [alpaca] Your API keys were rejected (HTTP "
+                              f"{status}). Falling back to delayed Yahoo quotes.")
+                        print("  [alpaca] Fix or remove ALPACA_KEY / ALPACA_SECRET in .env, "
+                              "then restart. Everything else keeps working.\n")
+                    elif _AUTH_FAILS < 3:
+                        print(f"[live poller] auth rejected ({status}) — retrying")
+                else:
+                    print(f"[live poller] {type(e).__name__}: {e}")
             # streaming healthy -> poll is just the safety net + prev_close refresh
             time.sleep(15.0 if ws_healthy() else interval)
 

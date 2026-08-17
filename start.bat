@@ -23,7 +23,15 @@ if not exist venv (
 echo Checking dependencies...
 venv\Scripts\pip install --quiet -r requirements.txt || (echo Dependency install failed - check your internet. & pause & exit /b 1)
 
-if not exist .env copy .env.example .env >nul
+if not exist .env (
+  REM Start with everything commented out. A placeholder value would be read
+  REM as a real key and the app would spend its life getting 401s.
+  echo # Windrose configuration - add keys here if you want live data or news.> .env
+  echo # With nothing set, Windrose uses delayed Yahoo quotes and works fine.>> .env
+  echo #ALPACA_KEY=>> .env
+  echo #ALPACA_SECRET=>> .env
+  echo #FINNHUB_KEY=>> .env
+)
 
 echo.
 echo   Windrose  -^>  http://127.0.0.1:7070
