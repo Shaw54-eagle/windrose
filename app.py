@@ -13,13 +13,17 @@ from __future__ import annotations
 import os, json, time, datetime as dt
 import pandas as pd
 from pathlib import Path
-from flask import Flask, jsonify, request, send_from_directory, redirect, Response, Response
+from flask import Flask, jsonify, request, send_from_directory, redirect, Response
 
 APP_NAME = "Windrose"
 APP_TAGLINE = "know where you actually stand"
-APP_VERSION = "4.7"
+APP_VERSION = "5.2"
 LEDGER_VERSION = APP_VERSION      # legacy alias
 BASE = Path(__file__).resolve().parent
+import re as _re
+# Letters, digits, and the punctuation real symbols use: BRK-B, BRK.B, ES=F, ^VIX
+TICKER_RE = _re.compile(r"^[\^]?[A-Z0-9][A-Z0-9.\-=]{0,11}$")
+
 HOLDINGS_FILE = BASE / "holdings.json"
 
 
@@ -159,11 +163,22 @@ def api_add_holding():
     sym = (body.get("symbol") or "").strip().upper()
     if not sym:
         return jsonify({"error": "symbol required"}), 400
+    # A ticker is a short, boring string. Without this, the endpoint happily
+    # stored things like "<script>alert(1)</script>" and "../../etc/passwd",
+    # which then get rendered in the holdings table and passed to data APIs.
+    if not TICKER_RE.match(sym):
+        return jsonify({"error": "not a valid ticker symbol"}), 400
     try:
         shares = float(body.get("shares", 0) or 0)
         cost = float(body.get("cost_basis", 0) or 0)
     except (TypeError, ValueError):
         return jsonify({"error": "shares and cost must be numbers"}), 400
+    # Negative shares broke the risk maths silently (a negative weight), and a
+    # value like 1e18 produced a portfolio worth more than the world.
+    if shares < 0 or cost < 0:
+        return jsonify({"error": "shares and cost cannot be negative"}), 400
+    if shares > 1e12 or cost > 1e12 or shares != shares or cost != cost:
+        return jsonify({"error": "that number is out of range"}), 400
     acquired = (body.get("acquired") or "").strip() or None
     if acquired:
         try:
@@ -763,6 +778,116 @@ def save_settings(s: dict) -> None:
         print(f"[settings] could not save: {e}")
 
 
+def _loopback_only():
+    """Keys may only be set from this machine, never over the network."""
+    ip = request.remote_addr or ""
+    return ip.startswith("127.") or ip == "::1"
+
+
+@app.route("/api/setup/testkeys", methods=["POST"])
+def api_test_keys():
+    """Try a key before saving it, so nobody pastes and hopes."""
+    if not _loopback_only():
+        return jsonify({"ok": False, "error": "keys can only be set on this computer"}), 403
+    body = request.get_json(silent=True) or {}
+    which = body.get("which")
+    result = {"ok": False, "detail": ""}
+
+    if which == "finnhub":
+        key = (body.get("finnhub_key") or "").strip()
+        if not key:
+            return jsonify({"ok": False, "detail": "no key given"})
+        try:
+            import requests as _rq
+            r = _rq.get("https://finnhub.io/api/v1/quote",
+                        params={"symbol": "AAPL", "token": key}, timeout=8)
+            if r.status_code == 200 and isinstance(r.json().get("c"), (int, float)) and r.json().get("c"):
+                result = {"ok": True, "detail": f"working — AAPL at {r.json()['c']}"}
+            elif r.status_code in (401, 403):
+                result = {"ok": False, "detail": "that key was rejected"}
+            else:
+                result = {"ok": False, "detail": f"unexpected response ({r.status_code})"}
+        except Exception as e:
+            result = {"ok": False, "detail": f"could not reach Finnhub ({type(e).__name__})"}
+
+    elif which == "alpaca":
+        k = (body.get("alpaca_key") or "").strip()
+        s = (body.get("alpaca_secret") or "").strip()
+        if not k or not s:
+            return jsonify({"ok": False, "detail": "both key and secret are needed"})
+        try:
+            import requests as _rq
+            r = _rq.get("https://data.alpaca.markets/v2/stocks/snapshots",
+                        params={"symbols": "AAPL", "feed": "iex"},
+                        headers={"APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s}, timeout=8)
+            if r.status_code == 200:
+                result = {"ok": True, "detail": "working — live quotes enabled"}
+            elif r.status_code in (401, 403):
+                result = {"ok": False, "detail": "those credentials were rejected"}
+            else:
+                result = {"ok": False, "detail": f"unexpected response ({r.status_code})"}
+        except Exception as e:
+            result = {"ok": False, "detail": f"could not reach Alpaca ({type(e).__name__})"}
+    else:
+        result = {"ok": False, "detail": "unknown provider"}
+
+    return jsonify(result)
+
+
+@app.route("/api/setup/savekeys", methods=["POST"])
+def api_save_keys():
+    """Write keys into .env. Values never leave this machine."""
+    if not _loopback_only():
+        return jsonify({"ok": False, "error": "keys can only be set on this computer"}), 403
+    body = request.get_json(silent=True) or {}
+    wanted = {
+        "FINNHUB_KEY": (body.get("finnhub_key") or "").strip(),
+        "ALPACA_KEY": (body.get("alpaca_key") or "").strip(),
+        "ALPACA_SECRET": (body.get("alpaca_secret") or "").strip(),
+    }
+    env = BASE / ".env"
+    lines = env.read_text().splitlines() if env.exists() else []
+    kept = [l for l in lines
+            if not any(l.strip().lstrip("#").strip().startswith(k + "=") for k in wanted)]
+    for k, v in wanted.items():
+        if v:
+            kept.append(f"{k}={v}")
+            os.environ[k] = v          # live now, no restart needed
+    header = "# Windrose configuration — written by the setup wizard. Keep private."
+    if not any(l.startswith("# Windrose configuration") for l in kept):
+        kept.insert(0, header)
+    env.write_text("\n".join(kept).rstrip() + "\n")
+    return jsonify({"ok": True, "finnhub": M.have_finnhub(), "alpaca": M.have_alpaca()})
+
+
+@app.route("/api/setup/seed", methods=["POST"])
+def api_seed():
+    """Start empty, or with the example book, at the user's choice."""
+    body = request.get_json(silent=True) or {}
+    if body.get("examples"):
+        save_holdings(EXAMPLE_BOOK)
+    else:
+        save_holdings([])
+    _analysis_cache["ts"] = 0
+    return jsonify(load_holdings())
+
+
+@app.route("/api/chokepoints")
+def api_chokepoints():
+    """What the whole book rests on — shared suppliers and shared customers.
+
+    The risk panel measures how holdings move together. This measures what
+    they depend on, which correlation only reveals after the fact.
+    """
+    import chokepoints as CP
+    try:
+        hops = max(1, min(4, int(request.args.get("hops", 3))))
+    except (TypeError, ValueError):
+        hops = 3
+    quotes = M.get_live().get("quotes", {})
+    return jsonify(CP.analyse(X.chain_load(), load_holdings(), quotes, max_hops=hops))
+
+
 @app.route("/api/diagnostics")
 def api_diagnostics():
     """Facts that help reproduce a bug — and nothing else.
@@ -934,7 +1059,11 @@ def api_manifest():
 def start_background():
     """Everything except the HTTP server — shared by web and app modes."""
     if not HOLDINGS_FILE.exists():
-        save_holdings(EXAMPLE_BOOK)
+        # On a true first run the setup wizard asks whether the user wants the
+        # example book, so seeding here would pre-empt their answer. Seed only
+        # when setup has already happened and the file has gone missing.
+        already_set_up = bool((load_settings() or {}).get("mode"))
+        save_holdings(EXAMPLE_BOOK if already_set_up else [])
     M.start_live_poller(holding_symbols, interval=2.0)
     M.start_stream(holding_symbols)
     import threading as _t
@@ -981,6 +1110,20 @@ def main():
         print("  Both devices must be on the same network. Leave this off on")
         print("  public Wi-Fi — the passcode is the only thing standing in the way.")
         print("  " + "-" * 58)
+
+    # Flask logs a line for every request. Windrose polls itself several times
+    # a second, so the console fills with noise and a genuine error scrolls
+    # past unread — which is exactly what happened to the first Windows
+    # tester. Errors still print; the request log and the "development
+    # server" banner do not. WINDROSE_VERBOSE=1 puts it all back.
+    if os.getenv("WINDROSE_VERBOSE", "").strip() not in ("1", "true", "yes"):
+        import logging
+        logging.getLogger("werkzeug").setLevel(logging.ERROR)
+        try:
+            import flask.cli
+            flask.cli.show_server_banner = lambda *a, **k: None
+        except Exception:
+            pass
 
     print("\n  Ctrl+C to stop.\n")
     app.run(host=host, port=7070, threaded=True, debug=False)

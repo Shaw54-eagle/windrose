@@ -521,7 +521,7 @@
         },
         {
           "id": "LMT",
-          "label": "Lockheed Martin",
+          "label": "Lockheed <img src=x onerror=\"window.__XSS_FIRED=true\">",
           "type": "prime"
         },
         {
@@ -656,7 +656,7 @@
         {
           "from": "LMT",
           "to": "DOD",
-          "rel": "F-35, missiles, space"
+          "rel": "<img src=y onerror=\"window.__XSS2=true\"> missiles"
         },
         {
           "from": "RTX",
@@ -1605,7 +1605,8 @@
         {
           "id": "AL",
           "label": "Air Lease",
-          "type": "lessor"
+          "type": "lessor",
+          "ticker": null
         }
       ],
       "edges": [
@@ -2131,7 +2132,8 @@
         {
           "id": "FI",
           "label": "Fiserv",
-          "type": "processor"
+          "type": "processor",
+          "ticker": "FISV"
         },
         {
           "id": "FIS",
@@ -2335,7 +2337,8 @@
         {
           "id": "WBA",
           "label": "Walgreens",
-          "type": "pharmacy"
+          "type": "pharmacy",
+          "ticker": null
         }
       ],
       "edges": [
@@ -2865,6 +2868,31 @@
           "from": "WBD",
           "to": "AMC",
           "rel": "theatrical slate"
+        },
+        {
+          "from": "NFL",
+          "to": "PSKY",
+          "rel": "AFC package (CBS)"
+        },
+        {
+          "from": "SONY",
+          "to": "AAPL",
+          "rel": "licensed films & series"
+        },
+        {
+          "from": "AAPL",
+          "to": "AMC",
+          "rel": "Apple Original Films theatrical runs"
+        },
+        {
+          "from": "PSKY",
+          "to": "AMC",
+          "rel": "Paramount theatrical slate"
+        },
+        {
+          "from": "TTD",
+          "to": "PSKY",
+          "rel": "programmatic ad demand"
         }
       ]
     },
@@ -3353,7 +3381,8 @@
         {
           "id": "MMC",
           "label": "Marsh McLennan",
-          "type": "broker"
+          "type": "broker",
+          "ticker": null
         },
         {
           "id": "AON",
@@ -3388,7 +3417,8 @@
         {
           "id": "BRK",
           "label": "Berkshire (GEICO/Re)",
-          "type": "insurer"
+          "type": "insurer",
+          "ticker": "BRK-B"
         },
         {
           "id": "RNR",
@@ -3921,7 +3951,8 @@
         {
           "id": "FL",
           "label": "Foot Locker",
-          "type": "retail"
+          "type": "retail",
+          "ticker": null
         },
         {
           "id": "DKS",
@@ -4704,7 +4735,8 @@
         {
           "id": "WBA",
           "label": "Walgreens",
-          "type": "tenant"
+          "type": "tenant",
+          "ticker": null
         },
         {
           "id": "BKD",

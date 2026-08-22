@@ -13,16 +13,29 @@ together, and where it sits in the wider economy — then gets out of the way.
 ```
 git clone https://github.com/Shaw54-eagle/windrose.git
 cd windrose
-bash setup.sh          # macOS users can double-click "Setup Windrose.command"
-bash start.sh          # macOS: double-click "Start Windrose.command"
+bash setup.sh
+bash start.sh
 ```
 
-Then open **http://127.0.0.1:7070** (http, not https — it's a local server).
+On macOS you can skip the terminal entirely: download the folder, double-click
+**Setup Windrose.command** once, then **Start Windrose.command**. On Windows,
+double-click **start.bat** — it sets itself up on the first run.
+
+Then open **http://127.0.0.1:7070** (http, not https — it's a local server) and
+a four-step wizard takes it from there: pick Simple or Advanced, optionally add
+API keys (it tests them before saving), choose whether to start empty or with an
+example book, and go.
+
+Cloning rather than downloading a zip is worth it — only a clone can update
+itself when new versions are published.
+
 
 Windows: double-click `start.bat`. It handles setup on first run.
 
-No API keys are required. Out of the box Windrose runs on delayed Yahoo Finance
-quotes. Two free keys unlock extras, and `setup.sh` will offer to save them:
+**No API keys are required.** Out of the box Windrose runs on delayed Yahoo
+Finance quotes and every panel works. Two free keys unlock extras, and the setup
+wizard will test a key against the real API before it saves it — so you find out
+immediately if you pasted the wrong thing:
 
 | Key | What it adds | Where |
 | --- | --- | --- |
@@ -81,6 +94,31 @@ tour on first run.
 
 ---
 
+## What your book rests on
+
+The risk panel measures how your holdings move *together*. This panel measures
+what they **depend on** — which correlation only reveals after it has cost you
+something.
+
+It walks the supply-chain map outward from each holding and reports every
+company two or more of them reach, weighted by how much of your portfolio value
+sits behind it. Both directions matter:
+
+- **Downstream — who your companies sell to.** Shared customers are demand-side
+  concentration. A defence-heavy book can show a single buyer behind 100% of its
+  value while its beta reads as calm.
+- **Upstream — what your companies depend on.** Shared suppliers are the
+  concentration you never chose. You often own none of them.
+
+Read it carefully, because it is structure, not revenue. A company appearing
+behind 70% of your book means the things you own sit downstream of it — not
+that 70% of your money depends on it. Hops are graph distance, not importance:
+this cannot tell a sole-source supplier from a commodity vendor. And the map is
+hand-curated, so a missing link may be a gap rather than independence.
+
+If nothing is shared, that is a real result too — structurally, that is what
+diversification looks like.
+
 ## One panel at a time
 
 Every panel header has a `⤢`. Click it and that panel becomes the only thing on
@@ -100,6 +138,63 @@ for your specific browser, because browsers never re-prompt once denied.
 Windrose also notifies through the operating system itself when no tab is open
 (`osascript` on macOS, toast notifications on Windows, `notify-send` on Linux).
 That's opt-out: set `"desktop_notifications": false` in `settings.json`.
+
+## Keeping it running
+
+Alerts are evaluated by the server, so they only fire while Windrose is
+running — close the window or sleep the machine and nothing is watching. The
+Alerts panel says so plainly, because an alert you believe in but never get is
+worse than no alert at all.
+
+To keep it up, run **Run at Login** in the Windrose folder. On macOS it installs
+a LaunchAgent, on Linux a `systemd --user` service; both start Windrose quietly
+at login and restart it if it dies. Run it again to remove it. On Windows, use
+Task Scheduler:
+
+```
+schtasks /create /tn Windrose /sc onlogon /tr "'%CD%\venv\Scripts\pythonw.exe' '%CD%\app.py'"
+```
+
+Neither approach can run while the computer is off, or wake a sleeping one.
+Alerts resume when it wakes.
+
+## A quiet console
+
+Windrose polls itself a few times a second, and Flask logs every request, so
+the terminal used to scroll constantly and bury anything that mattered. The
+request log is off by default; genuine errors still print. Set
+`WINDROSE_VERBOSE=1` to see everything.
+
+## Checking your install
+
+Something behaving oddly? Ask the app to diagnose itself:
+
+```
+./venv/bin/python selftest.py            # offline checks
+./venv/bin/python selftest.py --online   # also verifies live data and the map
+```
+
+It reports Python and dependency health, whether your keys are being read (never
+the keys themselves), whether your data files are valid JSON, and whether the
+supply-chain map is internally consistent — dangling edges, duplicate nodes,
+companies with no relationships. With `--online` it also confirms quotes are
+flowing, checks for updates, and verifies every mapped ticker still resolves,
+which is how acquisitions and renames get caught.
+
+Nothing in the report identifies you or your positions, so it is safe to paste
+into an issue.
+
+## A note on contributed map data
+
+`supply_chain.json` is community-editable, which makes its contents untrusted
+input. Company labels and relationship text are stripped of HTML when the file
+is loaded, and escaped again when rendered. Both locks exist because a crafted
+label was once able to run arbitrary JavaScript in the dashboard — with access
+to the local API that holds your positions. Please keep both in place if you
+fork this.
+
+Ticker symbols entered anywhere are validated against a strict pattern, and
+share counts and costs must be non-negative and finite.
 
 ## Feedback and contributing
 

@@ -24,3 +24,6 @@ Thumbs.db
 .vscode/
 *.swp
 .update_check
+
+# written by the Run at Login helper
+windrose.log

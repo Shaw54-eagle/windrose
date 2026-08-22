@@ -1,6 +1,18 @@
 /* Windrose console v2 — vanilla JS, no framework.
+
    Adds: canvas price charts (close + SMA20/50), table sparklines,
    conditions-score bars, weight-vs-risk paired bars, VaR/CVaR block. */
+
+// Anything that came from a person, a contributed data file, or an external
+// API is untrusted and must not be interpolated raw into innerHTML. A crafted
+// supply-chain label was able to run arbitrary JavaScript here.
+function esc(v) {
+  if (v === null || v === undefined) return "";
+  return String(v)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 
 const $  = (id) => document.getElementById(id);
 const fmtMoney = (n, d = 2) => (n == null ? "—" : "$" + Number(n).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }));
@@ -301,7 +313,7 @@ async function loadHoldings() {
   body.innerHTML = HOLDINGS.map(h => {
     const watch = h.shares > 0 ? "" : '<span class="watch-tag">WATCH</span>';
     return `<tr data-sym="${h.symbol}">
-      <td class="l"><span class="caret" data-news="${h.symbol}">▸</span><span class="sym">${h.symbol}</span>${watch}</td>
+      <td class="l"><span class="caret" data-news="${esc(h.symbol)}">▸</span><span class="sym">${esc(h.symbol)}</span>${watch}</td>
       <td class="l sparkcell"><canvas data-spark="${h.symbol}"></canvas></td>
       <td class="px num">—</td>
       <td class="day num">—</td>
@@ -534,8 +546,8 @@ function renderNewsRows(items) {
   if (items.length && items[0]._notice) return `<div class="notice">${items[0]._notice}</div>`;
   if (!items.length) return '<div class="empty" style="padding:6px 0">Nothing in the last 10 days.</div>';
   return items.map(n => `
-    <div class="nh">${n.url ? `<a href="${n.url}" target="_blank" rel="noopener">${n.headline}</a>` : n.headline}</div>
-    <div class="nm">${n.source} · ${n.when}</div>`).join("");
+    <div class="nh">${n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.headline)}</a>` : esc(n.headline)}</div>
+    <div class="nm">${esc(n.source)} · ${esc(n.when)}</div>`).join("");
 }
 
 async function toggleSymNews(sym) {
@@ -564,7 +576,7 @@ function initMarketWire() {
       dd.innerHTML = '<div class="empty">loading the wire…</div>';
       const items = await fetchSymNews("MARKET");
       dd.innerHTML = items.length && !items[0]._notice
-        ? items.map(n => `<div class="nrow"><div class="nh"><a href="${n.url}" target="_blank" rel="noopener">${n.headline}</a></div><div class="nm">${n.source} · ${n.when}</div></div>`).join("")
+        ? items.map(n => `<div class="nrow"><div class="nh"><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.headline)}</a></div><div class="nm">${esc(n.source)} · ${esc(n.when)}</div></div>`).join("")
         : renderNewsRows(items);
     }
   });
@@ -592,7 +604,7 @@ window.addEventListener("resize", () => {
   setTimeout(checkForUpdate, 4000);
   setInterval(checkForUpdate, 6 * 3600 * 1000);
   pollStatus(); pollFutures(); loadAnalysis(); loadSpark(); initMarketWire();
-  loadDividends(); loadBenchmark(); loadSandbox(); loadAlerts(); loadJournal(); loadEarnings(); initChain();
+  loadDividends(); loadBenchmark(); loadSandbox(); loadAlerts(); loadJournal(); loadEarnings(); initChain(); loadChokepoints();
   startStream();
   pollLive();                       // one immediate paint while SSE connects
   setInterval(pollStatus, 5000);
@@ -1349,6 +1361,9 @@ async function loadAlerts() {
         <button id="al-add">Add alert</button>
         <button id="al-notif" class="notifbtn">${notifBtnLabel()}</button>
       </div>
+      <div class="alertcaveat">Alerts only fire while Windrose is running. Close it
+        or sleep the computer and nothing is watching — use <b>Run at Login</b>
+        in the Windrose folder to keep it up.</div>
       <div class="nothint" id="al-nothint" style="display:none"></div>
       <div id="al-rules">${d.rules.length ? d.rules.map(alertRuleHtml).join("") : '<div class="empty">No alerts yet. Watching without staring starts here.</div>'}</div>
       <div class="al-fired" id="al-fired">${(d.recent || []).slice(-6).reverse().map(e =>
@@ -1391,7 +1406,7 @@ async function loadAlerts() {
 function alertRuleHtml(r) {
   const needsVal = !r.metric.startsWith("cross_");
   return `<div class="al-rule ${r.enabled ? "" : "off"}">
-    <span class="r-txt"><span class="mono">${r.symbol}</span> ${METRIC_LABELS[r.metric] || r.metric}${needsVal ? ` <span class="mono">${r.value}</span>` : ""}${r.note ? ` <span class="dim">— ${r.note}</span>` : ""}${r.last_fired ? ` <span class="dim">(last: ${r.last_fired})</span>` : ""}</span>
+    <span class="r-txt"><span class="mono">${esc(r.symbol)}</span> ${METRIC_LABELS[r.metric] || esc(r.metric)}${needsVal ? ` <span class="mono">${r.value}</span>` : ""}${r.note ? ` <span class="dim">— ${esc(r.note)}</span>` : ""}${r.last_fired ? ` <span class="dim">(last: ${r.last_fired})</span>` : ""}</span>
     <button class="al-toggle" data-altog="${r.id}">${r.enabled ? "on" : "off"}</button>
     <button class="del" data-aldel="${r.id}">✕</button>
   </div>`;
@@ -1428,6 +1443,60 @@ function onAlertEvents(events) {
 
 window.JOURNAL_BY_SYM = {};
 
+/* ======================================================================== */
+/*  CHOKEPOINTS — the dependencies underneath the portfolio                  */
+/* ======================================================================== */
+
+async function loadChokepoints() {
+  const body = $("chokebody");
+  if (!body) return;
+  try {
+    const d = await (await fetch("/api/chokepoints")).json();
+    if (!d.ok) {
+      body.innerHTML = `<div class="empty">None of your holdings appear in the
+        supply-chain map yet, so there is nothing to trace.</div>`;
+      return;
+    }
+    const meta = $("cpmeta");
+    if (meta) meta.textContent = `${d.mapped.length} of ${d.mapped.length + d.unmapped.length} holdings mapped · within ${d.hops} hops`;
+
+    const row = (x, dir) => {
+      const who = x.reaches.map(r => `${esc(r.symbol)}<span class="hp">${r.hops}</span>`).join(" ");
+      const bar = Math.max(2, Math.min(100, x.weight_pct));
+      return `<tr>
+        <td class="l"><span class="mono">${esc(x.ticker || x.id)}</span>${x.held ? ' <span class="ownedtag">owned</span>' : ""}
+          <div class="cplabel">${esc(x.label)}</div></td>
+        <td class="cpbarcell"><div class="cpbar" style="width:${bar}%"></div></td>
+        <td class="num">${x.weight_pct.toFixed(0)}%</td>
+        <td class="l cpwho">${who}</td>
+      </tr>`;
+    };
+
+    const table = (rows, dir, blurb, emptyMsg) => rows.length
+      ? `<div class="cpsect">${blurb}</div>
+         <table class="cptable"><tbody>${rows.map(x => row(x, dir)).join("")}</tbody></table>`
+      : `<div class="cpsect">${blurb}</div><div class="empty">${emptyMsg}</div>`;
+
+    const basisNote = d.basis === "equal"
+      ? "Percentages are equal-weighted — prices haven't loaded yet."
+      : "Percentages are the share of your portfolio value sitting behind each company.";
+
+    body.innerHTML =
+      table(d.downstream, "down",
+            "<b>Who your companies sell to.</b> Shared customers are demand-side concentration: if this buyer pulls back, several holdings feel it at once.",
+            "No customer is shared by two or more of your holdings.") +
+      table(d.upstream, "up",
+            "<b>What your companies depend on.</b> Shared suppliers are the concentration you did not choose — you may not own any of these.",
+            "No supplier is shared by two or more of your holdings. Structurally, that is what diversification looks like.") +
+      `<div class="cpnote">${esc(basisNote)} The number beside each holding is how
+        many steps away it sits. ${esc(d.note)}</div>` +
+      (d.unmapped.length ? `<div class="cpnote">Not in the map: ${d.unmapped.map(esc).join(", ")} —
+        add them to supply_chain.json to include them here.</div>` : "");
+  } catch (e) {
+    body.innerHTML = `<div class="empty">Could not work out dependencies.</div>`;
+  }
+}
+
 async function loadJournal() {
   const el = $("journal");
   try {
@@ -1452,7 +1521,7 @@ async function loadJournal() {
         <div class="j-entry">
           <span class="jd">${e.date}</span>
           <span class="js ${e.side === "buy" ? "up" : e.side === "sell" ? "down" : "dim"}">${e.side.toUpperCase()} ${e.symbol}${e.price ? " @ " + fmtNum(e.price) : ""}${e.shares ? " ×" + e.shares : ""}</span>
-          <span class="jr">${e.reason || ""}</span>
+          <span class="jr">${esc(e.reason || "")}</span>
           ${e._ret_pct != null ? `<span class="j-badge ${e._win ? "win" : "loss"}">${signPct(e._ret_pct)} since</span>` : ""}
           <button class="del" data-jdel="${e.id}">✕</button>
         </div>`).join("") || '<div class="empty">Nothing logged yet.</div>'}</div>`;
@@ -1971,7 +2040,7 @@ function renderChainInfo() {
   const feeds = CH.edges.filter(e => e.a === n).length;
   const fedby = CH.edges.filter(e => e.b === n).length;
   const px = q ? `$${q.price} <span class="${q.change_pct >= 0 ? "up" : "down"}">${q.change_pct >= 0 ? "+" : ""}${q.change_pct}%</span>` : "—";
-  el.innerHTML = `<b>${n.ticker || n.id}</b> ${n.label} · ${px} · supplies ${feeds} · buys from ${fedby}` +
+  el.innerHTML = `<b>${esc(n.ticker || n.id)}</b> ${esc(n.label)} · ${px} · supplies ${feeds} · buys from ${fedby}` +
     (n.ticker ? ` <button class="anlz" id="chainanlz">analyze in workbench ↗</button>` : "");
   el.className = "chaininfo on";
   const btn = $("chainanlz");
@@ -2129,13 +2198,13 @@ function showChainCard(n) {
   const q = n.ticker ? CH.quotes[n.ticker] : null;
   const px = q ? `$${q.price} <span class="${q.change_pct >= 0 ? "up" : "down"}">${q.change_pct >= 0 ? "+" : ""}${q.change_pct}%</span>` : "";
   const out = CH.edges.filter(e => e.a === n), inn = CH.edges.filter(e => e.b === n);
-  const relLine = (e, dir) => `<div class="ccrel">${dir === "out" ? "→ <b>" + (e.b.ticker || e.b.id) + "</b>" : "← <b>" + (e.a.ticker || e.a.id) + "</b>"} · ${e.rel.length > 26 ? e.rel.slice(0, 25) + "…" : e.rel}</div>`;
+  const relLine = (e, dir) => `<div class="ccrel">${dir === "out" ? "→ <b>" + esc(e.b.ticker || e.b.id) + "</b>" : "← <b>" + esc(e.a.ticker || e.a.id) + "</b>"} · ${esc(e.rel.length > 26 ? e.rel.slice(0, 25) + "…" : e.rel)}</div>`;
   card.innerHTML = `
     <span class="ccx" id="ccx">×</span>
-    <div class="cchead"><span class="ccsym">${n.ticker || n.id}</span><span class="ccpx">${px}</span></div>
-    <div class="ccname">${n.label || ""}</div>
+    <div class="cchead"><span class="ccsym">${esc(n.ticker || n.id)}</span><span class="ccpx">${px}</span></div>
+    <div class="ccname">${esc(n.label || "")}</div>
     ${n.ticker ? '<canvas class="ccspark" id="ccspark" width="220" height="34"></canvas>' : ""}
-    <span class="cctype">${n.type || ""}</span>
+    <span class="cctype">${esc(n.type || "")}</span>
     ${out.slice(0, 2).map(e => relLine(e, "out")).join("")}
     ${inn.slice(0, 2).map(e => relLine(e, "in")).join("")}
     ${out.length + inn.length > 4 ? `<div class="ccrel">… ${out.length + inn.length - 4} more relationships</div>` : ""}
@@ -2384,6 +2453,7 @@ const PANEL_LABELS = {
   holdings: "Holdings", risk: "Portfolio risk", benchmark: "vs SPY",
   chain: "Supply chain map", alerts: "Alerts", journal: "Decision journal",
   perholding: "Per-holding detail", workbench: "Workbench", sandbox: "What-if",
+  chokepoints: "What your book rests on",
 };
 
 const ADV_PANELS = ["perholding", "workbench", "sandbox"];
@@ -2519,66 +2589,192 @@ function applySettings() {
 
 /* ---------- first run: pick how much machinery you want ------------------ */
 
+let WIZ = { step: 1, mode: null, keys: {} };
+
 function showWelcome() {
+  WIZ = { step: 1, mode: null, keys: {} };
+  $("welcome").style.display = "flex";
+  wizRender();
+}
+
+function wizRender() {
   const el = $("welcome");
-  el.innerHTML = `
-    <div class="sheet">
+  const dots = [1, 2, 3, 4].map(n =>
+    `<span class="wdot${n === WIZ.step ? " on" : ""}${n < WIZ.step ? " done" : ""}"></span>`).join("");
+
+  if (WIZ.step === 1) {
+    el.innerHTML = `<div class="sheet">
       <h3>Welcome to Windrose</h3>
       <p class="lede">A private investing console that runs on your own machine.
-        Nothing you enter here leaves it. Start wherever you're comfortable —
-        you can switch at any time, and nothing is hidden permanently.</p>
+        Nothing you enter here leaves it. Four quick questions and you're set —
+        every answer can be changed later.</p>
       <div class="modes">
         <div class="modecard" data-pick="simple">
           <div class="mt">Simple</div>
-          <div class="md">The essentials, in plain language. Good if you're
-            building a portfolio and want to understand it without a finance degree.</div>
-          <ul>
-            <li>What you own and how it's doing</li>
-            <li>Whether you're beating the index</li>
-            <li>How concentrated you are, explained</li>
-            <li>The supply-chain map, simplified</li>
-          </ul>
+          <div class="md">The essentials, in plain language. Good if you're building
+            a portfolio and want to understand it without a finance degree.</div>
+          <ul><li>What you own and how it's doing</li>
+              <li>Whether you're beating the index</li>
+              <li>How concentrated you are, explained</li>
+              <li>The supply-chain map, simplified</li></ul>
         </div>
         <div class="modecard" data-pick="advanced">
           <div class="mt">Advanced</div>
-          <div class="md">Everything, unabridged. For people who already know what
-            a drawdown is and want the assumptions exposed.</div>
-          <ul>
-            <li>VaR, CVaR, beta, correlations, factors</li>
-            <li>Reverse DCF, comps, LBO, M&amp;A, Monte Carlo</li>
-            <li>Per-holding scoring and stress replays</li>
-            <li>The full map: path tracer, ripple, labels</li>
-          </ul>
+          <div class="md">Everything, unabridged. For people who already know what a
+            drawdown is and want the assumptions exposed.</div>
+          <ul><li>VaR, CVaR, beta, correlations, factors</li>
+              <li>Reverse DCF, comps, LBO, M&amp;A, Monte Carlo</li>
+              <li>Per-holding scoring and stress replays</li>
+              <li>The full map: path tracer, ripple, labels</li></ul>
         </div>
       </div>
+      <div class="wnav"><span class="wdots">${dots}</span></div>
     </div>`;
-  el.style.display = "flex";
-  el.querySelectorAll("[data-pick]").forEach(c =>
-    c.addEventListener("click", async () => {
-      await saveSettings({ mode: c.dataset.pick });
-      el.style.display = "none";
-      loadAnalysis();
-      setTimeout(tourStart, 500);
+    el.querySelectorAll("[data-pick]").forEach(c =>
+      c.addEventListener("click", async () => {
+        WIZ.mode = c.dataset.pick;
+        await saveSettings({ mode: WIZ.mode });
+        WIZ.step = 2; wizRender();
+      }));
+    return;
+  }
+
+  if (WIZ.step === 2) {
+    el.innerHTML = `<div class="sheet">
+      <h3>Market data</h3>
+      <p class="lede"><b>You don't need any keys.</b> Windrose already works —
+        prices come from Yahoo, delayed about 15 minutes, and every panel
+        functions. Add a free key only if you want more.</p>
+
+      <div class="keyrow">
+        <div class="keyhead"><b>Finnhub</b> — news headlines and analyst outlook
+          <a href="https://finnhub.io/register" target="_blank" rel="noopener">get a free key ↗</a></div>
+        <div class="keyfields">
+          <input id="wz-fh" type="password" placeholder="paste your Finnhub key" spellcheck="false" autocomplete="off">
+          <button class="wtest" data-test="finnhub">Test</button>
+        </div>
+        <div class="keyresult" id="wz-fh-r"></div>
+      </div>
+
+      <div class="keyrow">
+        <div class="keyhead"><b>Alpaca</b> — live prices, about two seconds instead of fifteen minutes
+          <a href="https://app.alpaca.markets" target="_blank" rel="noopener">get free paper keys ↗</a></div>
+        <div class="keyfields">
+          <input id="wz-ak" type="password" placeholder="API key ID" spellcheck="false" autocomplete="off">
+          <input id="wz-as" type="password" placeholder="secret key" spellcheck="false" autocomplete="off">
+          <button class="wtest" data-test="alpaca">Test</button>
+        </div>
+        <div class="keyresult" id="wz-ak-r"></div>
+      </div>
+
+      <p class="wfine">Keys are written to a file called <span class="mono">.env</span>
+        beside the app, on this computer only. They are never sent anywhere except
+        to the provider you got them from, and they can only be set from this machine.</p>
+
+      <div class="wnav"><span class="wdots">${dots}</span>
+        <button class="wghost" id="wz-skip">Skip — use delayed data</button>
+        <button class="wnext" id="wz-next2">Continue</button></div>
+    </div>`;
+
+    el.querySelectorAll("[data-test]").forEach(b => b.addEventListener("click", async () => {
+      const which = b.dataset.test;
+      const out = $(which === "finnhub" ? "wz-fh-r" : "wz-ak-r");
+      out.className = "keyresult testing";
+      out.textContent = "checking…";
+      const payload = which === "finnhub"
+        ? { which, finnhub_key: $("wz-fh").value }
+        : { which, alpaca_key: $("wz-ak").value, alpaca_secret: $("wz-as").value };
+      try {
+        const d = await (await fetch("/api/setup/testkeys", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload) })).json();
+        out.className = "keyresult " + (d.ok ? "good" : "bad");
+        out.textContent = (d.ok ? "\u2713 " : "\u2717 ") + (d.detail || "");
+      } catch (e) {
+        out.className = "keyresult bad";
+        out.textContent = "\u2717 could not test right now";
+      }
     }));
-}
 
-/* ---------- settings drawer --------------------------------------------- */
+    const goOn = async (save) => {
+      if (save) {
+        const payload = {
+          finnhub_key: $("wz-fh").value.trim(),
+          alpaca_key: $("wz-ak").value.trim(),
+          alpaca_secret: $("wz-as").value.trim(),
+        };
+        if (payload.finnhub_key || payload.alpaca_key) {
+          try {
+            await fetch("/api/setup/savekeys", { method: "POST",
+              headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+          } catch (e) {}
+        }
+      }
+      WIZ.step = 3; wizRender();
+    };
+    $("wz-next2").addEventListener("click", () => goOn(true));
+    $("wz-skip").addEventListener("click", () => goOn(false));
+    return;
+  }
 
-const REPO_URL = "https://github.com/Shaw54-eagle/windrose";
+  if (WIZ.step === 3) {
+    el.innerHTML = `<div class="sheet">
+      <h3>Your portfolio</h3>
+      <p class="lede">Windrose stores positions in a plain file on this computer.
+        Nothing is connected to a broker, and nothing can place a trade.</p>
+      <div class="modes">
+        <div class="modecard" data-seed="own">
+          <div class="mt">I'll add my own</div>
+          <div class="md">Start empty. Add positions in the Holdings panel —
+            ticker, share count, and what you paid.</div>
+          <ul><li>Zero shares means watch-only</li>
+              <li>An acquired date unlocks dividend-included returns</li></ul>
+        </div>
+        <div class="modecard" data-seed="examples">
+          <div class="mt">Show me an example first</div>
+          <div class="md">Five well-known companies across five sectors, so every
+            panel has something to show while you look around.</div>
+          <ul><li>Delete any row with the ✕</li>
+              <li>Not recommendations — just furniture</li></ul>
+        </div>
+      </div>
+      <div class="wnav"><span class="wdots">${dots}</span></div>
+    </div>`;
+    el.querySelectorAll("[data-seed]").forEach(c => c.addEventListener("click", async () => {
+      try {
+        await fetch("/api/setup/seed", { method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ examples: c.dataset.seed === "examples" }) });
+      } catch (e) {}
+      WIZ.step = 4; wizRender();
+    }));
+    return;
+  }
 
-async function reportProblem() {
-  let diag = {};
-  try { diag = await (await fetch("/api/diagnostics")).json(); } catch (e) {}
-  const lines = Object.entries(diag).map(([k, v]) => `- ${k}: ${v}`).join("\n");
-  const body = [
-    "**What happened?**", "", "",
-    "**What did you expect instead?**", "", "",
-    "**Steps to reproduce**", "1. ", "2. ", "",
-    "---", "<details><summary>Environment</summary>", "", lines, "", "</details>",
-  ].join("\n");
-  const url = `${REPO_URL}/issues/new?title=${encodeURIComponent("[bug] ")}`
-    + `&body=${encodeURIComponent(body)}&labels=bug`;
-  window.open(url, "_blank", "noopener");
+  // step 4
+  el.innerHTML = `<div class="sheet">
+    <h3>You're set</h3>
+    <p class="lede">Two things worth knowing before you start.</p>
+    <ul class="wlist">
+      <li><b>Alerts only fire while Windrose is running.</b> Close it and nothing is
+        watching. Use <span class="mono">Run at Login</span> in the app folder to keep it up.</li>
+      <li><b>Nothing here is advice.</b> Every model is an assumption engine — change
+        an input and the answer changes. The numbers come from free public sources
+        that are sometimes delayed or wrong.</li>
+    </ul>
+    <p class="lede">A short guided tour starts when you close this. The full written
+      walkthrough lives behind <b>learn</b> in the top bar, and <b>?</b> shows the
+      keyboard shortcuts.</p>
+    <div class="wnav"><span class="wdots">${dots}</span>
+      <button class="wnext" id="wz-done">Open the dashboard</button></div>
+  </div>`;
+  $("wz-done").addEventListener("click", async () => {
+    $("welcome").style.display = "none";
+    await loadHoldings();
+    loadAnalysis(); loadSpark(); loadBenchmark(); loadChokepoints();
+    pollStatus();
+    setTimeout(tourStart, 600);
+  });
 }
 
 function showSettings() {

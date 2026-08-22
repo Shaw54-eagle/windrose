@@ -352,9 +352,43 @@ def export_csv(holdings: list[dict], analysis: dict, live: dict) -> str:
 #  SUPPLY CHAIN
 # =========================================================================== #
 
+_TAG_RE = None
+
+
+def _scrub(value):
+    """Strip anything HTML-ish out of curated map text.
+
+    supply_chain.json is community-editable and pull requests against it are
+    invited, so its strings are untrusted input. The browser renders labels and
+    relationship text into innerHTML; a crafted label was able to execute
+    arbitrary JavaScript with access to the local API. Escaping happens at
+    render too — this is the second lock.
+    """
+    global _TAG_RE
+    if not isinstance(value, str):
+        return value
+    if _TAG_RE is None:
+        import re as _re
+        _TAG_RE = _re.compile(r"<[^>]*>")
+    return _TAG_RE.sub("", value).replace("<", "").replace(">", "")
+
+
+def _scrub_chain(data: dict) -> dict:
+    for net in (data.get("networks") or {}).values():
+        for n in net.get("nodes", []):
+            for k in ("id", "label", "type", "ticker"):
+                if k in n:
+                    n[k] = _scrub(n[k])
+        for e in net.get("edges", []):
+            for k in ("from", "to", "rel"):
+                if k in e:
+                    e[k] = _scrub(e[k])
+    return data
+
+
 def chain_load() -> dict:
     try:
-        return json.loads(CHAIN_FILE.read_text())
+        return _scrub_chain(json.loads(CHAIN_FILE.read_text()))
     except Exception as e:
         return {"networks": {}, "_error": str(e)}
 

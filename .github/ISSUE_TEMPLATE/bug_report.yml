@@ -38,6 +38,12 @@ body:
       options: [macOS, Windows, Linux]
     validations: { required: true }
   - type: textarea
+    id: selftest
+    attributes:
+      label: Self-test output (very helpful)
+      description: Run `./venv/bin/python selftest.py` and paste the result.
+      render: shell
+  - type: textarea
     id: terminal
     attributes:
       label: Terminal output (optional)

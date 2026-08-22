@@ -54,40 +54,14 @@ if [ -f .env ]; then
 else
   : # .env is written from scratch below — copying the example would
      # leave placeholder values that read as real keys
-  echo "  Windrose works right now with no keys at all (delayed prices via Yahoo)."
-  echo "  Two optional free keys unlock extras:"
-  echo "    · Finnhub  → news headlines + analyst outlook   https://finnhub.io/register"
-  echo "    · Alpaca   → live ~2s prices (paper keys work)  https://app.alpaca.markets"
-  echo ""
-  printf "  Finnhub key (press Enter to skip): "
-  read -r FKEY
-  printf "  Alpaca key ID (press Enter to skip): "
-  read -r AKEY
-  if [ -n "$AKEY" ]; then printf "  Alpaca secret: "; read -r ASEC; else ASEC=""; fi
-
-  echo ""
-  printf "  Passcode for phone access (Enter = auto-generate a 6-digit code): "
-  read -r PPIN
-
   {
-    echo "# Windrose local configuration — this file is git-ignored, keep it private."
-    echo ""
-    echo "# Live market data (Alpaca paper keys are fine — data API is separate from trading)"
-    if [ -n "$AKEY" ]; then
-      echo "ALPACA_KEY=$AKEY"
-      echo "ALPACA_SECRET=$ASEC"
-    else
-      echo "#ALPACA_KEY="
-      echo "#ALPACA_SECRET="
-    fi
-    echo ""
-    echo "# News + analyst outlook (Finnhub, free tier)"
-    if [ -n "$FKEY" ]; then echo "FINNHUB_KEY=$FKEY"; else echo "#FINNHUB_KEY="; fi
-    echo ""
-    echo "# Passcode your phone needs when you start with --lan (phone access)"
-    if [ -n "$PPIN" ]; then echo "WINDROSE_PIN=$PPIN"; else echo "#WINDROSE_PIN="; fi
+    echo "# Windrose configuration — add keys through the in-app setup wizard,"
+    echo "# or uncomment and fill these in by hand. All of them are optional."
+    echo "#FINNHUB_KEY="
+    echo "#ALPACA_KEY="
+    echo "#ALPACA_SECRET="
   } > .env
-  echo "  ✓ wrote .env  (edit it any time to add keys later)"
+  echo "  ✓ created .env — the app will offer to set up keys on first run"
 fi
 
 # ---- 4. Done ---------------------------------------------------------------

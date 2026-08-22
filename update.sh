@@ -55,6 +55,9 @@ windrose_update() {
         || echo "  (dependency update failed; the app may still run)"
     fi
   else
-    echo "  Update skipped — the app will start on your current version."
+    # Say why. A silent "skipped" is impossible to diagnose — the usual cause
+    # is an untracked local file that an incoming commit also wants to create.
+    echo "  Update skipped — starting on your current version. Git said:"
+    git merge --ff-only "origin/${branch}" 2>&1 | head -4 | sed 's/^/    /'
   fi
 }
