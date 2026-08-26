@@ -10,6 +10,29 @@ together, and where it sits in the wider economy — then gets out of the way.
 
 ![The Windrose dashboard](docs/screenshot.png)
 
+Stuck, or something looks wrong? [Open an issue](https://github.com/Shaw54-eagle/windrose/issues),
+or use **Report a problem** in Settings (⚙) — it fills in your version and
+platform for you, and never includes your holdings, keys or notes.
+
+## Before you start
+
+You need **Python 3** and **git**. Windows ships with neither; macOS usually has
+both, and `xcode-select --install` gets them if not.
+
+| | |
+| --- | --- |
+| Python 3.10 or newer | https://www.python.org/downloads/ |
+| git | https://git-scm.com/downloads |
+
+**Windows — tick "Add python.exe to PATH" in the Python installer.** It is off
+by default, at the bottom of the first screen. Miss it and every command below
+fails with `'python' is not recognized`.
+
+**Then close that terminal and open a new one.** An open window keeps the PATH
+it started with, so `git` and `python` will still look missing straight after a
+successful install. Nothing is broken — the window is stale. This is the single
+most likely place to give up, and reopening it is the whole fix.
+
 ```
 git clone https://github.com/Shaw54-eagle/windrose.git
 cd windrose
@@ -26,11 +49,8 @@ a four-step wizard takes it from there: pick Simple or Advanced, optionally add
 API keys (it tests them before saving), choose whether to start empty or with an
 example book, and go.
 
-Cloning rather than downloading a zip is worth it — only a clone can update
-itself when new versions are published.
-
-
-Windows: double-click `start.bat`. It handles setup on first run.
+Cloning rather than downloading a zip is worth it — only a clone can tell you
+when a new version is published, and taking it is then one `git pull`.
 
 **No API keys are required.** Out of the box Windrose runs on delayed Yahoo
 Finance quotes and every panel works. Two free keys unlock extras, and the setup
