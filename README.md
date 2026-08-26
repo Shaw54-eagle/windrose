@@ -165,6 +165,19 @@ the terminal used to scroll constantly and bury anything that mattered. The
 request log is off by default; genuine errors still print. Set
 `WINDROSE_VERBOSE=1` to see everything.
 
+## If port 7070 is taken
+
+Windrose serves on 7070 by default. If something else already owns it — common
+on a machine that runs other services — start it somewhere else:
+
+```
+WINDROSE_PORT=7071 bash start.sh
+```
+
+then open `http://127.0.0.1:7071`. The launchers and the browser-open follow
+the same variable. On Linux, `ss -ltnp | grep 7070` shows what is holding it;
+if no process name appears, it belongs to another user and needs `sudo` to see.
+
 ## Checking your install
 
 Something behaving oddly? Ask the app to diagnose itself:
@@ -195,6 +208,9 @@ fork this.
 
 Ticker symbols entered anywhere are validated against a strict pattern, and
 share counts and costs must be non-negative and finite.
+
+Working on the code? `CLAUDE.md` holds the project conventions,
+the security rules and the reasons behind them.
 
 ## Feedback and contributing
 
