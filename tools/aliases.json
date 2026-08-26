@@ -1,0 +1,185 @@
+{
+ "TSM": [
+  "Taiwan Semiconductor",
+  "TSMC"
+ ],
+ "ASML": [
+  "ASML"
+ ],
+ "AMAT": [
+  "Applied Materials"
+ ],
+ "LRCX": [
+  "Lam Research"
+ ],
+ "KLAC": [
+  "KLA-Tencor",
+  "KLA Corporation"
+ ],
+ "TER": [
+  "Teradyne"
+ ],
+ "ENTG": [
+  "Entegris"
+ ],
+ "MU": [
+  "Micron"
+ ],
+ "NVDA": [
+  "NVIDIA"
+ ],
+ "AMD": [
+  "Advanced Micro Devices"
+ ],
+ "INTC": [
+  "Intel"
+ ],
+ "QCOM": [
+  "QUALCOMM"
+ ],
+ "AVGO": [
+  "Broadcom"
+ ],
+ "ARM": [
+  "Arm Holdings",
+  "ARM Limited",
+  "Arm Limited"
+ ],
+ "CDNS": [
+  "Cadence"
+ ],
+ "SNPS": [
+  "Synopsys"
+ ],
+ "AMKR": [
+  "Amkor"
+ ],
+ "GFS": [
+  "GlobalFoundries"
+ ],
+ "UMC": [
+  "United Microelectronics"
+ ],
+ "MRVL": [
+  "Marvell"
+ ],
+ "NXPI": [
+  "NXP"
+ ],
+ "ON": [
+  "ON Semiconductor",
+  "onsemi"
+ ],
+ "TXN": [
+  "Texas Instruments"
+ ],
+ "ADI": [
+  "Analog Devices"
+ ],
+ "MPWR": [
+  "Monolithic Power"
+ ],
+ "AAPL": [
+  "Apple"
+ ],
+ "AMZN": [
+  "Amazon"
+ ],
+ "MSFT": [
+  "Microsoft"
+ ],
+ "META": [
+  "Meta Platforms"
+ ],
+ "GOOGL": [
+  "Alphabet"
+ ],
+ "TSLA": [
+  "Tesla"
+ ],
+ "SAMSUNG": [
+  "Samsung"
+ ],
+ "SKHYNIX": [
+  "SK hynix"
+ ],
+ "ZEISS": [
+  "Zeiss"
+ ],
+ "ATI": [
+  "ATI Inc",
+  "Allegheny Technologies"
+ ],
+ "HWM": [
+  "Howmet"
+ ],
+ "GE": [
+  "GE Aerospace",
+  "General Electric"
+ ],
+ "RTX": [
+  "RTX Corporation",
+  "Raytheon"
+ ],
+ "MRCY": [
+  "Mercury Systems"
+ ],
+ "WWD": [
+  "Woodward"
+ ],
+ "BA": [
+  "The Boeing Company",
+  "Boeing"
+ ],
+ "LMT": [
+  "Lockheed Martin"
+ ],
+ "NOC": [
+  "Northrop Grumman"
+ ],
+ "GD": [
+  "General Dynamics"
+ ],
+ "LHX": [
+  "L3Harris"
+ ],
+ "TDG": [
+  "TransDigm"
+ ],
+ "HEI": [
+  "HEICO"
+ ],
+ "COHR": [
+  "Coherent"
+ ],
+ "ALAB": [
+  "Astera Labs"
+ ],
+ "ANET": [
+  "Arista Networks"
+ ],
+ "VRT": [
+  "Vertiv"
+ ],
+ "SMCI": [
+  "Super Micro"
+ ],
+ "DELL": [
+  "Dell Technologies"
+ ],
+ "CRDO": [
+  "Credo"
+ ],
+ "ETN": [
+  "Eaton"
+ ],
+ "PWR": [
+  "Quanta Services"
+ ],
+ "GEV": [
+  "GE Vernova"
+ ],
+ "CEG": [
+  "Constellation Energy"
+ ]
+}
