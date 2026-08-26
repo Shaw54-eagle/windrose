@@ -209,22 +209,42 @@ format is documented above and the file is plain JSON.
 
 ## Updates
 
-Windrose keeps itself current if you installed it with `git clone`. Each launch
-it fetches the published version and fast-forwards — then starts. The rules it
-will not break:
+**Windrose tells you about updates. It does not install them.**
 
-- **fast-forward only.** It never merges, rebases, or resets. If your copy has
-  diverged, it says so and leaves it alone.
-- **your edits win.** Uncommitted changes to tracked files stop the update
-  cold. Extending `supply_chain.json` will not get you overwritten.
-- **your data is untouchable.** `.env`, holdings, journal, alerts and settings
-  are git-ignored, so an update cannot reach them.
+If you installed with `git clone`, each launch fetches the published version and
+compares. If something newer exists it prints the version number and stops there:
+
+```
+  Windrose 5.4 is available. You are on 5.3.
+  Nothing has been changed — Windrose no longer updates itself.
+
+      git pull
+```
+
+You update by running that, when you want to. Until then you stay exactly where
+you are.
+
+This used to fast-forward automatically, and it was the wrong default. An
+auto-applying updater means whatever is on `main` runs on your machine without
+you agreeing to it — including a mistake pushed at midnight. Checking is useful.
+Applying was never ours to decide.
+
+The rules the check will not break:
+
+- **it never writes.** No merge, no rebase, no reset, no checkout. It reads.
+- **your edits win.** Uncommitted changes to tracked files and it stays quiet
+  entirely. Extending `supply_chain.json` will not get you nagged.
+- **diverged history stops it.** It says so and does nothing else.
 - **failure is harmless.** Offline, unreachable, or anything unexpected — the
-  app just starts on the version you already have.
+  app just starts on the version you have.
 
-The header shows an `↑ v4.4` pill when something newer is published. Restart to
-take it. To turn the whole thing off, set `"auto_update": false` in
-`settings.json`, or launch with `WINDROSE_NO_UPDATE=1`.
+The header shows an `↑ v5.4` pill when something newer is published. It has
+always been notify-only and is unchanged.
+
+To skip the check entirely, set `"auto_update": false` in `settings.json`, or
+launch with `WINDROSE_NO_UPDATE=1`. That setting used to mean "don't apply
+updates" and now means "don't look" — if you had it off, you are still left
+alone.
 
 Installed from a zip instead of a clone? Nothing is downloaded automatically —
 the pill links you to the repo so you can grab it yourself.

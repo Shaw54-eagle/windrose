@@ -756,7 +756,10 @@ DEFAULT_SETTINGS = {
     "density": "comfortable",
     "hidden": [],            # panels the user switched off
     "title": "",             # optional name for this dashboard
-    "auto_update": True,     # fast-forward from GitHub when the launcher starts
+    # Whether the launcher *checks* for a newer version. It no longer applies
+    # one — see update.sh. False still means "leave me alone", which is what
+    # anyone who set it to false was asking for.
+    "auto_update": True,
     "desktop_notifications": True,   # OS popups when no browser tab is open
 }
 

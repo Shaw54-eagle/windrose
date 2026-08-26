@@ -2,9 +2,9 @@
 updater.py — is there a newer Windrose than the one running?
 
 Deliberately small and deliberately passive. This module *checks*; it never
-installs anything. Applying an update is the launcher's job (a fast-forward
-`git pull` before Python starts), so nothing swaps code out from under a
-running process.
+installs anything. Nothing else does either as of v5.3 — `update.sh` reports that
+a newer version exists and stops, and the user runs `git pull` when they want it.
+So nothing ever swaps code out from under a running process.
 
 The check reads APP_VERSION straight from the published app.py on the default
 branch. That means no GitHub API token, no release tagging required, and no
