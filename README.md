@@ -14,24 +14,41 @@ Stuck, or something looks wrong? [Open an issue](https://github.com/Shaw54-eagle
 or use **Report a problem** in Settings (⚙) — it fills in your version and
 platform for you, and never includes your holdings, keys or notes.
 
-## Before you start
+## Start it
 
-You need **Python 3** and **git**. Windows ships with neither; macOS usually has
-both, and `xcode-select --install` gets them if not.
+Get the folder, then **double-click one file**:
 
-| | |
+| Your computer | Double-click |
 | --- | --- |
-| Python 3.10 or newer | https://www.python.org/downloads/ |
-| git | https://git-scm.com/downloads |
+| Mac | **RUN-ME-mac.command** |
+| Windows | **RUN-ME-windows.bat** |
 
-**Windows — tick "Add python.exe to PATH" in the Python installer.** It is off
-by default, at the bottom of the first screen. Miss it and every command below
-fails with `'python' is not recognized`.
+That is the whole thing. It sets itself up the first time (a minute or two),
+starts the dashboard, and opens your browser. After that it just starts. To
+stop it, close the window it opened.
 
-**Then close that terminal and open a new one.** An open window keeps the PATH
-it started with, so `git` and `python` will still look missing straight after a
-successful install. Nothing is broken — the window is stale. This is the single
-most likely place to give up, and reopening it is the whole fix.
+You need **Python 3.10 or newer** — [python.org/downloads](https://www.python.org/downloads/).
+If it is missing, the launcher tells you so in plain language rather than
+failing at you. **On Windows, tick "Add python.exe to PATH"** on the installer's
+first screen; it is off by default, it is easy to miss, and nothing works
+without it.
+
+### Two things that catch people out
+
+**Mac: double-clicking does nothing.** GitHub's *Download ZIP* strips the
+permission that makes a file runnable. Open Terminal, type `chmod +x ` (with a
+space), drag `RUN-ME-mac.command` into the window, press Return, then
+double-click it again. Installing with `git clone` avoids this entirely.
+
+**Mac: "cannot be opened because it is from an unidentified developer."** That
+is Gatekeeper, and it is expected — the file is not signed with an Apple
+developer certificate. Right-click (or Control-click) the file, choose **Open**,
+then **Open** again in the dialog. Once only.
+
+On Windows, SmartScreen may show a blue "Windows protected your PC" box for the
+same reason: click **More info**, then **Run anyway**.
+
+### If you prefer a terminal
 
 ```
 git clone https://github.com/Shaw54-eagle/windrose.git
@@ -40,17 +57,18 @@ bash setup.sh
 bash start.sh
 ```
 
-On macOS you can skip the terminal entirely: download the folder, double-click
-**Setup Windrose.command** once, then **Start Windrose.command**. On Windows,
-double-click **start.bat** — it sets itself up on the first run.
+Also here: `Setup Windrose.command` and `Start Windrose.command` on macOS,
+`start.bat` on Windows. The RUN-ME files just wrap these with a friendlier
+first-run check — they run the same code.
 
-Then open **http://127.0.0.1:7070** (http, not https — it's a local server) and
-a four-step wizard takes it from there: pick Simple or Advanced, optionally add
-API keys (it tests them before saving), choose whether to start empty or with an
-example book, and go.
+Whichever route you take, it opens **http://127.0.0.1:7070** (http, not https —
+it's a local server) and a four-step wizard takes it from there: pick Simple or
+Advanced, optionally add API keys (it tests them before saving), choose whether
+to start empty or with an example book, and go.
 
 Cloning rather than downloading a zip is worth it — only a clone can tell you
-when a new version is published, and taking it is then one `git pull`.
+when a new version is published, and taking it is then one `git pull`. It also
+sidesteps the `chmod` problem above.
 
 **No API keys are required.** Out of the box Windrose runs on delayed Yahoo
 Finance quotes and every panel works. Two free keys unlock extras, and the setup

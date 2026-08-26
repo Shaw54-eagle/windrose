@@ -1,0 +1,10 @@
+# Batch files must reach Windows with CRLF endings. cmd.exe tolerates LF for
+# simple scripts — start.bat has survived on it — but `goto` and labels are
+# where LF-only files fail, and the beginner launcher uses both. Normalising
+# here means it is correct however the repo is cloned, zipped or checked out.
+*.bat text eol=crlf
+
+# Shell scripts and .command files must stay LF, including on Windows
+# checkouts, or bash sees a stray \r and reports "command not found".
+*.sh        text eol=lf
+*.command   text eol=lf
