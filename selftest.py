@@ -15,6 +15,7 @@ Exit code 0 means everything passed.
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import platform
 import sys
@@ -184,6 +185,110 @@ try:
 except Exception as e:
     bad(f"supply_chain.json unreadable: {type(e).__name__}: {e}")
     all_tickers = set()
+
+# --------------------------------------------------------------------------- #
+section("Map provenance (schema v2)")
+# Coverage is the first question anyone evaluating this dataset asks, so it is
+# printed whether or not it flatters us. An unverified edge is a legitimate row;
+# a verified one that cannot support the claim is not. See docs/SCHEMA.md.
+CRITICALITY = {"sole-source", "major", "minor"}
+CONFIDENCE = {"verified", "unverified"}
+MAX_QUOTE_WORDS = 15
+
+
+def _is_iso(d):
+    if d is None:
+        return True
+    try:
+        dt.date.fromisoformat(str(d))
+        return True
+    except (ValueError, TypeError):
+        return False
+
+
+def validate_edge(net_id, e):
+    """Return a list of problems. Silence means the edge is honestly described."""
+    out = []
+    who = f"{net_id}: {e.get('from')} -> {e.get('to')}"
+    conf = e.get("confidence", "unverified")
+    if conf not in CONFIDENCE:
+        out.append(f"{who}: confidence '{conf}' is not verified/unverified")
+        conf = "unverified"          # unknown reads as the conservative case
+    crit = e.get("criticality")
+    if crit is not None and crit not in CRITICALITY:
+        out.append(f"{who}: criticality '{crit}' is not one of {sorted(CRITICALITY)}")
+    for f in ("valid_from", "valid_to"):
+        if f in e and not _is_iso(e[f]):
+            out.append(f"{who}: {f} '{e[f]}' is not an ISO YYYY-MM-DD date")
+    if _is_iso(e.get("valid_from")) and _is_iso(e.get("valid_to")) \
+            and e.get("valid_from") and e.get("valid_to") \
+            and str(e["valid_to"]) < str(e["valid_from"]):
+        out.append(f"{who}: valid_to precedes valid_from")
+
+    srcs = e.get("sources", [])
+    if not isinstance(srcs, list):
+        out.append(f"{who}: sources must be a list")
+        srcs = []
+    for i, s in enumerate(srcs):
+        if not isinstance(s, dict):
+            out.append(f"{who}: source[{i}] is not an object")
+            continue
+        u = (s.get("url") or "").strip()
+        if not u:
+            out.append(f"{who}: source[{i}] has no usable url "
+                       f"(non-https urls are stripped at load)")
+        q = (s.get("quote") or "").strip()
+        if not q:
+            out.append(f"{who}: source[{i}] has no quote")
+        elif len(q.split()) > MAX_QUOTE_WORDS:
+            out.append(f"{who}: source[{i}] quote is {len(q.split())} words "
+                       f"(max {MAX_QUOTE_WORDS})")
+        if not s.get("supports"):
+            out.append(f"{who}: source[{i}] does not say which claims it supports")
+
+    # The whole point of the flag: verified has to mean something.
+    if conf == "verified":
+        usable = [s for s in srcs if isinstance(s, dict)
+                  and (s.get("url") or "").strip() and (s.get("quote") or "").strip()]
+        if not usable:
+            out.append(f"{who}: marked verified with no fetchable source and quote")
+        if crit and not any("criticality" in (s.get("supports") or []) for s in usable):
+            out.append(f"{who}: criticality '{crit}' is asserted but no source supports it")
+    return out
+
+
+try:
+    rows, issues = [], []
+    tot_v = tot_e2 = 0
+    for net_id, net in sorted(nets.items()):
+        edges = net.get("edges", [])
+        v = sum(1 for e in edges if e.get("confidence") == "verified")
+        for e in edges:
+            issues += validate_edge(net_id, e)
+        rows.append((net_id, v, len(edges)))
+        tot_v += v
+        tot_e2 += len(edges)
+
+    covered = [r for r in rows if r[1]]
+    if covered:
+        print("  verified coverage by network:")
+        for net_id, v, n in sorted(covered, key=lambda r: -r[1] / max(r[2], 1)):
+            print(f"    {net_id:<24} {v:>3}/{n:<4} {v / n * 100:5.1f}%")
+        if len(covered) < len(rows):
+            print(f"    {'(' + str(len(rows) - len(covered)) + ' networks at 0%)':<24}")
+    pct = (tot_v / tot_e2 * 100) if tot_e2 else 0.0
+    print(f"  {tot_v} of {tot_e2} edges verified against a filing ({pct:.1f}%)")
+    if tot_v == 0:
+        warn("no edge carries a citation yet — every relationship is curator-asserted")
+
+    for p in issues[:12]:
+        bad(p)
+    if len(issues) > 12:
+        bad(f"...and {len(issues) - 12} more schema problems")
+    if not issues:
+        ok("every edge is honestly described for what it claims")
+except Exception as e:
+    bad(f"provenance check failed: {type(e).__name__}: {e}")
 
 # --------------------------------------------------------------------------- #
 if ONLINE:

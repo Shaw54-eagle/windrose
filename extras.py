@@ -375,6 +375,7 @@ def _scrub(value):
 
 _URL_KEYS = ("url", "href", "link", "source_url")
 _URL_OK = None
+_BAD_SCHEME = None
 
 
 def _scrub_url(value: str) -> str:
@@ -392,6 +393,22 @@ def _scrub_url(value: str) -> str:
     return v if _URL_OK.match(v) else ""
 
 
+def _has_bad_scheme(value: str) -> bool:
+    """Does this string lead with a scheme that executes when clicked?
+
+    Browsers tolerate whitespace, tabs, newlines and NUL between the scheme and
+    the colon, so `java\\tscript:` and ` javascript :` both fire. Strip the
+    characters they ignore before deciding.
+    """
+    global _BAD_SCHEME
+    if _BAD_SCHEME is None:
+        import re as _re
+        _BAD_SCHEME = _re.compile(
+            r"^(javascript|data|vbscript|file|blob|about)\s*:", _re.I)
+    stripped = "".join(c for c in value if c not in "\t\r\n\x00 ").lstrip()
+    return bool(_BAD_SCHEME.match(stripped))
+
+
 def _scrub_deep(value, key=None):
     """Scrub every string anywhere in the structure, whatever it is called.
 
@@ -401,7 +418,13 @@ def _scrub_deep(value, key=None):
     remembers to protect it.
     """
     if isinstance(value, str):
-        return _scrub_url(value) if key in _URL_KEYS else _scrub(value)
+        if key in _URL_KEYS:
+            return _scrub_url(value)
+        # A URL-bearing field named something we did not anticipate — homepage,
+        # docs, ref — is still a URL when it reaches an href. Keying the check
+        # off the field name fails open exactly like the old field allowlist
+        # did, so judge the value instead.
+        return "" if _has_bad_scheme(value) else _scrub(value)
     if isinstance(value, list):
         return [_scrub_deep(v, key) for v in value]
     if isinstance(value, dict):
@@ -411,13 +434,22 @@ def _scrub_deep(value, key=None):
 
 
 def _scrub_chain(data: dict) -> dict:
+    """Scrub the whole networks tree, not just nodes and edges.
+
+    Naming the two keys to walk fails open the same way naming the fields did:
+    a schema that grows a sibling key — per-network metadata, a provenance
+    block — would ship unscrubbed. Walking each network entire means the next
+    addition is covered before anyone thinks about it.
+    """
     if not isinstance(data, dict):
         return data
-    for name, net in (data.get("networks") or {}).items():
-        if not isinstance(net, dict):
-            continue
-        net["nodes"] = _scrub_deep(net.get("nodes", []))
-        net["edges"] = _scrub_deep(net.get("edges", []))
+    nets = data.get("networks")
+    if isinstance(nets, dict):
+        data["networks"] = {
+            _scrub(k) if isinstance(k, str) else k:
+                (_scrub_deep(v) if isinstance(v, dict) else _scrub_deep(v))
+            for k, v in nets.items()
+        }
     return data
 
 
