@@ -246,7 +246,22 @@
         {
           "from": "ARM",
           "to": "QCOM",
-          "rel": "core licenses"
+          "rel": "core licenses",
+          "confidence": "verified",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000097/arm-20260331.htm",
+              "doc_type": "20-F",
+              "filer_cik": "0001973239",
+              "accession": "0001973239-26-000097",
+              "filed": "2026-05-26",
+              "retrieved": "2026-08-26",
+              "quote": "relationship with or revenue from Qualcomm, which is currently a major customer of ours and",
+              "supports": [
+                "rel"
+              ]
+            }
+          ]
         },
         {
           "from": "ARM",
@@ -291,7 +306,24 @@
         {
           "from": "TSM",
           "to": "AVGO",
-          "rel": "fabs custom ASICs"
+          "rel": "fabs custom ASICs",
+          "confidence": "verified",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+              "doc_type": "10-K",
+              "filer_cik": "0001730168",
+              "accession": "0001730168-25-000121",
+              "filed": "2025-12-18",
+              "retrieved": "2026-08-26",
+              "quote": "approximately 95% of the wafers manufactured by our CMs were produced by TSMC",
+              "supports": [
+                "rel",
+                "criticality"
+              ]
+            }
+          ],
+          "criticality": "major"
         },
         {
           "from": "TSM",
@@ -391,7 +423,22 @@
         {
           "from": "QCOM",
           "to": "AAPL",
-          "rel": "5G modems"
+          "rel": "5G modems",
+          "confidence": "verified",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/804328/000080432825000085/qcom-20250928.htm",
+              "doc_type": "10-K",
+              "filer_cik": "0000804328",
+              "accession": "0000804328-25-000085",
+              "filed": "2025-11-05",
+              "retrieved": "2026-08-26",
+              "quote": "fiscal 2025, revenues from Apple, Samsung and Xiaomi each comprised 10% or more of our",
+              "supports": [
+                "rel"
+              ]
+            }
+          ]
         },
         {
           "from": "TXN",
@@ -406,12 +453,44 @@
         {
           "from": "ZEISS",
           "to": "ASML",
-          "rel": "EUV optics \u2014 sole source"
+          "rel": "EUV optics \u2014 sole source",
+          "confidence": "verified",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/937966/000162828026011378/asml-20251231.htm",
+              "doc_type": "20-F",
+              "filer_cik": "0000937966",
+              "accession": "0001628280-26-011378",
+              "filed": "2026-02-25",
+              "retrieved": "2026-08-26",
+              "quote": "our key suppliers, Carl Zeiss SMT, our sole supplier of lenses, mirrors, illuminators, collectors and",
+              "supports": [
+                "rel",
+                "criticality"
+              ]
+            }
+          ],
+          "criticality": "sole-source"
         },
         {
           "from": "ENTG",
           "to": "TSM",
-          "rel": "materials & wafer handling"
+          "rel": "materials & wafer handling",
+          "confidence": "verified",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1101302/000110130226000012/entg-20251231.htm",
+              "doc_type": "10-K",
+              "filer_cik": "0001101302",
+              "accession": "0001101302-26-000012",
+              "filed": "2026-02-11",
+              "retrieved": "2026-08-26",
+              "quote": "net sales to top customers: Taiwan Semiconductor Manufacturing Company (TSMC) 16% 16% 11% Remaining top",
+              "supports": [
+                "rel"
+              ]
+            }
+          ]
         },
         {
           "from": "ENTG",
@@ -421,7 +500,22 @@
         {
           "from": "TER",
           "to": "TSM",
-          "rel": "wafer test systems"
+          "rel": "wafer test systems",
+          "confidence": "verified",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/97210/000095017024018701/ter-20231231.htm",
+              "doc_type": "10-K",
+              "filer_cik": "0000097210",
+              "accession": "0000950170-24-018701",
+              "filed": "2024-02-22",
+              "retrieved": "2026-08-26",
+              "quote": "2021, revenues from Taiwan Semiconductor Manufacturing Company Ltd., a customer of our Semiconductor Test segment",
+              "supports": [
+                "rel"
+              ]
+            }
+          ]
         },
         {
           "from": "TER",
@@ -436,12 +530,42 @@
         {
           "from": "AMKR",
           "to": "QCOM",
-          "rel": "packaging & test"
+          "rel": "packaging & test",
+          "confidence": "verified",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/804328/000080432825000085/qcom-20250928.htm",
+              "doc_type": "10-K",
+              "filer_cik": "0000804328",
+              "accession": "0000804328-25-000085",
+              "filed": "2025-11-05",
+              "retrieved": "2026-08-26",
+              "quote": "suppliers are Advanced Semiconductor Engineering, Amkor Technology, Siliconware Precision Industries and STATSChipPAC",
+              "supports": [
+                "rel"
+              ]
+            }
+          ]
         },
         {
           "from": "UMC",
           "to": "QCOM",
-          "rel": "mature-node foundry"
+          "rel": "mature-node foundry",
+          "confidence": "verified",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1033767/000119312522125284/d168667d20f.htm",
+              "doc_type": "20-F",
+              "filer_cik": "0001033767",
+              "accession": "0001193125-22-125284",
+              "filed": "2022-04-28",
+              "retrieved": "2026-08-26",
+              "quote": "Our customers include industry leaders such as Intel Mobile, MediaTek, Realtek, Texas Instruments and Qualcomm",
+              "supports": [
+                "rel"
+              ]
+            }
+          ]
         },
         {
           "from": "UMC",
