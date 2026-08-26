@@ -5,6 +5,8 @@ REM First run creates a private Python environment and installs dependencies.
 REM ---------------------------------------------------------------------------
 cd /d "%~dp0"
 
+if not defined WINDROSE_PORT set WINDROSE_PORT=7070
+
 where python >nul 2>nul
 if errorlevel 1 (
   echo Python 3 was not found.
@@ -34,10 +36,10 @@ if not exist .env (
 )
 
 echo.
-echo   Windrose  -^>  http://127.0.0.1:7070
+echo   Windrose  -^>  http://127.0.0.1:%WINDROSE_PORT%
 echo   Leave this window open. Close it to stop.
 echo.
-start "" http://127.0.0.1:7070
+start "" http://127.0.0.1:%WINDROSE_PORT%
 REM For phone access on your Wi-Fi, change the next line to:  venv\Scripts\python app.py --lan
 venv\Scripts\python app.py
 pause

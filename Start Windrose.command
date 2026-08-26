@@ -4,10 +4,11 @@
 # Close this window or press Ctrl+C to stop the dashboard.
 
 cd "$(dirname "$0")"
+export WINDROSE_PORT="${WINDROSE_PORT:-7070}"
 
 # Already running? Just open the browser.
-if curl -s --max-time 1 http://127.0.0.1:7070/api/status >/dev/null 2>&1; then
-  open http://127.0.0.1:7070
+if curl -s --max-time 1 http://127.0.0.1:${WINDROSE_PORT:-7070}/api/status >/dev/null 2>&1; then
+  open http://127.0.0.1:${WINDROSE_PORT:-7070}
   echo "Windrose is already running — opened your browser."
   echo "(This window can be closed.)"
   exit 0
@@ -55,8 +56,8 @@ fi
 # Open the browser only once the server actually answers (first runs are slow).
 (
   for i in $(seq 1 120); do
-    if curl -s --max-time 1 http://127.0.0.1:7070/api/status >/dev/null 2>&1; then
-      open http://127.0.0.1:7070 
+    if curl -s --max-time 1 http://127.0.0.1:${WINDROSE_PORT:-7070}/api/status >/dev/null 2>&1; then
+      open http://127.0.0.1:${WINDROSE_PORT:-7070} 
       exit 0
     fi
     sleep 1
@@ -64,7 +65,7 @@ fi
 ) &
 
 echo ""
-echo "  Windrose  →  http://127.0.0.1:7070"
+echo "  Windrose  →  http://127.0.0.1:${WINDROSE_PORT:-7070}"
 echo "  Leave this window open. Close it (or Ctrl+C) to stop."
 echo ""
 exec ./venv/bin/python app.py "$@"

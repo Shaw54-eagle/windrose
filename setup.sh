@@ -77,7 +77,7 @@ else
   echo "     bash start.sh"
 fi
 echo ""
-echo "   Then open  http://127.0.0.1:7070"
+echo "   Then open  http://127.0.0.1:${WINDROSE_PORT:-7070}"
 echo "   It opens with five example holdings so nothing is blank."
 echo "   Delete any row with the x and add your own."
 echo "  ────────────────────────────────────────────"

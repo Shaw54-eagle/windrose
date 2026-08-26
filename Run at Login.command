@@ -60,7 +60,7 @@ PLISTEOF
   if launchctl load "$PLIST" 2>/dev/null; then
     echo ""
     echo "  ✓ Windrose now starts at login and stays running."
-    echo "    Dashboard:  http://127.0.0.1:7070"
+    echo "    Dashboard:  http://127.0.0.1:${WINDROSE_PORT:-7070}"
     echo "    Log file:   ${DIR}/windrose.log"
     echo "    Run this again to undo it."
     echo ""
@@ -109,7 +109,7 @@ UNITEOF
   systemctl --user daemon-reload 2>/dev/null
   if systemctl --user enable --now windrose.service 2>/dev/null; then
     echo "  ✓ Windrose now starts at login and stays running."
-    echo "    Dashboard: http://127.0.0.1:7070"
+    echo "    Dashboard: http://127.0.0.1:${WINDROSE_PORT:-7070}"
     echo "    Logs:      journalctl --user -u windrose -f"
     echo "    Run this again to undo it."
   else

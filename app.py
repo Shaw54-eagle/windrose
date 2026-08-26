@@ -17,7 +17,17 @@ from flask import Flask, jsonify, request, send_from_directory, redirect, Respon
 
 APP_NAME = "Windrose"
 APP_TAGLINE = "know where you actually stand"
-APP_VERSION = "5.2"
+APP_VERSION = "5.3"
+
+# 7070 is the default, but it is not always free — a Linux box running other
+# services may already own it, and the app used to die with a raw Flask error.
+PORT = 7070
+try:
+    PORT = int((os.getenv("WINDROSE_PORT") or "7070").strip())
+    if not (1 <= PORT <= 65535):
+        PORT = 7070
+except (TypeError, ValueError):
+    PORT = 7070
 LEDGER_VERSION = APP_VERSION      # legacy alias
 BASE = Path(__file__).resolve().parent
 import re as _re
@@ -1085,7 +1095,7 @@ def main():
 
     start_background()
     print(f"\n  {APP_NAME} v{APP_VERSION} — {APP_TAGLINE}")
-    print("  ->  http://127.0.0.1:7070")
+    print(f"  ->  http://127.0.0.1:{PORT}")
     print("  Alpaca live:", "yes" if M.have_alpaca() else "no (using delayed yfinance)",
           "| Finnhub news:", "yes" if M.have_finnhub() else "no")
 
@@ -1093,7 +1103,7 @@ def main():
     if LAN_MODE:
         LAN_PIN = _load_or_make_pin()
         host = "0.0.0.0"
-        url = f"http://{_local_ip()}:7070"
+        url = f"http://{_local_ip()}:{PORT}"
         host = "0.0.0.0"
 
         print("\n  " + "-" * 58)
@@ -1129,7 +1139,24 @@ def main():
             pass
 
     print("\n  Ctrl+C to stop.\n")
-    app.run(host=host, port=7070, threaded=True, debug=False)
+    # Check before handing over to Flask — it swallows the error and prints its
+    # own, which tells the user nothing about how to fix it.
+    import socket as _sk
+    _probe = _sk.socket(_sk.AF_INET, _sk.SOCK_STREAM)
+    try:
+        _probe.bind((host if host != "0.0.0.0" else "", PORT))
+        _probe.close()
+    except OSError:
+        _probe.close()
+        alt = PORT + 1
+        print(f"\n  Port {PORT} is already being used by another program.")
+        print(f"  Start Windrose somewhere else instead:\n")
+        print(f"      WINDROSE_PORT={alt} bash \"Start Windrose.command\"\n")
+        print(f"  then open  http://127.0.0.1:{alt}")
+        print(f"  On Linux, 'ss -ltnp | grep {PORT}' shows what is holding it.\n")
+        raise SystemExit(1)
+
+    app.run(host=host, port=PORT, threaded=True, debug=False)
 
 
 if __name__ == "__main__":

@@ -373,16 +373,51 @@ def _scrub(value):
     return _TAG_RE.sub("", value).replace("<", "").replace(">", "")
 
 
+_URL_KEYS = ("url", "href", "link", "source_url")
+_URL_OK = None
+
+
+def _scrub_url(value: str) -> str:
+    """Only http(s) survives. Everything else becomes empty.
+
+    Stripping angle brackets does nothing to `javascript:alert(1)` once it lands
+    in an href, so URL fields need a scheme check rather than tag removal. Also
+    kills `data:`, `vbscript:`, `file:` and protocol-relative `//evil.com`.
+    """
+    global _URL_OK
+    if _URL_OK is None:
+        import re as _re
+        _URL_OK = _re.compile(r"^https?://[^\s]+$", _re.I)
+    v = _scrub(value).strip()
+    return v if _URL_OK.match(v) else ""
+
+
+def _scrub_deep(value, key=None):
+    """Scrub every string anywhere in the structure, whatever it is called.
+
+    The previous version listed the fields to clean, which fails open the moment
+    schema v2 adds one — exactly the mistake that put a script tag in a company
+    label. Walking everything means a new field is protected before anyone
+    remembers to protect it.
+    """
+    if isinstance(value, str):
+        return _scrub_url(value) if key in _URL_KEYS else _scrub(value)
+    if isinstance(value, list):
+        return [_scrub_deep(v, key) for v in value]
+    if isinstance(value, dict):
+        return {_scrub(k) if isinstance(k, str) else k: _scrub_deep(v, k)
+                for k, v in value.items()}
+    return value
+
+
 def _scrub_chain(data: dict) -> dict:
-    for net in (data.get("networks") or {}).values():
-        for n in net.get("nodes", []):
-            for k in ("id", "label", "type", "ticker"):
-                if k in n:
-                    n[k] = _scrub(n[k])
-        for e in net.get("edges", []):
-            for k in ("from", "to", "rel"):
-                if k in e:
-                    e[k] = _scrub(e[k])
+    if not isinstance(data, dict):
+        return data
+    for name, net in (data.get("networks") or {}).items():
+        if not isinstance(net, dict):
+            continue
+        net["nodes"] = _scrub_deep(net.get("nodes", []))
+        net["edges"] = _scrub_deep(net.get("edges", []))
     return data
 
 

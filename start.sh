@@ -4,6 +4,7 @@
 # First run sets things up (one-time). Ctrl+C or close the window to stop.
 
 cd "$(dirname "$0")"
+export WINDROSE_PORT="${WINDROSE_PORT:-7070}"
 
 # If launched without a terminal (Nemo "Run"), reopen inside one so logs show.
 if [ ! -t 1 ] && [ -z "$LEDGER_NOTERM" ]; then
@@ -20,8 +21,8 @@ if [ ! -t 1 ] && [ -z "$LEDGER_NOTERM" ]; then
 fi
 
 # Already running? Just open the browser.
-if curl -s --max-time 1 http://127.0.0.1:7070/api/status >/dev/null 2>&1; then
-  xdg-open http://127.0.0.1:7070 >/dev/null 2>&1 || true
+if curl -s --max-time 1 http://127.0.0.1:${WINDROSE_PORT:-7070}/api/status >/dev/null 2>&1; then
+  xdg-open http://127.0.0.1:${WINDROSE_PORT:-7070} >/dev/null 2>&1 || true
   echo "Windrose is already running — opened your browser."
   exit 0
 fi
@@ -68,8 +69,8 @@ fi
 # Open the browser only once the server actually answers (first runs are slow).
 (
   for i in $(seq 1 120); do
-    if curl -s --max-time 1 http://127.0.0.1:7070/api/status >/dev/null 2>&1; then
-      xdg-open http://127.0.0.1:7070 >/dev/null 2>&1 || true
+    if curl -s --max-time 1 http://127.0.0.1:${WINDROSE_PORT:-7070}/api/status >/dev/null 2>&1; then
+      xdg-open http://127.0.0.1:${WINDROSE_PORT:-7070} >/dev/null 2>&1 || true
       exit 0
     fi
     sleep 1
@@ -77,7 +78,7 @@ fi
 ) &
 
 echo ""
-echo "  Windrose  →  http://127.0.0.1:7070"
+echo "  Windrose  →  http://127.0.0.1:${WINDROSE_PORT:-7070}"
 echo "  Leave this window open. Close it (or Ctrl+C) to stop."
 echo ""
 exec ./venv/bin/python app.py "$@"
