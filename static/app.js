@@ -14,6 +14,72 @@ function esc(v) {
 }
 
 
+const THEMES = [
+  ["auto",     "Auto",          "follows your system setting"],
+  ["graphite", "Graphite",      "dark, ember accent"],
+  ["midnight", "Midnight",      "deep navy, easier at night"],
+  ["terminal", "Terminal",      "phosphor green, mono everywhere"],
+  ["paper",    "Paper",         "clean light"],
+  ["sepia",    "Sepia",         "warm light, gentler for long reads"],
+  ["contrast", "High contrast", "maximum legibility"],
+];
+
+// Layout presets. Each names the panels for the two columns and the full-width
+// row; anything unlisted is hidden. They exist because "arrange 10 panels
+// yourself" is not a reasonable first experience.
+const PRESETS = {
+  overview: {
+    label: "Overview",
+    blurb: "Everything, in a sensible order. The default.",
+    left: ["holdings", "benchmark", "alerts", "journal"],
+    right: ["risk", "sandbox"],
+    full: ["chokepoints", "perholding", "workbench", "chain"],
+  },
+  watching: {
+    label: "Watching",
+    blurb: "For market hours. Positions, alerts and news up top, analysis out of the way.",
+    left: ["holdings", "alerts"],
+    right: ["risk", "journal"],
+    full: ["chain"],
+  },
+  research: {
+    label: "Research",
+    blurb: "Digging into one company. Workbench and the map get the space.",
+    left: ["holdings", "perholding"],
+    right: ["risk"],
+    full: ["workbench", "chain", "chokepoints"],
+  },
+  risk: {
+    label: "Risk",
+    blurb: "How the book behaves as a whole, and what it rests on.",
+    left: ["holdings", "benchmark"],
+    right: ["risk", "sandbox"],
+    full: ["chokepoints", "perholding"],
+  },
+  minimal: {
+    label: "Minimal",
+    blurb: "Am I up, and am I beating the index? Nothing else.",
+    left: ["holdings"],
+    right: ["benchmark"],
+    full: [],
+  },
+};
+
+function applyPreset(name) {
+  const p = PRESETS[name];
+  if (!p) return;
+  const all = Object.keys(PANEL_LABELS);
+  const shown = [...p.left, ...p.right, ...p.full];
+  try {
+    localStorage.setItem("windrose-layout2",
+      JSON.stringify({ left: p.left, right: p.right, full: p.full }));
+  } catch (e) {}
+  SET.hidden = all.filter(x => !shown.includes(x));
+  SET.preset = name;
+  saveSettings({ hidden: SET.hidden, preset: name });
+  location.reload();     // the layout engine places panels at boot
+}
+
 const $  = (id) => document.getElementById(id);
 const fmtMoney = (n, d = 2) => (n == null ? "—" : "$" + Number(n).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }));
 const fmtNum   = (n, d = 2) => (n == null ? "—" : Number(n).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }));
@@ -616,7 +682,13 @@ window.addEventListener("resize", () => {
     const s = await (await fetch("/api/status")).json();
     window.APP_VERSION = s.version;
     applySettings();
-    if (!SET.mode) showWelcome();              // never chosen -> ask first
+    // ?walk=1 is how the learn page hands you back to the dashboard with the
+    // advanced walkthrough already running. It beats the first-run tour.
+    const wantWalk = new URLSearchParams(location.search).get("walk") === "1";
+    if (wantWalk) {
+      history.replaceState(null, "", location.pathname);   // don't re-fire on reload
+      setTimeout(walkStart, 2200);
+    } else if (!SET.mode) showWelcome();       // never chosen -> ask first
     else if (s.first_run) setTimeout(tourStart, 1600);
   } catch (e) {}
 })();
@@ -980,16 +1052,19 @@ setTimeout(() => mwSwitch("rdcf"), 400);   // after holdings load
     drawCharts();
     if (typeof mwFetch === "function") mwFetch();
   };
+  // built from THEMES so adding a theme is a one-line change
+  sel.innerHTML = THEMES.map(([v, label]) => `<option value="${v}">${label}</option>`).join("");
+  const VALID = THEMES.map(t => t[0]);
   let pref = "auto";
   try {
-    const saved = localStorage.getItem("ledger-theme");
-    if (["paper", "graphite"].includes(saved)) pref = saved;
+    const saved = localStorage.getItem("windrose-theme") || localStorage.getItem("ledger-theme");
+    if (VALID.includes(saved)) pref = saved;
   } catch (e) {}
   document.documentElement.dataset.theme = resolve(pref);
   sel.value = pref;
   sel.addEventListener("change", () => {
     pref = sel.value;
-    try { localStorage.setItem("ledger-theme", pref); } catch (e) {}
+    try { localStorage.setItem("windrose-theme", pref); } catch (e) {}
     document.documentElement.dataset.theme = resolve(pref);
     repaint();
   });
@@ -1330,6 +1405,33 @@ function notifBtnLabel() {
   if (Notification.permission === "granted") return "\u2713 Desktop notifications on";
   if (Notification.permission === "denied") return "Notifications blocked";
   return "Enable desktop notifications";
+}
+
+/* Open a GitHub issue with the boring facts already filled in.
+   What goes in the body is exactly what /api/diagnostics returns and nothing
+   else — no tickers, no share counts, no journal text, no keys. The user sees
+   the whole thing on GitHub before they press submit, which is the point: they
+   can read what they are about to send. */
+async function reportProblem() {
+  let diag = {};
+  try {
+    diag = await (await fetch("/api/diagnostics")).json();
+  } catch (e) {
+    diag = { version: "unknown", note: "diagnostics unavailable — server not reachable" };
+  }
+  const repo = diag.repo || "Shaw54-eagle/windrose";
+  const facts = Object.entries(diag)
+    .filter(([k]) => k !== "repo")
+    .map(([k, v]) => `| ${k} | ${v} |`).join("\n");
+  const body =
+    "**What happened?**\n\n\n**What did you expect instead?**\n\n\n" +
+    "**Steps to reproduce**\n1. \n2. \n\n---\n\n" +
+    "<sub>Filled in automatically. No holdings, keys or notes are included.</sub>\n\n" +
+    "| | |\n|---|---|\n" + facts + "\n";
+  const url = `https://github.com/${repo}/issues/new` +
+    `?title=${encodeURIComponent("[" + (diag.version || "?") + "] ")}` +
+    `&body=${encodeURIComponent(body)}`;
+  window.open(url, "_blank", "noopener");
 }
 
 function notifUnblockHint() {
@@ -2436,6 +2538,307 @@ function tourEnd() {
 window.tourStart = tourStart;
 
 /* ======================================================================== */
+/*  ADVANCED WALKTHROUGH — drives the real UI, against the real book        */
+/* ======================================================================== */
+/*  The first-run tour points at panels and describes them. This one uses
+    them: it runs a reverse DCF on a position the user actually holds, traces
+    a real route across the map, reads their own chokepoints out loud. Every
+    number quoted below is scraped back out of what rendered, so the card can
+    never claim something the screen isn't showing.
+
+    Each step is skippable, the whole thing is re-runnable from learn and from
+    settings, and every step has to say something sensible when the book is
+    empty — a new user is exactly who this is for.                          */
+
+const walkSleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+async function walkUntil(fn, ms = 30000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < ms) {
+    try { if (fn()) return true; } catch (e) { /* not ready yet */ }
+    await walkSleep(200);
+  }
+  return false;
+}
+
+/* Scrape the rendered panel rather than the API response: if the user cannot
+   see it, the walkthrough has no business narrating it. */
+const walkText = (sel) => {
+  const el = document.querySelector(sel);
+  return el ? el.textContent.trim() : "";
+};
+
+const WALK = [
+
+  { title: "What the price already assumes",
+    sel: '[data-panel="workbench"]',
+    async run() {
+      const h = HOLDINGS[0];
+      // An empty book gets a named demonstration rather than SPY: an index fund
+      // has no free cash flow to run backwards, so the model would just fail and
+      // teach nothing. Better to show it working and say plainly it isn't theirs.
+      const sym = (h && h.symbol) || "AAPL";
+      MW.sym = sym;
+      mwSwitch("rdcf");
+      await walkUntil(() => {
+        const t = walkText("#modelbody");
+        return t && !t.includes("Computing");
+      }, 35000);
+
+      const g = walkText("#modelbody .h-big");
+      const hist = [...document.querySelectorAll("#modelbody .kcell")]
+        .find(c => (c.querySelector(".k") || {}).textContent?.includes("Actual FCF CAGR"));
+      const histV = hist ? (hist.querySelector(".v") || {}).textContent : null;
+
+      if (!g) {
+        return `The reverse DCF could not price <b>${esc(sym)}</b>. It needs reported
+          free cash flow, which banks, REITs, index funds and anything recently
+          listed do not give up in a usable form.${h
+            ? " Pick another holding from the dropdown and it will run."
+            : ""}
+          What the model does everywhere else is still worth knowing: it runs a
+          discounted cash flow <i>backwards</i>, to find the growth rate that makes
+          today's price merely fair. It is never a forecast — it is the hurdle the
+          price has already set.`;
+      }
+      const lead = h
+        ? `That is a reverse DCF on <b>${esc(sym)}</b> — your own position, not a demo ticker.`
+        : `Your book is empty, so this is a demonstration on <b>${esc(sym)}</b> rather
+           than anything of yours. Add a holding and start this again to point it at
+           something you actually own.`;
+      return `${lead}
+        It reads <b>${esc(g)}</b>, and that number is the whole idea:
+        it is not a forecast, and nobody here believes ${esc(sym)} will grow at that rate.
+        It is the growth the current price has <i>already committed to</i> — run the
+        discounted cash flow backwards and this is what has to happen for today's
+        price to be merely fair.
+        ${histV ? `Next to it sits <b>${esc(histV)}</b>, what the company has actually
+          managed. When the implied number sits well above the actual one, the price
+          is asking for an acceleration, and something has to pay for it.` : ""}
+        Your job shrinks to one judgement you are qualified to make: is that hurdle
+        easy or hard?`;
+    } },
+
+  { title: "Two companies, and the line between them",
+    sel: '[data-panel="chain"]',
+    async run() {
+      const sel = $("chainnet");
+      if (sel) { sel.value = "all"; sel.dispatchEvent(new Event("change")); }
+      const ok = await walkUntil(() => CH.net === "all" && CH.nodes.length > 0, 40000);
+      if (!ok) {
+        return `The full map did not finish loading. It is the heaviest view in the
+          app — every industry at once — so give it a moment and try the
+          <b>all</b> entry in the dropdown yourself.`;
+      }
+      document.querySelector('[data-panel="chain"]')
+        ?.scrollIntoView({ block: "center", behavior: "smooth" });
+      await walkSleep(600);
+
+      const ids = new Set(CH.nodes.map(n => n.id));
+      const held = HOLDINGS.map(x => x.symbol).filter(s => ids.has(s));
+      let a = held[0] || "ASML", b = null, path = null;
+      for (const cand of ["TSM", "ASML", "NVDA", "MSFT", "AAPL", "INTC", "CAT"]) {
+        if (cand === a || !ids.has(cand)) continue;
+        const p = chainFindPath(a, cand);
+        if (p && p.length >= 2) { b = cand; path = p; break; }
+      }
+      if (!path) { a = "ASML"; b = "MSFT"; path = chainFindPath(a, b); }
+      if (path) chainApplyPath(path);
+
+      if (!path) {
+        return `No route came back between two mapped companies, which usually means
+          the map is still settling. The <b>⇄ path</b> button does this on demand:
+          click it, then click any two companies.`;
+      }
+      const hops = path.length - 1;
+      const mine = held.includes(a) ? ` — and <b>${esc(a)}</b> is yours` : "";
+      return `The map is on <b>all</b> now: every industry at once, which is the only
+        view where the lines <i>between</i> industries exist.
+        The lit route is <span class="mono">${esc(path.join(" → "))}</span> —
+        ${hops} ${hops === 1 ? "hop" : "hops"}${mine}.
+        That is <b>⇄ path</b>, and you can run it on any two companies yourself.
+        Read it as "these two are structurally connected", nothing more. The map
+        records who feeds whom, hand-curated from filings and news. It carries no
+        sense of how much money moves along that line, and it drifts as companies
+        get acquired.`;
+    } },
+
+  { title: "What your book quietly rests on",
+    sel: '[data-panel="chokepoints"]',
+    async run() {
+      document.querySelector('[data-panel="chokepoints"]')
+        ?.scrollIntoView({ block: "center", behavior: "smooth" });
+      await loadChokepoints();
+      await walkSleep(700);
+
+      const body = walkText("#chokebody");
+      if (!HOLDINGS.length) {
+        return `This panel needs a book to work on, and yours is empty. It looks for
+          companies that sit underneath <i>several</i> of your holdings at once —
+          the concentration you did not choose and would not spot from a list of
+          tickers. Add a few positions and come back.`;
+      }
+      if (body.includes("None of your holdings appear")) {
+        return `None of your holdings are on the supply-chain map yet, so there is
+          nothing to trace. The map covers ~430 companies across 26 industries;
+          anything outside it is invisible here. <span class="mono">supply_chain.json</span>
+          takes pull requests.`;
+      }
+      // The panel prints two tables: shared customers first, then shared
+      // suppliers. They mean opposite things, so pick deliberately — this step
+      // is about what the book depends on, which is the supplier side.
+      const sect = [...document.querySelectorAll("#chokebody .cpsect")]
+        .find(s => s.textContent.includes("depend on"));
+      let table = sect && sect.nextElementSibling;
+      let kind = "supplier";
+      if (!table || !table.classList.contains("cptable")) {
+        table = document.querySelector("#chokebody .cptable");
+        kind = "customer";
+      }
+      const top = table && table.querySelector("tr");
+      const who = top ? (top.querySelector(".mono") || {}).textContent : null;
+      const pct = top ? (top.querySelector(".num") || {}).textContent : null;
+      const meta = walkText("#cpmeta");
+
+      if (!who || !pct) {
+        return `Nothing in your book shares a supplier or a customer with anything
+          else in it, within the hops the map can see. Structurally, that is what
+          diversification actually looks like — and it is the one result here worth
+          being pleased about. ${meta ? `<span class="mono">${esc(meta)}</span>.` : ""}`;
+      }
+      // Whole rows routinely tie at the same percentage — they are reached by the
+      // same holdings. Calling the first one "the strongest" would invent a
+      // ranking the number does not support.
+      const tied = [...table.querySelectorAll("tr")]
+        .filter(r => ((r.querySelector(".num") || {}).textContent || "") === pct).length;
+      const noun = kind === "supplier" ? "supplier" : "customer";
+      const framing = tied > 1
+        ? `<b>${tied}</b> companies tie at the top of what your book ${kind === "supplier"
+             ? "depends on" : "sells into"} — <b>${esc(who)}</b> among them — each sitting
+           behind <b>${esc(pct)}</b> of it. They tie because the same holdings reach all
+           of them, which is itself the finding: that is one dependency wearing
+           ${tied} names, not ${tied} separate ones.`
+        : kind === "supplier"
+          ? `The strongest shared <i>supplier</i> under your book is <b>${esc(who)}</b>,
+             sitting behind <b>${esc(pct)}</b> of it — concentration you did not pick
+             and may not own.`
+          : `Nothing in your book shares a supplier, so this is the other table: the
+             strongest shared <i>${noun}</i> is <b>${esc(who)}</b>, with <b>${esc(pct)}</b>
+             of your book selling into it.`;
+      return `${framing}
+        ${meta ? `<span class="mono">${esc(meta)}</span>.` : ""}
+        Now the part that is easy to over-read, so read it twice:
+        <b>this is graph structure, not revenue.</b> "${esc(pct)} of your book" means
+        holdings worth that share of your money sit that many hops away from
+        ${esc(who)} on a hand-drawn map. It does not mean that share of your money
+        commercially depends on it, and at two or three hops the connection can be
+        thin enough to be meaningless. It is a prompt to go and check, never a finding.`;
+    } },
+
+  { title: "The field that argues with you later",
+    sel: '[data-panel="journal"]',
+    async run() {
+      document.querySelector('[data-panel="journal"]')
+        ?.scrollIntoView({ block: "center", behavior: "smooth" });
+      await walkSleep(500);
+      const r = $("j-reason");
+      if (r) { r.focus(); r.placeholder = "why — the part you'll want in eight months"; }
+      return `Last one, and it is the only part of Windrose with no maths in it.
+        Every entry wants a <b>reason</b> before it will take the trade.
+        That field is not for you today — today you know exactly why. It is for you
+        in eight months, when the position is down and memory has quietly rewritten
+        the thesis into whatever would hurt least.
+        Buys get marked to market with a running hit rate, and the panel says
+        plainly that a handful of calls is noise rather than skill. A journal that
+        flattered you would be worse than no journal.`;
+    } },
+];
+
+let WALK_I = 0;
+
+async function walkStart() {
+  tourEnd();
+  if (SET.mode !== "advanced") {
+    await saveSettings({ mode: "advanced" });
+    loadAnalysis();
+    await walkSleep(1200);
+  }
+  WALK_I = 0;
+  walkShow();
+}
+
+async function walkShow() {
+  const step = WALK[WALK_I];
+  if (!step) return walkEnd();
+  const card = $("tourcard"), box = $("tourbox");
+
+  card.style.display = "block";
+  card.className = "walk";
+  card.innerHTML = `<h4>${esc(step.title)}</h4><p class="walkwait">Working…</p>`;
+
+  const el = document.querySelector(step.sel);
+  if (el) {
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    await walkSleep(420);
+  }
+
+  let body;
+  try {
+    body = await step.run();
+  } catch (e) {
+    body = `That step could not finish — <span class="mono">${esc(String(e && e.message || e))}</span>.
+            Skip on; the rest still works.`;
+  }
+  if (WALK[WALK_I] !== step) return;    // user moved on while we were working
+
+  const t = document.querySelector(step.sel);
+  if (t) {
+    const r = t.getBoundingClientRect();
+    box.style.display = "block";
+    box.style.left = (r.left - 8) + "px"; box.style.top = (r.top - 8) + "px";
+    box.style.width = (r.width + 16) + "px"; box.style.height = (r.height + 16) + "px";
+  } else {
+    box.style.display = "none";
+  }
+
+  const last = WALK_I === WALK.length - 1;
+  card.innerHTML = `
+    <h4>${esc(step.title)}</h4><p>${body}</p>
+    <div class="trow">
+      <span class="tstep">${WALK_I + 1} / ${WALK.length}</span>
+      <button class="ghost" id="wkskip">skip</button>
+      ${WALK_I > 0 ? '<button class="ghost" id="wkback">back</button>' : ""}
+      <button id="wknext">${last ? "done" : "next"}</button>
+    </div>`;
+
+  const cw = 430, chH = 260;
+  const r2 = t ? t.getBoundingClientRect() : { right: 20, top: 90, left: 20, bottom: 300 };
+  let cx = r2.right + 18, cy = r2.top;
+  if (cx + cw > innerWidth - 12) { cx = Math.min(Math.max(12, r2.left), innerWidth - cw - 12); cy = r2.bottom + 14; }
+  if (cy + chH > innerHeight - 12) cy = Math.max(12, innerHeight - chH - 14);
+  card.style.left = cx + "px"; card.style.top = Math.max(12, cy) + "px";
+
+  $("wknext").addEventListener("click", () => {
+    if (last) return walkEnd();
+    WALK_I++; walkShow();
+  });
+  $("wkskip").addEventListener("click", walkEnd);
+  const bk = $("wkback");
+  if (bk) bk.addEventListener("click", () => { WALK_I--; walkShow(); });
+}
+
+function walkEnd() {
+  const card = $("tourcard");
+  $("tourbox").style.display = "none";
+  card.style.display = "none";
+  card.className = "";
+  CH.path = null; CH.pathEdges = null;
+  if (typeof chainDraw === "function") chainDraw();
+  fetch("/api/tutorial/seen", { method: "POST" }).catch(() => {});
+}
+window.walkStart = walkStart;
+
+/* ======================================================================== */
 /*  WINDROSE v4 — experience mode, personalisation, keyboard                */
 /* ======================================================================== */
 
@@ -2566,6 +2969,7 @@ async function saveSettings(patch) {
 
 function applySettings() {
   const b = document.body;
+  document.documentElement.dataset.cbsafe = SET.cbsafe ? "1" : "0";
   b.dataset.mode = SET.mode || "advanced";
   b.dataset.density = SET.density || "comfortable";
   document.documentElement.style.setProperty("--accent", SET.accent);
@@ -2786,6 +3190,30 @@ function showSettings() {
       <h3>Settings</h3>
       <p class="lede">All of this is stored on this machine, in settings.json.</p>
 
+      <div class="setrow col">
+        <div class="lab"><b>Layout presets</b>
+          <span>A starting arrangement for what you're doing right now. You can
+                still drag panels afterwards.</span></div>
+        <div class="presets">
+          ${Object.entries(PRESETS).map(([k, p]) => `
+            <button class="presetcard${SET.preset === k ? " on" : ""}" data-preset="${k}">
+              <span class="pt">${p.label}</span>
+              <span class="pb">${p.blurb}</span>
+            </button>`).join("")}
+        </div>
+      </div>
+
+      <div class="setrow">
+        <div class="lab"><b>Colour-blind safe</b>
+          <span>Gains and losses in blue and orange instead of green and red.
+                Around one man in twelve cannot separate red from green reliably,
+                and here that pairing carries the meaning.</span></div>
+        <div class="seg" id="setcb">
+          <button data-cb="0" class="${SET.cbsafe ? "" : "on"}">Green / red</button>
+          <button data-cb="1" class="${SET.cbsafe ? "on" : ""}">Blue / orange</button>
+        </div>
+      </div>
+
       <div class="setrow">
         <div class="lab"><b>Something wrong?</b>
           <span>Opens a GitHub issue with your version and platform filled in —
@@ -2848,6 +3276,14 @@ function showSettings() {
         <div class="lab"><b>Replay the tour</b><span>The guided walkthrough of every panel.</span></div>
         <button class="anlz" id="setretour">Start</button>
       </div>
+
+      <div class="setrow">
+        <div class="lab"><b>Advanced walkthrough</b>
+          <span>The longer one. Runs the models on your own book rather than
+                describing them — reverse DCF, a traced route across the map,
+                your chokepoints. Skippable at any step.</span></div>
+        <button class="anlz" id="setwalk">Start</button>
+      </div>
     </div>`;
   el.style.display = "flex";
 
@@ -2878,12 +3314,24 @@ function showSettings() {
     cb.checked ? hidden.delete(p) : hidden.add(p);
     saveSettings({ hidden: [...hidden] });
   }));
+  el.querySelectorAll("[data-preset]").forEach(b =>
+    b.addEventListener("click", () => applyPreset(b.dataset.preset)));
+  el.querySelectorAll("[data-cb]").forEach(b =>
+    b.addEventListener("click", async () => {
+      SET.cbsafe = b.dataset.cb === "1";
+      await saveSettings({ cbsafe: SET.cbsafe });
+      applySettings();
+      showSettings();
+      drawSparklines(); drawCharts();
+    }));
   const rep = $("setreport");
   if (rep) rep.addEventListener("click", reportProblem);
   $("setclose").addEventListener("click", () => { el.style.display = "none"; });
   el.addEventListener("click", e => { if (e.target === el) el.style.display = "none"; });
   $("setshortcuts").addEventListener("click", () => { el.style.display = "none"; showShortcuts(); });
   $("setretour").addEventListener("click", () => { el.style.display = "none"; tourStart(); });
+  $("setwalk").addEventListener("click", () => { el.style.display = "none"; walkStart(); });
+
 }
 
 /* ---------- keyboard ------------------------------------------------------ */

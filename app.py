@@ -771,6 +771,8 @@ DEFAULT_SETTINGS = {
     # anyone who set it to false was asking for.
     "auto_update": True,
     "desktop_notifications": True,   # OS popups when no browser tab is open
+    "cbsafe": False,         # blue/orange instead of green/red for gains and losses
+    "preset": "",            # last-applied layout preset, for the settings UI
 }
 
 
@@ -910,9 +912,13 @@ def api_diagnostics():
     is a yes/no; the key itself never leaves the machine.
     """
     import platform, sys as _sys
+    import updater
     s = load_settings()
     holdings = load_holdings()
     return jsonify({
+        # Which fork is running is itself a fact needed to reproduce a bug, and
+        # it is what points the Report button at the right issue tracker.
+        "repo": updater.REPO,
         "version": APP_VERSION,
         "python": platform.python_version(),
         "platform": f"{platform.system()} {platform.release()} ({platform.machine()})",

@@ -617,6 +617,13 @@ body.layout-edit .zone { outline: 1px dashed var(--line-soft); border-radius: 10
   font-size: 12.5px; padding: 6px 13px; border-radius: 7px; cursor: pointer; }
 #tourcard button.ghost { background: none; border-color: var(--line); color: var(--text-dim); }
 
+/* the advanced walkthrough reuses the tour chrome, but it quotes real numbers
+   back and needs the room to do it */
+#tourcard.walk { width: 430px; }
+#tourcard.walk p { max-height: 46vh; overflow-y: auto; }
+#tourcard.walk .mono { font-family: var(--mono); font-size: 12px; color: var(--text); }
+#tourcard.walk .walkwait { color: var(--text-dim); font-style: italic; }
+
 .chaincanvas.max { height: 86vh !important; }
 #chainmax.on { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
 
@@ -915,3 +922,91 @@ body.solo .panel.soloed .chaincanvas { height: calc(100vh - 210px) !important; }
   .keyfields { flex-direction: column; }
   .wnav { flex-wrap: wrap; }
 }
+
+/* ==========================================================================
+   THEMES
+   An investing console is stared at for an hour at a time, so these are about
+   legibility before looks. Every pairing below is contrast-checked.
+   ========================================================================== */
+
+/* Midnight — cool deep navy. Lower blue-light glare than graphite for evenings. */
+html[data-theme="midnight"] {
+  --ink: #070B14; --panel: #0D1424; --panel-2: #121B2F;
+  --line: #1E2A42; --line-soft: #162135;
+  --text: #E4ECF8; --text-2: #93A3BE; --text-dim: #55647E;
+  --up: #3FBF8F; --up-bg: rgba(63,191,143,.14);
+  --down: #E3606B; --down-bg: rgba(227,96,107,.14);
+  --accent: #5B9BFF; --accent-dim: rgba(91,155,255,.15);
+  --warn: #D7A94B; --warn-bg: rgba(215,169,75,.12);
+}
+html[data-theme="midnight"] .topbar { background: linear-gradient(180deg, #0C1322, #090F1B); }
+
+/* Terminal — the old trading-floor look. Phosphor on black, mono-forward. */
+html[data-theme="terminal"] {
+  --ink: #000000; --panel: #070907; --panel-2: #0C110C;
+  --line: #172117; --line-soft: #101810;
+  --text: #C8F5C8; --text-2: #7FC98A; --text-dim: #4A7A52;
+  --up: #46E08A; --up-bg: rgba(70,224,138,.14);
+  --down: #FF6B5E; --down-bg: rgba(255,107,94,.14);
+  --accent: #46E08A; --accent-dim: rgba(70,224,138,.14);
+  --warn: #E8C15A; --warn-bg: rgba(232,193,90,.12);
+}
+html[data-theme="terminal"] .topbar { background: #050705; }
+html[data-theme="terminal"] body, html[data-theme="terminal"] .panel { font-family: var(--mono); }
+html[data-theme="terminal"] h2 { letter-spacing: .12em; }
+
+/* Sepia — warm light. Stark white is punishing over long reading sessions. */
+html[data-theme="sepia"] {
+  --ink: #F4EDE0; --panel: #FBF6EC; --panel-2: #F1E8D8;
+  --line: #DCCEB6; --line-soft: #E8DCC8;
+  --text: #2E2823; --text-2: #6B5F50; --text-dim: #9A8B77;
+  --up: #2E7D52; --up-bg: rgba(46,125,82,.12);
+  --down: #B4404A; --down-bg: rgba(180,64,74,.12);
+  --accent: #A8541C; --accent-dim: rgba(168,84,28,.12);
+  --warn: #8A6516; --warn-bg: rgba(138,101,22,.12);
+}
+html[data-theme="sepia"] .topbar { background: #F8F1E4; }
+html[data-theme="sepia"] .card, html[data-theme="sepia"] .scard { box-shadow: 0 1px 3px rgba(46,40,35,.07); }
+
+/* High contrast — for low vision, glare, or a screen in direct sunlight.
+   Pure black and white, heavier borders, no low-contrast dim text. */
+html[data-theme="contrast"] {
+  --ink: #000000; --panel: #0A0A0A; --panel-2: #141414;
+  --line: #5A5A5A; --line-soft: #3A3A3A;
+  --text: #FFFFFF; --text-2: #E0E0E0; --text-dim: #B8B8B8;
+  --up: #4DE38A; --up-bg: rgba(77,227,138,.20);
+  --down: #FF7A7A; --down-bg: rgba(255,122,122,.20);
+  --accent: #FFC24D; --accent-dim: rgba(255,194,77,.22);
+  --warn: #FFD966; --warn-bg: rgba(255,217,102,.18);
+}
+html[data-theme="contrast"] .panel { border-width: 2px; }
+html[data-theme="contrast"] .topbar { background: #000; border-bottom: 2px solid var(--line); }
+html[data-theme="contrast"] .meta, html[data-theme="contrast"] .lede { color: var(--text-2); }
+
+/* --------------------------------------------------------------------------
+   Colour-blind safe gains and losses.
+   Roughly one man in twelve cannot reliably separate red from green, and in
+   this app that pairing carries the meaning. This swaps them for blue/orange,
+   which stays distinguishable under every common form of colour blindness.
+   Independent of the theme — it works with all of them.
+   -------------------------------------------------------------------------- */
+html[data-cbsafe="1"] {
+  --up: #3D8FD9; --up-bg: rgba(61,143,217,.16);
+  --down: #E08214; --down-bg: rgba(224,130,20,.16);
+}
+html[data-cbsafe="1"][data-theme="sepia"],
+html[data-cbsafe="1"][data-theme="paper"] {
+  --up: #1F6FB8; --up-bg: rgba(31,111,184,.13);
+  --down: #B3620A; --down-bg: rgba(179,98,10,.13);
+}
+
+/* presets + colourblind row */
+.setrow.col { display: block; }
+.presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 9px; margin-top: 11px; }
+.presetcard { text-align: left; background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 11px 13px; cursor: pointer; display: block; }
+.presetcard:hover { border-color: var(--accent); }
+.presetcard.on { border-color: var(--accent); background: var(--accent-dim); }
+.presetcard .pt { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.presetcard .pb { display: block; font-size: 11.5px; line-height: 1.45; color: var(--text-dim); }
