@@ -8,7 +8,13 @@ It is deliberately **view-only**. Windrose cannot place a trade, and it never
 tells you what to buy. It shows you what you own, how it actually behaves
 together, and where it sits in the wider economy — then gets out of the way.
 
-![The Windrose dashboard](docs/screenshot.png)
+![What your book rests on: shared suppliers and shared customers underneath five semiconductor holdings](docs/chokepoints.png)
+
+Five holdings, five tickers, one industry — and underneath them, companies
+nobody in the book owns. Once each link is discounted for distance and for what
+the map can actually show about it, 60% of this book's value sits behind TSMC,
+with Cadence, Applied Materials and Lam Research behind it. Correlation only
+tells you that after it has cost you something.
 
 Stuck, or something looks wrong? [Open an issue](https://github.com/Shaw54-eagle/windrose/issues),
 or use **Report a problem** in Settings (⚙) — it fills in your version and
@@ -84,6 +90,8 @@ immediately if you pasted the wrong thing:
 
 ## What's in it
 
+![The Windrose dashboard: holdings, portfolio risk and the SPY comparison](docs/screenshot.png)
+
 **Holdings** — live prices, day moves, P/L against your cost. Zero shares means
 watch-only: full analysis, no effect on portfolio math. Add an acquired date and
 it unlocks dividend-included returns and an exact index comparison.
@@ -127,8 +135,14 @@ market with a running hit rate, and an honest note that a handful of decisions
 is noise, not skill.
 
 Plus: an editable ticker strip that follows you down the page, per-holding news
-dropdowns, a drag-anywhere panel layout, three themes, CSV export, and a guided
-tour on first run.
+dropdowns, a drag-anywhere panel layout, five layout presets, CSV export, and a
+guided tour on first run.
+
+**Themes** — six, plus an Auto setting that follows your system between light
+and dark, and a separate colour-blind safe toggle that swaps gain/loss green and
+red for blue and orange. The same panel in four of them:
+
+![The holdings panel in the graphite, midnight, terminal and sepia themes](docs/themes.png)
 
 ---
 
