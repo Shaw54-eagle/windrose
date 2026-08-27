@@ -1560,16 +1560,20 @@ async function loadChokepoints() {
       return;
     }
     const meta = $("cpmeta");
-    if (meta) meta.textContent = `${d.mapped.length} of ${d.mapped.length + d.unmapped.length} holdings mapped · within ${d.hops} hops`;
+    if (meta) meta.textContent = `${d.mapped.length} of ${d.mapped.length + d.unmapped.length} holdings mapped · within ${d.hops} hops, discounted by distance`;
 
     const row = (x, dir) => {
       const who = x.reaches.map(r => `${esc(r.symbol)}<span class="hp">${r.hops}</span>`).join(" ");
-      const bar = Math.max(2, Math.min(100, x.weight_pct));
+      // score_pct is the weighted number — value share discounted for distance
+      // and for what the map records about each link. weight_pct is the raw
+      // reach it is discounted from, kept so the two can be told apart.
+      const pct = x.score_pct != null ? x.score_pct : x.weight_pct;
+      const bar = Math.max(2, Math.min(100, pct));
       return `<tr>
         <td class="l"><span class="mono">${esc(x.ticker || x.id)}</span>${x.held ? ' <span class="ownedtag">owned</span>' : ""}
           <div class="cplabel">${esc(x.label)}</div></td>
         <td class="cpbarcell"><div class="cpbar" style="width:${bar}%"></div></td>
-        <td class="num">${x.weight_pct.toFixed(0)}%</td>
+        <td class="num">${pct.toFixed(0)}%</td>
         <td class="l cpwho">${who}</td>
       </tr>`;
     };
@@ -1580,8 +1584,8 @@ async function loadChokepoints() {
       : `<div class="cpsect">${blurb}</div><div class="empty">${emptyMsg}</div>`;
 
     const basisNote = d.basis === "equal"
-      ? "Percentages are equal-weighted — prices haven't loaded yet."
-      : "Percentages are the share of your portfolio value sitting behind each company.";
+      ? "Prices haven't loaded yet, so every holding is weighted equally here."
+      : "Percentages start from the share of your portfolio value sitting behind each company.";
 
     body.innerHTML =
       table(d.downstream, "down",
@@ -1590,8 +1594,14 @@ async function loadChokepoints() {
       table(d.upstream, "up",
             "<b>What your companies depend on.</b> Shared suppliers are the concentration you did not choose — you may not own any of these.",
             "No supplier is shared by two or more of your holdings. Structurally, that is what diversification looks like.") +
-      `<div class="cpnote">${esc(basisNote)} The number beside each holding is how
-        many steps away it sits. ${esc(d.note)}</div>` +
+      `<div class="cpnote">${esc(basisNote)} That share is then discounted twice:
+        once for distance — a direct link counts in full, each further hop counts
+        half — and once for what the map records about the links themselves, where
+        a sole-source dependency a filing backs counts for more than one nobody has
+        checked. So these numbers are smaller than the share of your money that
+        merely reaches each company, deliberately: reaching something in three
+        steps down unproven links is not the same as depending on it. The number
+        beside each holding is how many steps away it sits. ${esc(d.note)}</div>` +
       (d.unmapped.length ? `<div class="cpnote">Not in the map: ${d.unmapped.map(esc).join(", ")} —
         add them to supply_chain.json to include them here.</div>` : "");
   } catch (e) {
@@ -2728,11 +2738,13 @@ const WALK = [
       return `${framing}
         ${meta ? `<span class="mono">${esc(meta)}</span>.` : ""}
         Now the part that is easy to over-read, so read it twice:
-        <b>this is graph structure, not revenue.</b> "${esc(pct)} of your book" means
-        holdings worth that share of your money sit that many hops away from
-        ${esc(who)} on a hand-drawn map. It does not mean that share of your money
-        commercially depends on it, and at two or three hops the connection can be
-        thin enough to be meaningless. It is a prompt to go and check, never a finding.`;
+        <b>this is graph structure, not revenue.</b> ${esc(pct)} is the share of your
+        money sitting behind <b>${esc(who)}</b> after two discounts — one for distance,
+        so a direct link counts in full and each hop further out counts half, and one
+        for what the map records about the links, so a sole-source dependency backed
+        by a filing counts more than one nobody has checked. It is still a hand-drawn
+        map, and it still does not mean that share of your money commercially depends
+        on ${esc(who)}. It is a prompt to go and check, never a finding.`;
     } },
 
   { title: "The field that argues with you later",

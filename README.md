@@ -154,7 +154,12 @@ something.
 
 It walks the supply-chain map outward from each holding and reports every
 company two or more of them reach, weighted by how much of your portfolio value
-sits behind it. Both directions matter:
+sits behind it — then discounted twice, because reach on its own ranks noise at
+the top. A direct link counts in full and each further hop counts half, so a
+company three steps away counts a quarter of one you buy from directly. And
+where the map records what a link actually is, that counts too: a sole-source
+dependency with a filing behind it weighs more than one nobody has checked.
+Both directions matter:
 
 - **Downstream — who your companies sell to.** Shared customers are demand-side
   concentration. A defence-heavy book can show a single buyer behind 100% of its
@@ -164,9 +169,15 @@ sits behind it. Both directions matter:
 
 Read it carefully, because it is structure, not revenue. A company appearing
 behind 70% of your book means the things you own sit downstream of it — not
-that 70% of your money depends on it. Hops are graph distance, not importance:
-this cannot tell a sole-source supplier from a commodity vendor. And the map is
-hand-curated, so a missing link may be a gap rather than independence.
+that 70% of your money depends on it. And the map is hand-curated, so a missing
+link may be a gap rather than independence.
+
+The weighting can only use what the map records, which today is thin: 2 of 529
+edges carry a criticality rating. Distance does nearly all the work for now, and
+a company whose importance the map has not recorded — ASML is the honest example
+— ranks on its distance from your book alone. Verifying an edge is what changes
+that, which is what [`docs/SCHEMA.md`](docs/SCHEMA.md) and `tools/evidence.py`
+exist for.
 
 If nothing is shared, that is a real result too — structurally, that is what
 diversification looks like.

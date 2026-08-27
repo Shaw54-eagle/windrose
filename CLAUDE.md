@@ -158,12 +158,28 @@ Cleared since this list was written:
 **1. Verify `start.bat` on Windows.** It honours `WINDROSE_PORT` now, but the
 change is code-verified only and has never been executed. Acer's job.
 
-**2. Decide whether 3 hops is too generous for chokepoints.** Building the
-walkthrough surfaced this: a book of AAPL/NVDA/XOM reports twelve suppliers all
-tied at 61%, and reaches AMC Theatres downstream. Not wrong — they genuinely sit
-within three hops — but a tie that wide is closer to noise than signal. The
-walkthrough now says "one dependency wearing twelve names" rather than picking a
-fake winner, which is honest but treats the symptom.
+**2. Verify enough of the map for criticality to matter.** The 3-hop question
+is answered — three hops is fine now that distance costs something. Chokepoint
+ranking weights each holding's share by `HOP_DECAY ** (hops - 1)` (0.5, so a
+three-hop link counts a quarter of a direct one) and by the weakest link's
+recorded criticality. Ties are gone: the semis demo book now ranks TSMC first at
+60% and AMC Theatres eighth at 28%, where before AMC led at 100% above a
+four-way tie at 81%.
+
+What is *not* fixed is the data. Criticality sits on 2 of 529 edges, so it moves
+almost nothing today — on the demo book it is worth +2.9pp to TSMC and changes no
+ranks at all. The visible cost: **ASML ranks ninth**, below Teradyne and Arm,
+because it sits two hops out and nothing in the map records that it is the sole
+EUV source. The scorer is not wrong; the map is silent. Marking `ASML>TSM`
+sole-source with a filing lifts it to sixth, and assessing the `TSM>` links as
+well lifts it to fifth — so verification is the fix, and `tools/evidence.py` is
+how. Until then this panel ranks on distance and is honest about it.
+
+One consequence worth knowing before verifying anything: a path is scored by its
+**weakest** link, so verifying one deep edge pays almost nothing while the links
+in front of it are unassessed. Verify whole paths outward from a holding, not
+famous edges in isolation. If that proves too strict in practice, the combining
+rule (`min` in `_reachable`) is the one line to revisit.
 
 ## Before you finish anything
 
