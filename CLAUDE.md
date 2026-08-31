@@ -216,6 +216,7 @@ rule (`min` in `_reachable`) is the one line to revisit.
     python3 tests/wizt.py                # 16 checks: setup wizard, both branches
     python3 tests/final47.py             # 13 checks — needs a server already up
     python3 tests/walk.py                # 62 checks: the advanced walkthrough
+    python3 tests/layout.py              # 50 checks: columns, density, charts
     git diff --stat                      # read it
 
 The suites restore your holdings, journal, alerts, settings and `.env` when they

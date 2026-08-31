@@ -12,9 +12,41 @@ internal state instead.
     python3 tests/wizt.py      # 16 checks: the setup wizard, both branches
     python3 tests/final47.py   # 13 checks: solo, notifications, updater, feedback
     python3 tests/walk.py      # 62 checks: the advanced walkthrough, book and no book
+    python3 tests/layout.py    # 50 checks: wide-screen columns, dense, panel charts
 
-`final47.py` drives a server you already have running; the other three start
-their own on port 7070.
+`final47.py` drives a server you already have running; the others start their
+own on port 7070.
+
+## What `layout.py` is really guarding
+
+The column engine gives a wide monitor three or four columns instead of two, and
+the arrangement is saved. Those two facts fight each other: the moment the
+window can change how many columns exist, it can also quietly rewrite what the
+user arranged. The rule is that it must not — resizing re-derives the screen
+from the saved plan, and only a drag writes to disk.
+
+That promise is invisible. Nothing on screen looks wrong when it breaks; you
+find out weeks later that a layout you set up on the big monitor came back
+flattened. So the suite walks the viewport across every breakpoint and back and
+asserts the stored plan is byte-identical afterwards, drags a panel at four
+columns and checks it is still there after a round trip through two, and opens a
+four-column layout at laptop width to check nothing was dropped on the way in.
+
+It also pins two things that were already broken when the columns went in, both
+found by writing these checks rather than by looking at the screen:
+
+- **Presets moved nothing.** `applyPreset` wrote `windrose-layout2`; the layout
+  engine read `ledger-layout2`. Choosing a preset hid the right panels — which
+  looked like it had worked — and moved none of them.
+- **The holdings table painted outside its panel.** Nine nowrap columns fit
+  fine in half a window and not in a quarter of one. The check is that no panel
+  scrolls wider than its own box, at both densities, at four columns.
+
+The density numbers it prints (page height, risk panel, table row) are measured
+on a fresh load per density, not by toggling. Toggling leaves the sparklines at
+their old pixel size, which holds the table rows tall and understates the
+change — that was a real bug, caught by this measurement disagreeing with what
+the screenshots showed.
 
 ## They are safe to run against a live install
 
