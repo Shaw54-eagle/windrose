@@ -65,14 +65,116 @@ const PRESETS = {
   },
 };
 
+/* The saved layout is an ordered list of columns plus a full-width row:
+   {cols: [[...ids], [...ids]], full: [...ids]}. It is stored at whatever
+   column count it was arranged in and is never rewritten by a resize —
+   fitPlan() adapts it to the window on the way to the screen, folding columns
+   together when there is no room and splitting them apart when there is. Both
+   directions are pure, so widening a window undoes narrowing it exactly, and
+   a layout saved on a 27" monitor still opens on a laptop with everything in
+   it. Only a drag writes to disk. */
+const LAYOUT_KEY = "windrose-layout3";
+let LAYOUT_COLS = 0;          // columns currently on screen
+
+/* 3 columns past ~1600px, 4 past ~2100px. Two is the floor on a laptop and one
+   on a phone. Ordered widest-first; the first match wins. */
+const COL_BREAKS = [[2100, 4], [1600, 3], [1000, 2], [0, 1]];
+
+const DEF_PLAN = {
+  cols: [["holdings", "benchmark", "alerts", "journal"], ["risk", "sandbox"]],
+  full: ["chokepoints", "perholding", "workbench", "chain"],
+};
+
+function colCount(w) {
+  w = w == null ? window.innerWidth : w;
+  for (const [min, n] of COL_BREAKS) if (w >= min) return n;
+  return 1;
+}
+
+/* Roughly how tall each panel runs, from data-weight in the template. Used
+   only to decide where to split a column — a wrong number costs balance, never
+   correctness. Counting panels instead was tried first and put Portfolio risk,
+   which is taller than the other three put together, alone in the fourth
+   column beside three short ones. */
+function panelWeight(id) {
+  const el = document.querySelector(`.panel[data-panel="${id}"]`);
+  const w = el && parseFloat(el.dataset.weight);
+  return w > 0 ? w : 4;
+}
+const colWeight = (ids) => ids.reduce((t, id) => t + panelWeight(id), 0);
+
+/* Adapt a saved column list to n columns without mutating it.
+   Too many columns for the window: column i folds into column i % n, so
+   nothing is hidden and the fold is reversible. Too few: the heaviest column
+   splits at its most even point, repeatedly, until every column is used — an
+   empty column on a wide monitor is the thing this whole change exists to
+   remove. Weights are declared rather than measured so that the same window
+   width always produces the same arrangement, before and after the data
+   arrives. */
+function fitPlan(cols, n) {
+  const out = (cols || []).map(c => c.slice()).filter(c => c.length);
+  if (!out.length) return Array.from({ length: n }, () => []);
+  while (out.length > n) {
+    const tail = out.pop();
+    out[out.length % n].push(...tail);
+  }
+  while (out.length < n) {
+    let bi = -1, best = 0;
+    out.forEach((c, i) => {
+      const w = c.length > 1 ? colWeight(c) : 0;   // a lone panel cannot split
+      if (w > best) { best = w; bi = i; }
+    });
+    if (bi < 0) break;                       // nothing left worth splitting
+    const col = out[bi];
+    let run = 0, cut = 1, bestGap = Infinity;
+    for (let k = 0; k < col.length - 1; k++) {
+      run += panelWeight(col[k]);
+      const gap = Math.abs(best - 2 * run);  // |rest - head|, minimised
+      if (gap < bestGap) { bestGap = gap; cut = k + 1; }
+    }
+    out.splice(bi + 1, 0, col.slice(cut));
+    out[bi] = col.slice(0, cut);
+  }
+  while (out.length < n) out.push([]);       // genuinely fewer panels than columns
+  return out;
+}
+
+// localStorage is editable by hand and survives version changes, so nothing
+// out of it is trusted to be the shape it was written in.
+const idList = (v) => (Array.isArray(v) ? v.filter(x => typeof x === "string") : []);
+
+function loadPlan() {
+  try {
+    const p = JSON.parse(localStorage.getItem(LAYOUT_KEY) || "null");
+    if (p && Array.isArray(p.cols)) {
+      return { cols: p.cols.map(idList).filter(c => c.length), full: idList(p.full) };
+    }
+  } catch (e) {}
+  // pre-v5.6 shape, under both keys it was ever written to
+  for (const k of ["ledger-layout2", "windrose-layout2"]) {
+    try {
+      const o = JSON.parse(localStorage.getItem(k) || "null");
+      if (o && Array.isArray(o.left)) {
+        return { cols: [idList(o.left), idList(o.right)].filter(c => c.length), full: idList(o.full) };
+      }
+    } catch (e) {}
+  }
+  return { cols: DEF_PLAN.cols.map(c => c.slice()), full: DEF_PLAN.full.slice() };
+}
+
 function applyPreset(name) {
   const p = PRESETS[name];
   if (!p) return;
   const all = Object.keys(PANEL_LABELS);
   const shown = [...p.left, ...p.right, ...p.full];
+  // A preset is a two-column arrangement; fitPlan splits it out again on a
+  // wide screen. It has to be written under the key the layout engine reads —
+  // this used to write "windrose-layout2" while initLayout read
+  // "ledger-layout2", so choosing a preset hid the right panels and then moved
+  // none of them.
   try {
-    localStorage.setItem("windrose-layout2",
-      JSON.stringify({ left: p.left, right: p.right, full: p.full }));
+    localStorage.setItem(LAYOUT_KEY,
+      JSON.stringify({ cols: [p.left, p.right], full: p.full }));
   } catch (e) {}
   SET.hidden = all.filter(x => !shown.includes(x));
   SET.preset = name;
@@ -195,7 +297,10 @@ function seriesChart(canvas, data, sym) {
 
 function sparkline(canvas, closes) {
   const dpr = window.devicePixelRatio || 1;
-  const W = 92, H = 26;
+  // the canvas is what sets the row height in the holdings table, so it has to
+  // shrink with the density or 11px rows sit in 26px of empty space
+  const dense = document.body.dataset.density === "dense";
+  const W = dense ? 72 : 92, H = dense ? 15 : 26;
   canvas.width = W * dpr; canvas.height = H * dpr;
   canvas.style.width = W + "px"; canvas.style.height = H + "px";
   const ctx = canvas.getContext("2d");
@@ -216,6 +321,149 @@ function sparkline(canvas, closes) {
     else ctx.lineTo(X(i), Y(v));
   });
   ctx.stroke();
+}
+
+/* ---- small panel charts -------------------------------------------------
+   Every panel that has a series behind it gets a picture of it. These reuse
+   the same 2d-canvas approach as the holdings charts rather than pulling in a
+   charting library: the app has no build step, and a line with a fill under it
+   is not worth 200KB of dependency.
+
+   All of them read their colours from CSS variables at draw time, so themes
+   and colour-blind-safe mode carry through without the charts knowing. */
+
+function miniChart(canvas, lines, opts) {
+  opts = opts || {};
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth, H = canvas.clientHeight || 80;
+  if (!W || !H) return;                       // hidden panel — nothing to size to
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  const all = [];
+  for (const l of lines) for (const v of l.values) if (v != null && isFinite(v)) all.push(v);
+  if (all.length < 2) return;
+  let lo = Math.min(...all), hi = Math.max(...all);
+  if (opts.zero != null) { lo = Math.min(lo, opts.zero); hi = Math.max(hi, opts.zero); }
+  if (hi === lo) { hi += Math.abs(hi) * 0.01 || 1; lo -= Math.abs(lo) * 0.01 || 1; }
+
+  const labels = opts.labels !== false;
+  const padT = 6, padB = 5, padL = 1, padR = labels ? 42 : 2;
+  const len = Math.max(...lines.map(l => l.values.length));
+  const X = (i) => padL + (i / Math.max(1, len - 1)) * (W - padL - padR);
+  const Y = (v) => padT + (1 - (v - lo) / (hi - lo)) * (H - padT - padB);
+
+  if (opts.zero != null) {                    // the line that means "flat"
+    ctx.strokeStyle = css("--line") || "#222938";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, Y(opts.zero)); ctx.lineTo(W - padR, Y(opts.zero)); ctx.stroke();
+  }
+
+  for (const l of lines) {
+    const xs = l.values.map((_, i) => X(i));
+    const ys = l.values.map(v => (v == null || !isFinite(v)) ? null : Y(v));
+    if (l.fill) {
+      const base = opts.zero != null ? Y(opts.zero) : H - padB;
+      ctx.beginPath();
+      let first = null, last = null;
+      for (let i = 0; i < xs.length; i++) {
+        if (ys[i] == null) continue;
+        if (first == null) { first = i; ctx.moveTo(xs[i], ys[i]); } else ctx.lineTo(xs[i], ys[i]);
+        last = i;
+      }
+      if (first != null) {
+        ctx.lineTo(xs[last], base); ctx.lineTo(xs[first], base); ctx.closePath();
+        const g = ctx.createLinearGradient(0, padT, 0, H);
+        g.addColorStop(0, l.fill); g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g; ctx.fill();
+      }
+    }
+    drawLine(ctx, xs, ys, l.color, l.width || 1.4);
+    const li = l.values.length - 1;
+    if (l.dot !== false && ys[li] != null) {
+      ctx.fillStyle = l.color;
+      ctx.beginPath(); ctx.arc(xs[li], ys[li], 2.2, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  if (labels) {
+    const f = opts.fmt || ((v) => v.toFixed(Math.abs(v) >= 100 ? 0 : 1));
+    ctx.font = "9.5px 'IBM Plex Mono', monospace";
+    ctx.fillStyle = css("--text-dim") || "#5C6476";
+    ctx.textAlign = "left";
+    ctx.fillText(f(hi), W - padR + 5, padT + 4);
+    ctx.fillText(f(lo), W - padR + 5, H - padB);
+  }
+}
+
+/* Histogram of daily portfolio returns, with the VaR and CVaR cut-offs drawn
+   on it. The bars and the numbers in the panel above come from the same array,
+   so where the marker falls is where the loss figure came from. */
+function histChart(canvas, h) {
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth, H = canvas.clientHeight || 60;
+  if (!W || !H || !h || !h.counts || !h.counts.length) return;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  const lo = h.edges[0], hi = h.edges[h.edges.length - 1];
+  if (hi <= lo) return;
+  const maxC = Math.max(...h.counts) || 1;
+  const padB = 11, padT = 3;
+  const X = (v) => ((v - lo) / (hi - lo)) * W;
+  const upC = css("--up") || "#43B37D", dnC = css("--down") || "#E5565C";
+
+  for (let i = 0; i < h.counts.length; i++) {
+    const x0 = X(h.edges[i]), x1 = X(h.edges[i + 1]);
+    const bh = (h.counts[i] / maxC) * (H - padT - padB);
+    ctx.fillStyle = h.edges[i] < 0 ? dnC : upC;
+    ctx.globalAlpha = 0.45;
+    ctx.fillRect(x0 + 0.5, H - padB - bh, Math.max(1, x1 - x0 - 1), bh);
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.font = "9.5px 'IBM Plex Mono', monospace";
+  for (const [v, lab, col] of [[h.var95_pct, "VaR95", dnC], [h.cvar95_pct, "CVaR", css("--warn") || "#D9A441"]]) {
+    if (v == null || v < lo || v > hi) continue;
+    const x = X(v);
+    ctx.strokeStyle = col; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, H - padB); ctx.stroke();
+    ctx.fillStyle = col;
+    ctx.textAlign = x < W * 0.4 ? "left" : "right";
+    ctx.fillText(lab, x + (x < W * 0.4 ? 3 : -3), padT + 8);
+  }
+  ctx.fillStyle = css("--text-dim") || "#5C6476";
+  ctx.textAlign = "left";  ctx.fillText(lo.toFixed(1) + "%", 1, H - 2);
+  ctx.textAlign = "right"; ctx.fillText(hi.toFixed(1) + "%", W - 1, H - 2);
+}
+
+/* The panel canvases repaint from whatever the last fetch left behind, so a
+   resize or a column change never needs the network. */
+let PORTF = null, BENCH = null;
+
+function drawPanelCharts() {
+  document.querySelectorAll("canvas.pchart[data-pchart]").forEach(cv => {
+    const kind = cv.dataset.pchart;
+    const sr = PORTF && PORTF.series;
+    if (kind === "equity" && sr && sr.equity) {
+      miniChart(cv, [{ values: sr.equity, color: css("--accent") || "#7C83E8", width: 1.5, fill: accentRGBA(.22) }],
+                { fmt: v => v.toFixed(1) });
+    } else if (kind === "drawdown" && sr && sr.drawdown) {
+      miniChart(cv, [{ values: sr.drawdown, color: css("--down") || "#E5565C", width: 1.2, fill: "rgba(229,86,92,.28)", dot: false }],
+                { zero: 0, fmt: v => v.toFixed(0) + "%" });
+    } else if (kind === "returns" && sr && sr.returns) {
+      histChart(cv, sr.returns);
+    } else if (kind === "bench" && BENCH && BENCH.series && BENCH.series.book) {
+      miniChart(cv, [
+        { values: BENCH.series.shadow, color: css("--warn") || "#D9A441", width: 1.2, dot: false },
+        { values: BENCH.series.book, color: css("--accent") || "#7C83E8", width: 1.5, fill: accentRGBA(.18) },
+      ], { fmt: v => (v >= 10000 ? (v / 1000).toFixed(0) + "k" : v.toFixed(0)) });
+    }
+  });
 }
 
 /* ======================= clock / status ================================== */
@@ -429,6 +677,17 @@ function drawCharts() {
   });
 }
 
+/* One repaint entry point. Canvases size themselves to their container, so
+   anything that changes a container — a resize, a column-count change, a drag,
+   soloing a panel — has to come back through here or half the panels keep
+   painting at their old width. */
+function repaintPanels() {
+  drawSparklines();
+  drawCharts();
+  drawPanelCharts();
+  if (typeof chainDraw === "function" && CH && CH.nodes) chainDraw();
+}
+
 async function addPosition() {
   const sym = $("in-sym").value.trim().toUpperCase();
   if (!sym) { $("in-sym").focus(); return; }
@@ -457,6 +716,7 @@ async function loadAnalysis() {
   try { a = await (await fetch("/api/analysis")).json(); }
   catch (e) { return; }
   $("anmeta").textContent = a.generated_at ? "as of " + a.generated_at : "";
+  PORTF = a.portfolio;
   renderPortfolio(a.portfolio);
   renderStocks(a.stocks || []);
   drawCharts();
@@ -473,6 +733,7 @@ function renderPortfolio(p) {
   const corr = p.correlation || {};
   const syms = Object.keys(corr);
   const v = p.var || {};
+  const sr = p.series || {};
 
   // signature: weight vs risk-contribution paired bars
   const wrRows = (p.positions || []).map(pos => {
@@ -504,6 +765,9 @@ function renderPortfolio(p) {
     <div class="bigsub ${cls(p.total_pl_dollar)}">
       ${p.total_pl_dollar >= 0 ? "+" : ""}${fmtMoney(p.total_pl_dollar)} (${signPct(p.total_pl_pct)}) all-in
     </div>
+    ${sr.equity ? `<div class="chartlab" style="margin-top:8px"><span>book, rebased to 100 over the price window</span>
+        <span><b>${fmtNum(sr.equity[sr.equity.length - 1], 1)}</b></span></div>
+      <canvas class="pchart" data-pchart="equity"></canvas>` : ""}
 
     <div class="statgrid">
       <div class="stat"><div class="k">Effective holdings</div><div class="v">${fmtNum(c.effective_holdings, 2)} <span class="dim">/ ${c.n_positions}</span></div></div>
@@ -518,7 +782,13 @@ function renderPortfolio(p) {
     <div class="wr">${wrRows}</div>
     <div class="wr-legend"><span class="li-w"><i></i>share of value</span><span class="li-r"><i></i>share of risk</span></div>
 
+    ${sr.drawdown ? `<div class="sect advonly">Underwater — how far below the last peak</div>
+      <canvas class="pchart short advonly" data-pchart="drawdown"></canvas>` : ""}
+
     <div class="sect advonly">A bad day, in dollars</div>
+    ${sr.returns ? `<canvas class="pchart short advonly" data-pchart="returns"></canvas>
+      <div class="chartlab advonly">
+        <span>every daily move in the window · the markers are the two cut-offs below</span></div>` : ""}
     <div class="varblock advonly">
       <div class="varcell"><div class="k">1-in-20 day (hist. VaR 95)</div><div class="v down">−${fmtMoney(v.hist_95_dollar)}</div><div class="s">${fmtNum(v.hist_95_pct, 1)}% · from actual returns</div></div>
       <div class="varcell"><div class="k">Average of those days (CVaR)</div><div class="v down">−${fmtMoney(v.cvar_95_dollar)}</div><div class="s">${fmtNum(v.cvar_95_pct, 1)}% · expected shortfall</div></div>
@@ -529,6 +799,8 @@ function renderPortfolio(p) {
     <div class="riskread advonly">${p.risk_read || ""}</div>
     <div class="riskread simpleonly">${p.risk_read_plain || p.risk_read || ""}</div>
     ${corrHtml}`;
+
+  drawPanelCharts();
 }
 
 function renderStocks(stocks) {
@@ -660,7 +932,7 @@ $("addbtn").addEventListener("click", addPosition);
 let resizeTimer;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => { drawSparklines(); drawCharts(); }, 150);
+  resizeTimer = setTimeout(() => { drawSparklines(); drawCharts(); drawPanelCharts(); }, 150);
 });
 
 (async function init() {
@@ -1082,41 +1354,81 @@ setTimeout(() => mwSwitch("rdcf"), 400);   // after holdings load
 /* ======================================================================== */
 
 function initLayout() {
-  const DEF_ZONES = {
-    left:  ["holdings", "benchmark", "alerts", "journal"],
-    right: ["risk", "sandbox"],
-    full:  ["perholding", "workbench", "chain"],
-  };
   const root = $("layout");
   root.classList.add("layoutgrid");
-  const zones = {};
-  for (const z of ["left", "right", "full"]) {
-    const d = document.createElement("div");
-    d.className = "zone"; d.dataset.zone = z;
-    root.appendChild(d); zones[z] = d;
-  }
+  const plan = loadPlan();
+  const zones = { cols: [], full: null };
 
-  let saved = null;
-  try { saved = JSON.parse(localStorage.getItem("ledger-layout2") || "null"); } catch (e) {}
-  const plan = (saved && saved.left) ? saved : DEF_ZONES;
-  const placed = new Set();
-  for (const z of ["left", "right", "full"]) {
-    for (const id of (plan[z] || [])) {
-      const p = root.querySelector(`.panel[data-panel="${id}"]`);
-      if (p) { zones[z].appendChild(p); placed.add(id); }
-    }
-  }
-  // anything new/unplanned falls into its default zone
-  root.querySelectorAll(":scope > .panel").forEach(p => {
-    const z = Object.keys(DEF_ZONES).find(k => DEF_ZONES[k].includes(p.dataset.panel)) || "full";
-    zones[z].appendChild(p);
+  // A panel the saved plan has never heard of — one added by an upgrade —
+  // joins its declared home rather than disappearing.
+  const adopt = () => {
+    const named = new Set([...plan.cols.flat(), ...plan.full]);
+    root.querySelectorAll(".panel[data-panel]").forEach(p => {
+      const id = p.dataset.panel;
+      if (named.has(id)) return;
+      named.add(id);
+      const home = p.dataset.defcol || "full";
+      if (home === "full") plan.full.push(id);
+      else if (!plan.cols.length) plan.cols.push([id]);
+      else if (home === "right" && plan.cols.length > 1) plan.cols[1].push(id);
+      else plan.cols[0].push(id);
+    });
+  };
+
+  const render = (n) => {
+    adopt();
+    const cols = fitPlan(plan.cols, n);
+    const frag = document.createDocumentFragment();
+    const made = [];
+    const take = (id) => root.querySelector(`.panel[data-panel="${id}"]`);
+
+    cols.forEach((ids, i) => {
+      const d = document.createElement("div");
+      d.className = "zone";
+      d.dataset.zone = "c" + i;
+      ids.forEach(id => { const p = take(id); if (p) d.appendChild(p); });
+      frag.appendChild(d);
+      made.push(d);
+    });
+    const f = document.createElement("div");
+    f.className = "zone";
+    f.dataset.zone = "full";
+    plan.full.forEach(id => { const p = take(id); if (p) f.appendChild(p); });
+    frag.appendChild(f);
+
+    // the old wrappers are empty by now — every panel has been moved out
+    root.querySelectorAll(":scope > .zone").forEach(z => z.remove());
+    root.appendChild(frag);
+    root.dataset.cols = n;
+    zones.cols = made;
+    zones.full = f;
+    LAYOUT_COLS = n;
+  };
+
+  render(colCount());
+
+  // Resizing never edits the plan: it re-derives the screen from it. Crossing
+  // a breakpoint back and forth leaves what was saved exactly as it was.
+  let rt;
+  window.addEventListener("resize", () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => {
+      const n = colCount();
+      if (n === LAYOUT_COLS) return;
+      render(n);
+      repaintPanels();
+    }, 160);
   });
 
+  /* A drag is what you see is what you get: the columns on screen become the
+     saved columns. Rearranging at two columns therefore flattens a four-column
+     plan — which is the honest reading of "put this panel here", and the only
+     rule that never moves a panel somewhere the user did not watch it go. */
   const save = () => {
-    const out = {};
-    for (const z of ["left", "right", "full"])
-      out[z] = [...zones[z].querySelectorAll(".panel")].map(p => p.dataset.panel);
-    try { localStorage.setItem("ledger-layout2", JSON.stringify(out)); } catch (e) {}
+    plan.cols = zones.cols.map(z =>
+      [...z.querySelectorAll(":scope > .panel")].map(p => p.dataset.panel));
+    plan.full = [...zones.full.querySelectorAll(":scope > .panel")].map(p => p.dataset.panel);
+    try { localStorage.setItem(LAYOUT_KEY, JSON.stringify(plan)); } catch (e) {}
   };
   window._layoutSave = save;
 
@@ -1128,7 +1440,10 @@ function initLayout() {
     rst.style.display = on ? "" : "none";
   });
   rst.addEventListener("click", () => {
-    try { localStorage.removeItem("ledger-layout2"); } catch (e) {}
+    // clear the old keys too, or the migration below would resurrect them
+    for (const k of [LAYOUT_KEY, "ledger-layout2", "windrose-layout2"]) {
+      try { localStorage.removeItem(k); } catch (e) {}
+    }
     location.reload();
   });
 
@@ -1152,11 +1467,12 @@ function initLayout() {
   });
 
   function targetZone(e) {
-    const r = root.getBoundingClientRect();
-    const fx = (e.clientX - r.left) / r.width;
     const fr = zones.full.getBoundingClientRect();
     if (fr.height > 20 && e.clientY > fr.top - 10) return zones.full;
-    return fx < 0.5 ? zones.left : zones.right;
+    const r = root.getBoundingClientRect();
+    const n = zones.cols.length;
+    const i = Math.floor((e.clientX - r.left) / (r.width / n));
+    return zones.cols[Math.min(n - 1, Math.max(0, i))];
   }
 
   function moveGhost(e) {
@@ -1181,7 +1497,7 @@ function initLayout() {
     if (lift) lift.classList.remove("lifting");
     lift = ghost = slot = null;
     save();
-    drawSparklines(); drawCharts(); chainDraw && chainDraw();
+    repaintPanels();
   }
 }
 
@@ -1253,10 +1569,28 @@ function renderFactors() {
   if (!el) return;
   if (!FACTORS || !FACTORS.ok) { el.innerHTML = ""; return; }
   const b = FACTORS.benches || {};
+  // correlation runs -1..1, so the bar is diverging from a centre line rather
+  // than filling from the left — a corr of -0.4 and one of +0.4 are different
+  // facts and a left-filled bar would draw them the same width apart.
+  const corrBar = (c) => {
+    if (c == null) return "";
+    const w = Math.min(50, Math.abs(c) * 50);
+    return `<div class="dbar fbar"><i class="mid"></i>
+      <i class="${c >= 0 ? "acc" : "neg"}" style="left:${c >= 0 ? 50 : 50 - w}%;width:${w}%"></i></div>`;
+  };
   const row = (name, label) => b[name]
-    ? `<div class="frow"><span class="fk">${label}</span><span class="fv">β ${fmtNum(b[name].beta, 2)} · corr ${fmtNum(b[name].corr, 2)}</span></div>` : "";
+    ? `<div class="frow"><span class="fk">${label}</span><span class="fv">β ${fmtNum(b[name].beta, 2)} · corr ${fmtNum(b[name].corr, 2)}</span></div>
+       ${corrBar(b[name].corr)}` : "";
   const ita = b.ITA ? b.ITA.corr : null;
-  const sectors = (FACTORS.sectors || []).map(s =>
+  const secs = FACTORS.sectors || [];
+  // one stacked bar instead of a row of percentages to add up by eye. Shades of
+  // the accent rather than a colour per sector: the chips below carry the
+  // names, and inventing eight hues would collide with green/red meaning gains.
+  const secbar = secs.length
+    ? `<div class="secbar">${secs.map((x, i) =>
+        `<span title="${esc(x.sector)} ${fmtNum(x.weight_pct, 0)}%" style="width:${x.weight_pct}%;background:${accentRGBA(0.85 - Math.min(0.55, i * 0.11))};box-shadow:inset -1px 0 0 var(--panel)"></span>`).join("")}</div>`
+    : "";
+  const sectors = secs.map(s =>
     `<span class="chip">${s.sector} <b>${fmtNum(s.weight_pct, 0)}%</b></span>`).join("");
   const income = DIVS && DIVS.income && DIVS.income.annual_income
     ? `<div class="frow"><span class="fk">Dividend income / yr (current rates)</span><span class="fv up">$${fmtNum(DIVS.income.annual_income, 2)}</span></div>` : "";
@@ -1266,6 +1600,7 @@ function renderFactors() {
     ${row("ITA", "vs Defense (ITA)")}
     ${row("XLI", "vs Industrials (XLI)")}
     ${income}
+    ${secbar}
     <div class="sectorchips">${sectors}</div>
     ${ita != null && ita >= 0.5 ? `<div class="riskread" style="margin-top:12px">Your book moves with the defense ETF (corr ${fmtNum(ita, 2)}) far more than with the market — however many tickers it holds, it is substantially one macro trade.</div>` : ""}
   </div>`;
@@ -1280,14 +1615,20 @@ async function loadBenchmark() {
   try {
     const d = await (await fetch("/api/benchmark")).json();
     if (!d.ok) { el.innerHTML = `<div class="empty">${d.note}</div>`; return; }
+    BENCH = d;
     const t = d.totals;
     const scale = Math.max(t.book, t.shadow, t.spent) * 1.05;
+    const sr = d.series || {};
     el.innerHTML = `
       <div class="bm-hero">
         <span class="bm-big ${cls(t.book_pct)}">${signPct(t.book_pct)} <span class="bm-vs">your book</span></span>
         <span class="bm-big ${cls(t.shadow_pct)}">${signPct(t.shadow_pct)} <span class="bm-vs">SPY, same dollars</span></span>
         <span class="bm-big ${cls(t.alpha)}">${t.alpha >= 0 ? "+" : "−"}${fmtMoney(Math.abs(t.alpha))} <span class="bm-vs">the difference</span></span>
       </div>
+      ${sr.book ? `<div class="chartlab"><span><b style="color:var(--accent)">━</b> your book</span>
+          <span><b style="color:var(--warn)">━</b> the same dollars in SPY</span>
+          <span>from ${esc(sr.dates[0])}</span></div>
+        <canvas class="pchart" data-pchart="bench"></canvas>` : ""}
       <div class="bm-bars">
         <div class="brow" style="display:grid;grid-template-columns:110px 1fr 84px;gap:10px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--text-2)">
           <span>your book</span><div class="btrack" style="height:10px;background:var(--panel-2);border-radius:3px;overflow:hidden"><div style="height:100%;width:${t.book/scale*100}%;background:var(--accent);opacity:.8"></div></div><span>${fmtMoney(t.book)}</span></div>
@@ -1301,6 +1642,7 @@ async function loadBenchmark() {
           <td class="l dim" style="font-family:var(--sans)">${r.dated ? "" : "≈ no date set"}</td></tr>`).join("")}
       </table>
       <div class="riskread" style="margin-top:12px">${d.read}</div>`;
+    drawPanelCharts();
   } catch (e) {
     el.innerHTML = '<div class="empty">Benchmark unavailable.</div>';
   }
@@ -1365,22 +1707,34 @@ async function runWhatif() {
       const t = Object.entries(rc).sort((a, b) => b[1] - a[1])[0];
       return t ? `${t[0]} ${fmtNum(t[1], 0)}%` : "—";
     };
+    // Each metric is in its own unit, so the bar shows the move as a share of
+    // where the number started rather than against the other rows. Clamped at
+    // half the width: past ±50% the exact length stops meaning anything and
+    // the figure beside it is the thing to read.
+    const dbar = (a, delta, good) => {
+      if (a == null || delta == null || Math.abs(a) < 1e-9 || Math.abs(delta) < 1e-9) return "";
+      const w = Math.min(50, Math.abs(delta / a) * 100);
+      const kind = good === null ? "acc" : (good ? "pos" : "neg");
+      return `<div class="dbar"><i class="mid"></i>
+        <i class="${kind}" style="left:${delta >= 0 ? 50 : 50 - w}%;width:${w}%"></i></div>`;
+    };
     out.innerHTML = `<table class="sbtable">
-      <tr><th class="l">metric</th><th>now</th><th>hypothetical</th><th>Δ</th></tr>
+      <tr><th class="l">metric</th><th>now</th><th>hypothetical</th><th>Δ</th><th></th></tr>
       ${rows.map(([label, path, dp, lowerBetter]) => {
         const a = c.ok ? g(c, path) : null, b2 = g(h, path);
         const delta = (a != null && b2 != null) ? b2 - a : null;
-        let dCls = "";
+        let dCls = "", good = null;
         if (delta != null && lowerBetter !== null) {
-          const good = lowerBetter ? delta < 0 : delta > 0;
+          good = lowerBetter ? delta < 0 : delta > 0;
           dCls = Math.abs(delta) < 1e-9 ? "" : (good ? "pos" : "neg");
         }
         return `<tr><td class="l" style="font-family:var(--sans)">${label}</td>
           <td>${fmtNum(a, dp)}</td><td>${fmtNum(b2, dp)}</td>
-          <td class="${dCls}">${delta == null ? "—" : (delta >= 0 ? "+" : "") + fmtNum(delta, dp)}</td></tr>`;
+          <td class="${dCls}">${delta == null ? "—" : (delta >= 0 ? "+" : "") + fmtNum(delta, dp)}</td>
+          <td style="width:74px">${dbar(a, delta, good)}</td></tr>`;
       }).join("")}
       <tr><td class="l" style="font-family:var(--sans)">Top risk driver</td>
-        <td>${c.ok ? topRisk(c) : "—"}</td><td>${topRisk(h)}</td><td></td></tr>
+        <td>${c.ok ? topRisk(c) : "—"}</td><td>${topRisk(h)}</td><td></td><td></td></tr>
     </table>
     <div class="hint" style="margin-top:8px">Hypothetical only — your real holdings are untouched. When a change you like shows up here, you make it at your broker, on purpose.</div>`;
   } catch (e) {
@@ -2909,11 +3263,7 @@ function soloPanel(id) {
   try { localStorage.setItem(SOLO_KEY, id); } catch (e) {}
   window.scrollTo(0, 0);
   // canvases size themselves to their container, so nudge them after the reflow
-  setTimeout(() => {
-    if (typeof chainDraw === "function") chainDraw();
-    if (typeof drawCharts === "function") drawCharts();
-    if (typeof drawSparklines === "function") drawSparklines();
-  }, 60);
+  setTimeout(repaintPanels, 60);
 }
 
 function unsolo() {
@@ -2922,11 +3272,7 @@ function unsolo() {
   const bar = $("solobar");
   if (bar) bar.style.display = "none";
   try { localStorage.removeItem(SOLO_KEY); } catch (e) {}
-  setTimeout(() => {
-    if (typeof chainDraw === "function") chainDraw();
-    if (typeof drawCharts === "function") drawCharts();
-    if (typeof drawSparklines === "function") drawSparklines();
-  }, 60);
+  setTimeout(repaintPanels, 60);
 }
 
 function initSolo() {
@@ -2981,6 +3327,7 @@ async function saveSettings(patch) {
 
 function applySettings() {
   const b = document.body;
+  const wasDensity = b.dataset.density;
   document.documentElement.dataset.cbsafe = SET.cbsafe ? "1" : "0";
   b.dataset.mode = SET.mode || "advanced";
   b.dataset.density = SET.density || "comfortable";
@@ -3000,6 +3347,10 @@ function applySettings() {
     pill.textContent = SET.mode === "simple" ? "simple" : "advanced";
     pill.classList.toggle("simple", SET.mode === "simple");
   }
+  // Sparklines and panel charts are sized in pixels, not ems, so a density
+  // change has to redraw them — otherwise 11px rows sit in a 26px sparkline
+  // and the row never gets shorter.
+  if (wasDensity && wasDensity !== b.dataset.density) setTimeout(repaintPanels, 40);
   if (typeof chainDraw === "function" && CH && CH.nodes) chainDraw();
 }
 
@@ -3049,7 +3400,13 @@ function wizRender() {
     el.querySelectorAll("[data-pick]").forEach(c =>
       c.addEventListener("click", async () => {
         WIZ.mode = c.dataset.pick;
-        await saveSettings({ mode: WIZ.mode });
+        // Choosing Advanced on a wide monitor is itself the answer to the
+        // density question, so don't ask it again — start dense. Only on first
+        // run, and only above the three-column breakpoint; it stays one click
+        // away in settings either way.
+        const patch = { mode: WIZ.mode };
+        if (WIZ.mode === "advanced" && window.innerWidth >= 1600) patch.density = "dense";
+        await saveSettings(patch);
         WIZ.step = 2; wizRender();
       }));
     return;
@@ -3251,10 +3608,14 @@ function showSettings() {
       </div>
 
       <div class="setrow">
-        <div class="lab"><b>Density</b><span>Compact fits more on screen.</span></div>
+        <div class="lab"><b>Density</b>
+          <span>Compact fits more on screen. Dense fits a great deal more —
+                11px rows, mono figures, almost no padding. It is meant for a
+                large monitor; on a laptop it will feel tight.</span></div>
         <div class="seg" id="setdens">
           <button data-d="comfortable">Comfortable</button>
           <button data-d="compact">Compact</button>
+          <button data-d="dense">Dense</button>
         </div>
       </div>
 

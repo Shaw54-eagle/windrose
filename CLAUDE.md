@@ -52,6 +52,22 @@ refuse any request not from 127.0.0.1, so keys cannot be set over LAN access.
 must read as *unset* (`market._clean()`), or the app believes it has credentials
 and hammers the API with 401s forever. That shipped and a Windows user found it.
 
+**One layout key, and presets must write it.** The saved panel arrangement
+lives at `windrose-layout3` in localStorage — `{cols: [[ids], [ids]], full:
+[ids]}`, an ordered list of columns rather than the old left/right/full. There
+was a second key: `applyPreset` wrote `windrose-layout2` while `initLayout` read
+`ledger-layout2`, so choosing a preset hid the right panels — which looked like
+it had worked — and moved none of them. It shipped that way and nobody noticed,
+because the half that fails is invisible. `LAYOUT_KEY` is now the only name; use
+it, and read both old keys only in `loadPlan`'s migration.
+
+The other half of that rule: a resize must never write to disk. `fitPlan` adapts
+a saved plan to the window on the way to the screen — folding columns together
+when there is no room, splitting them apart when there is — and only a drag
+saves. Otherwise a layout arranged on a monitor comes back flattened from one
+session on a laptop, and the user has no way to know why. `tests/layout.py`
+exists to hold that line.
+
 **Never invoke `venv/bin/pip`.** A virtualenv bakes in its absolute path, so
 renaming the folder breaks every script in `venv/bin`. Always
 `venv/bin/python -m pip`, which uses the interpreter directly.
@@ -140,6 +156,17 @@ Cleared since this list was written:
   private state files and restores them on exit, exception, Ctrl-C and SIGTERM.
   This exists because a sweep run deleted a real KO position out of a real book.
   See `tests/README.md`.
+- **Advanced mode uses a wide screen.** Three columns past 1600px, four past
+  2100px, and no max-width cap in Advanced above 1600 — a dashboard is not a
+  reading column. A third density, `dense`, sits below compact: 11px table rows,
+  2px cell padding, mono tabular figures throughout, ~57% more page per screen
+  and 64% more of the risk panel. Nothing below 10px; the few 9.5px uppercase
+  micro-labels predate it. Advanced picked on a first run wider than 1600px
+  starts dense. Every panel with a series behind it now draws it — equity curve,
+  underwater, return histogram with the VaR cut-offs on it, book-vs-SPY — from
+  the arrays the panel's own numbers are computed from, so the picture and the
+  figure cannot disagree.
+
 - **`reportProblem` is defined.** It was referenced at `app.js:2986` and existed
   nowhere, so the Report a Problem button threw a `ReferenceError`. It now opens
   a prefilled GitHub issue built from `/api/diagnostics`, which carries no

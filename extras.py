@@ -111,6 +111,39 @@ def portfolio_income(div_rows: list[dict], holdings: list[dict]) -> dict:
 #  BENCHMARK SHADOW — same dollars into SPY, same dates
 # =========================================================================== #
 
+def _bench_series(legs, close: pd.DataFrame, b: pd.Series, points: int = 160) -> dict:
+    """The two totals as daily curves: what the book was worth, and what the
+    same dollars in SPY were worth, over the price window.
+
+    Each position joins both lines on the day it was acquired and contributes
+    nothing before it, so the two lines step up by identical dollars at
+    identical moments. That is the property worth having: every gap between
+    them is performance, never a deposit."""
+    if not legs or b.empty:
+        return {}
+    idx = b.index
+    n = len(idx)
+    spy = b.to_numpy(dtype=float)
+    book = np.zeros(n)
+    shadow = np.zeros(n)
+    for sym, shares, spent, spy_entry, e in legs:
+        if sym not in close.columns or spy_entry <= 0:
+            continue
+        px = close[sym].reindex(idx).ffill().bfill().to_numpy(dtype=float)
+        book[e:] += np.nan_to_num(px[e:] * shares)
+        shadow[e:] += spent / spy_entry * spy[e:]
+
+    step = max(1, n // points)
+    keep = list(range(0, n, step))
+    if keep[-1] != n - 1:
+        keep.append(n - 1)
+    return {
+        "dates": [str(idx[i].date()) for i in keep],
+        "book": [round(float(book[i]), 2) for i in keep],
+        "shadow": [round(float(shadow[i]), 2) for i in keep],
+    }
+
+
 def benchmark(holdings: list[dict], close: pd.DataFrame, live: dict,
               bench: str = "SPY") -> dict:
     """For each sized position: the dollars you spent, converted into SPY at
@@ -123,6 +156,7 @@ def benchmark(holdings: list[dict], close: pd.DataFrame, live: dict,
         return {"ok": False, "note": "no benchmark history"}
 
     rows, approx = [], False
+    legs = []                    # (symbol, shares, spent, spy_entry, entry_index)
     tot_cost = tot_now = tot_shadow = 0.0
     for h in holdings:
         shares = float(h.get("shares", 0))
@@ -140,12 +174,11 @@ def benchmark(holdings: list[dict], close: pd.DataFrame, live: dict,
                 ts = pd.to_datetime(acq)
                 bi = b.index.searchsorted(ts)
                 bi = min(max(bi, 0), len(b) - 1)
-                spy_entry = float(b.iloc[bi])
-                dated = True
+                spy_entry, entry_i, dated = float(b.iloc[bi]), int(bi), True
             except Exception:
-                spy_entry, dated = float(b.iloc[0]), False
+                spy_entry, entry_i, dated = float(b.iloc[0]), 0, False
         else:
-            spy_entry, dated = float(b.iloc[0]), False
+            spy_entry, entry_i, dated = float(b.iloc[0]), 0, False
         if not dated:
             approx = True
 
@@ -158,6 +191,7 @@ def benchmark(holdings: list[dict], close: pd.DataFrame, live: dict,
             "dated": dated,
         })
         tot_cost += spent; tot_now += now_val; tot_shadow += shadow
+        legs.append((sym, shares, spent, spy_entry, entry_i))
 
     if not rows:
         return {"ok": False, "note": "no sized positions with cost basis"}
@@ -165,6 +199,7 @@ def benchmark(holdings: list[dict], close: pd.DataFrame, live: dict,
     verdict = tot_now - tot_shadow
     return {
         "ok": True, "rows": rows, "approx": approx,
+        "series": _bench_series(legs, close, b),
         "totals": {
             "spent": round(tot_cost, 2), "book": round(tot_now, 2),
             "shadow": round(tot_shadow, 2), "alpha": round(verdict, 2),

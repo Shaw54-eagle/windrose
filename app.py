@@ -947,6 +947,8 @@ def api_settings():
                 s[k] = body[k]
         if s.get("mode") not in (None, "simple", "advanced"):
             s["mode"] = "advanced"
+        if s.get("density") not in ("comfortable", "compact", "dense"):
+            s["density"] = "comfortable"
         if not isinstance(s.get("hidden"), list):
             s["hidden"] = []
         save_settings(s)

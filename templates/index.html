@@ -56,9 +56,10 @@
     <div class="layout" id="layout">
 
       <!-- HOLDINGS -->
-      <section class="card panel" data-panel="holdings" data-defcol="left">
+      <section class="card panel" data-panel="holdings" data-weight="3" data-defcol="left">
         <h2><span class="drag" draggable="true" title="drag to move this panel">⠿</span> Holdings
           <a class="qlink" href="/tutorial#live">?</a> <span class="meta" id="holdmeta"></span></h2>
+        <div class="tscroll">
         <table class="hold">
           <thead>
             <tr>
@@ -70,6 +71,7 @@
             <tr><td colspan="9" class="empty">No positions yet — add one below.</td></tr>
           </tbody>
         </table>
+        </div>
         <div class="addform">
           <input class="sym" id="in-sym" placeholder="TICKER" maxlength="6" autocomplete="off">
           <input class="qty num" id="in-shares" placeholder="shares" inputmode="decimal" autocomplete="off">
@@ -81,7 +83,7 @@
       </section>
 
       <!-- PORTFOLIO RISK -->
-      <section class="card panel" data-panel="risk" data-defcol="right">
+      <section class="card panel" data-panel="risk" data-weight="8" data-defcol="right">
         <h2><span class="drag" draggable="true">⠿</span> Portfolio · Risk
           <a class="qlink" href="/tutorial#portfolio-risk">?</a> <span class="meta" id="anmeta"></span></h2>
         <div id="portfolio"><div class="empty">Add a sized position to see portfolio risk.</div></div>
@@ -89,38 +91,38 @@
       </section>
 
       <!-- BENCHMARK -->
-      <section class="card panel" data-panel="benchmark" data-defcol="left">
+      <section class="card panel" data-panel="benchmark" data-weight="4" data-defcol="left">
         <h2><span class="drag" draggable="true">⠿</span> vs SPY</h2>
         <div id="benchmark"><div class="empty">Loading…</div></div>
       </section>
 
       <!-- WHAT-IF SANDBOX -->
-      <section class="card panel" data-panel="sandbox" data-adv="1" data-defcol="right">
+      <section class="card panel" data-panel="sandbox" data-weight="3" data-adv="1" data-defcol="right">
         <h2><span class="drag" draggable="true">⠿</span> What-if <span class="meta">hypothetical only — nothing is saved</span></h2>
         <div id="sandbox"><div class="empty">Loading…</div></div>
       </section>
 
       <!-- ALERTS -->
-      <section class="card panel" data-panel="alerts" data-defcol="left">
+      <section class="card panel" data-panel="alerts" data-weight="3" data-defcol="left">
         <h2><span class="drag" draggable="true">⠿</span> Alerts <span class="meta" id="alertmeta"></span></h2>
         <div id="alertsbody"><div class="empty">Loading…</div></div>
       </section>
 
       <!-- CHOKEPOINTS -->
-      <section class="card panel" data-panel="chokepoints" data-defcol="full">
+      <section class="card panel" data-panel="chokepoints" data-weight="6" data-defcol="full">
         <h2><span class="drag" draggable="true">⠿</span> What your book rests on
           <span class="meta" id="cpmeta"></span></h2>
         <div id="chokebody"><div class="empty">Loading…</div></div>
       </section>
 
       <!-- JOURNAL -->
-      <section class="card panel" data-panel="journal" data-defcol="right">
+      <section class="card panel" data-panel="journal" data-weight="4" data-defcol="right">
         <h2><span class="drag" draggable="true">⠿</span> Decision journal <span class="meta" id="jmeta"></span></h2>
         <div id="journal"><div class="empty">Loading…</div></div>
       </section>
 
       <!-- PER-HOLDING -->
-      <section class="card panel" data-panel="perholding" data-adv="1" data-defcol="full">
+      <section class="card panel" data-panel="perholding" data-weight="7" data-adv="1" data-defcol="full">
         <h2><span class="drag" draggable="true">⠿</span> Per-holding
           <a class="qlink" href="/tutorial#perstock">?</a>
           <span class="meta scorenote">score = weighted state of trend / momentum / vs-SPY / risk / stretch — descriptive, not a recommendation</span></h2>
@@ -128,7 +130,7 @@
       </section>
 
       <!-- WORKBENCH -->
-      <section class="card panel modelcard" data-panel="workbench" data-adv="1" data-defcol="full">
+      <section class="card panel modelcard" data-panel="workbench" data-weight="7" data-adv="1" data-defcol="full">
         <h2 class="wb-title"><span class="drag" draggable="true">⠿</span> Workbench <a class="qlink" href="/tutorial#models">?</a></h2>
         <div class="modelbar">
           <div class="modeltabs" id="modeltabs">
@@ -148,7 +150,7 @@
       </section>
 
       <!-- SUPPLY CHAIN -->
-      <section class="card panel" data-panel="chain" data-defcol="full">
+      <section class="card panel" data-panel="chain" data-weight="7" data-defcol="full">
         <h2><span class="drag" draggable="true">⠿</span> Supply chain <span class="meta">arrows: supplier → customer</span></h2>
         <div class="chainbar">
           <select id="chainnet" class="themesel"></select>

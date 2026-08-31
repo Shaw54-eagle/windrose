@@ -478,6 +478,26 @@ def portfolio(holdings: list[dict], hist_close: pd.DataFrame,
     peak = np.maximum.accumulate(curve)
     port_mdd = float((curve / peak - 1).min() * 100)
 
+    # ---- the same three arrays, thinned, for the panel charts -------------
+    # Nothing new is computed here. The equity curve and the drawdown beneath
+    # it are what max_drawdown_pct is already read off, and the histogram is
+    # the distribution the historical VaR percentile is already taken from —
+    # so the picture and the number cannot disagree, which is the only reason
+    # to draw it from the same arrays rather than fetch prices again.
+    series = {}
+    if curve.size and curve[0]:
+        hist_counts, hist_edges = np.histogram(port_rets * 100, bins=29)
+        series = {
+            "equity": _thin(curve / curve[0] * 100, 150),
+            "drawdown": _thin((curve / peak - 1) * 100, 150),
+            "returns": {
+                "counts": [int(c) for c in hist_counts],
+                "edges": [round(float(e), 3) for e in hist_edges],
+                "var95_pct": _r(q05 * 100, 2),
+                "cvar95_pct": _r(cvar95 * 100, 2),
+            },
+        }
+
     risk_read = _portfolio_summary(eff_n, max_w, worst_pair, worst_corr,
                                    ewma_port_vol, beta,
                                    q05 * 100, q05 * total_val,
@@ -504,6 +524,7 @@ def portfolio(holdings: list[dict], hist_close: pd.DataFrame,
         "vol_annual_pct": _r(port_vol_annual, 1),
         "ewma_vol_pct": _r(ewma_port_vol, 1),
         "max_drawdown_pct": _r(port_mdd, 1),
+        "series": series,
         "diversification_ratio": _r(div_ratio, 2),
         "risk_contribution": contrib,
         "var": {
@@ -626,6 +647,21 @@ def chart_series(hist: pd.DataFrame, points: int = 130) -> dict:
 # --------------------------------------------------------------------------- #
 #  helpers
 # --------------------------------------------------------------------------- #
+
+def _thin(arr, n=150, ndigits=3):
+    """Evenly spaced sample of a series, last point always kept.
+
+    A canvas 300px wide cannot show 1,300 daily closes, and shipping them
+    costs more than the chart is worth. Sampling rather than averaging is
+    deliberate: every point drawn is a real observation."""
+    a = np.asarray(arr, dtype=float)
+    if a.size == 0:
+        return []
+    if a.size > n:
+        idx = np.unique(np.linspace(0, a.size - 1, n).round().astype(int))
+        a = a[idx]
+    return [None if np.isnan(v) else round(float(v), ndigits) for v in a]
+
 
 def _r(x, ndigits=2):
     try:
