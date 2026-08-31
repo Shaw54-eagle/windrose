@@ -17,7 +17,7 @@ from flask import Flask, jsonify, request, send_from_directory, redirect, Respon
 
 APP_NAME = "Windrose"
 APP_TAGLINE = "know where you actually stand"
-APP_VERSION = "5.5"
+APP_VERSION = "5.6"
 
 # 7070 is the default, but it is not always free — a Linux box running other
 # services may already own it, and the app used to die with a raw Flask error.
