@@ -22,6 +22,24 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 PYV=$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')
+# Report the version AND act on it. This used to only print, so a Mac with
+# nothing but Apple's command line tools (Python 3.9) built a venv, installed
+# everything, and failed later at something unrelated-looking. RUN-ME-mac.command
+# and selftest.py both refuse 3.9 already; this is the path that did not.
+#
+# 3.9 does in fact run Windrose — but Apple's build links against LibreSSL 2.8.3,
+# which urllib3 v2 says it does not support, and every price fetch is an HTTPS
+# request. Failing here with a sentence beats flaky network errors later.
+if ! python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)'; then
+  echo "  ✗ Python $PYV found — Windrose needs 3.10 or newer."
+  echo ""
+  echo "    If you just installed Apple's command line developer tools, that"
+  echo "    is where this 3.9 came from. It is not enough on its own."
+  echo ""
+  echo "    Install Python from https://www.python.org/downloads/, then run"
+  echo "    this again. Nothing has been changed."
+  exit 1
+fi
 echo "  ✓ Python $PYV"
 
 # ---- 2. Virtual environment ------------------------------------------------

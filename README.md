@@ -16,45 +16,66 @@ the map can actually show about it, 60% of this book's value sits behind TSMC,
 with Cadence, Applied Materials and Lam Research behind it. Correlation only
 tells you that after it has cost you something.
 
+**Before you start:** budget a few minutes, and expect two prerequisites rather
+than an installer. Windrose is not code-signed — there is no signed `.dmg` or
+`.exe` — so a downloaded copy gets blocked by Gatekeeper on macOS and SmartScreen
+on Windows before it can run at all. Installing with `git clone` sidesteps that
+completely, which is why it is the route below. You will need Python 3.10+ and,
+on a Mac, one pasted line. It goes most smoothly if you are comfortable opening
+Terminal once.
+
 Stuck, or something looks wrong? [Open an issue](https://github.com/Shaw54-eagle/windrose/issues),
 or use **Report a problem** in Settings (⚙) — it fills in your version and
 platform for you, and never includes your holdings, keys or notes.
 
 ## Start it
 
-Get the folder, then **double-click one file**:
+### macOS — one line, pasted once
 
-| Your computer | Double-click |
-| --- | --- |
-| Mac | **RUN-ME-mac.command** |
-| Windows | **RUN-ME-windows.bat** |
+First install **Python 3.10 or newer** from
+[python.org/downloads](https://www.python.org/downloads/) — download, open, click
+through. (macOS ships a Python of its own and the developer tools add another,
+but both are 3.9, which is too old. Windrose will tell you so rather than
+half-work.)
 
-That is the whole thing. It sets itself up the first time (a minute or two),
-starts the dashboard, and opens your browser. After that it just starts. To
-stop it, close the window it opened.
+Then open Terminal — press Cmd-Space, type `Terminal`, press Return — and paste
+this one line:
 
-You need **Python 3.10 or newer** — [python.org/downloads](https://www.python.org/downloads/).
-If it is missing, the launcher tells you so in plain language rather than
-failing at you. **On Windows, tick "Add python.exe to PATH"** on the installer's
-first screen; it is off by default, it is easy to miss, and nothing works
-without it.
+    git clone https://github.com/Shaw54-eagle/windrose.git ~/windrose && cd ~/windrose && bash setup.sh && bash "Start Windrose.command"
 
-### Two things that catch people out
+Press Return. The first time, macOS may offer to install the command line
+developer tools — accept it, wait for it to finish, then paste the line again.
+Setup takes a minute, then your browser opens on the dashboard.
 
-**Mac: double-clicking does nothing.** GitHub's *Download ZIP* strips the
-permission that makes a file runnable. Open Terminal, type `chmod +x ` (with a
-space), drag `RUN-ME-mac.command` into the window, press Return, then
-double-click it again. Installing with `git clone` avoids this entirely.
+That is the install. Windrose is now in a `windrose` folder in your home folder,
+and from then on you start it by double-clicking **RUN-ME-mac.command** inside it.
 
-**Mac: "cannot be opened because it is from an unidentified developer."** That
-is Gatekeeper, and it is expected — the file is not signed with an Apple
-developer certificate. Right-click (or Control-click) the file, choose **Open**,
-then **Open** again in the dialog. Once only.
+**Why a pasted line rather than a download button.** Nothing here is signed with
+an Apple developer certificate, and macOS stamps everything your browser
+downloads with a flag called `com.apple.quarantine`. The flag survives unzipping,
+and Gatekeeper then refuses to run the launcher — the dialog about an
+"unidentified developer", or a double-click that does nothing at all. `chmod +x`
+does not help, because the flag is a separate thing from the permission. A clone
+carries no flag, so nothing blocks it. That is the entire difference, and it is
+the single biggest thing that goes wrong for people installing this.
 
-On Windows, SmartScreen may show a blue "Windows protected your PC" box for the
-same reason: click **More info**, then **Run anyway**.
+### Windows
 
-### If you prefer a terminal
+Install **Python 3.10 or newer** from
+[python.org/downloads](https://www.python.org/downloads/) and **tick "Add
+python.exe to PATH"** on the installer's first screen — it is off by default, it
+is easy to miss, and nothing works without it. Install
+[git](https://git-scm.com/download/win) too.
+
+Then, in Command Prompt:
+
+    git clone https://github.com/Shaw54-eagle/windrose.git
+    cd windrose
+
+and double-click **RUN-ME-windows.bat** in that folder. Cloning avoids the mark
+of the web the same way it avoids quarantine on macOS, so SmartScreen stays quiet.
+
+### Either platform, if you would rather run the pieces yourself
 
 ```
 git clone https://github.com/Shaw54-eagle/windrose.git
@@ -63,18 +84,54 @@ bash setup.sh
 bash start.sh
 ```
 
-Also here: `Setup Windrose.command` and `Start Windrose.command` on macOS,
-`start.bat` on Windows. The RUN-ME files just wrap these with a friendlier
-first-run check — they run the same code.
+`start.sh` is the Linux/terminal launcher — on macOS use `Start Windrose.command`
+instead, which is the same thing plus opening your browser. `start.bat` is the
+Windows equivalent. The RUN-ME files just wrap these with a friendlier first-run
+check; they run the same code.
 
 Whichever route you take, it opens **http://127.0.0.1:7070** (http, not https —
 it's a local server) and a four-step wizard takes it from there: pick Simple or
 Advanced, optionally add API keys (it tests them before saving), choose whether
 to start empty or with an example book, and go.
 
-Cloning rather than downloading a zip is worth it — only a clone can tell you
-when a new version is published, and taking it is then one `git pull`. It also
-sidesteps the `chmod` problem above.
+One more reason the clone is worth it: only a clone can tell you when a new
+version is published, and taking it is then one `git pull`.
+
+### Fallback: the Download ZIP button
+
+The ZIP works, but you have to undo the download stamp yourself first. If you
+have already downloaded it and the launcher will not open, this is why — and
+this is the fix.
+
+**On a Mac.** Open Terminal (press Cmd-Space, type "Terminal"), type this much:
+
+    xattr -dr com.apple.quarantine
+
+then type a space, drag the unzipped **windrose folder** from Finder into the
+Terminal window — that fills in the path — and press Return. It clears the stamp
+from everything in the folder at once, so the app bundle and the other launchers
+work too. Then double-click **RUN-ME-mac.command**.
+
+If you would rather not use Terminal, either of these also gets you in:
+
+- Right-click (or Control-click) `RUN-ME-mac.command`, choose **Open**, then
+  **Open** again in the dialog.
+- On macOS 15 and newer that option may be missing. Double-click the file, let
+  it be refused, then open **System Settings > Privacy & Security**, scroll to
+  the bottom, and click **Open Anyway**.
+
+Both of those admit only that one file, so the next launcher you touch asks
+again. The `xattr` line above clears the whole folder once and is done. However
+you get in the first time, `RUN-ME-mac.command` notices the stamp is still there
+and offers to clear it for you.
+
+A ZIP also strips the permission that makes a file runnable, so if the launcher
+opens in TextEdit rather than running, type `chmod +x ` (with the space) in
+Terminal, drag the file in, and press Return. That and the stamp are two
+separate problems; you may need both fixes.
+
+**On Windows.** SmartScreen shows a blue "Windows protected your PC" box for the
+same reason: click **More info**, then **Run anyway**.
 
 **No API keys are required.** Out of the box Windrose runs on delayed Yahoo
 Finance quotes and every panel works. Two free keys unlock extras, and the setup

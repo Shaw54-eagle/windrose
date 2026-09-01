@@ -5,27 +5,47 @@
 #  It sets everything up the first time (a minute or two), starts the
 #  dashboard, and opens your browser. After that it just starts.
 #
-#  ── If double-clicking does nothing ──────────────────────────────────────
-#  You probably downloaded this as a ZIP. GitHub's "Download ZIP" strips the
-#  permission that makes a file runnable, and macOS then treats this as a
-#  plain text document. To fix it once, open Terminal and run:
+#  ── If macOS refuses to open this ────────────────────────────────────────
+#  "cannot be opened because it is from an unidentified developer", or the
+#  double-click does nothing at all.
 #
-#      chmod +x "/path/to/windrose/RUN-ME-mac.command"
+#  Nothing is broken and nothing is wrong with your Mac. Anything a browser
+#  downloads gets tagged com.apple.quarantine, the tag survives unzipping,
+#  and macOS will not run a tagged script that is not signed with an Apple
+#  developer certificate. `chmod +x` does NOT fix this — the tag and the
+#  permission are two separate things, and you may need both.
 #
-#  (Type chmod +x, a space, then drag this file into the Terminal window —
-#  that fills in the path for you. Press Return, then double-click again.)
+#  Clear the tag. Open Terminal (press Cmd-Space, type "Terminal"), type
+#  this much:
 #
-#  Installing with `git clone` instead avoids this entirely.
+#      xattr -dr com.apple.quarantine
 #
-#  ── If macOS says it "cannot be opened because it is from an
-#     unidentified developer" ─────────────────────────────────────────────
-#  That is Gatekeeper, and it is expected — this file is not signed with an
-#  Apple developer certificate. Right-click (or Control-click) this file,
-#  choose Open, then click Open in the dialog. You only do this once.
+#  then type a space, drag the *windrose folder* from Finder into the
+#  Terminal window — that fills in the path for you — and press Return.
+#  It clears the tag from everything in the folder at once, so the other
+#  launchers and the app bundle work too. Then double-click this again.
+#
+#  Rather not touch Terminal? Either of these also works:
+#    * Right-click (or Control-click) this file, choose Open, then Open
+#      again in the dialog.
+#    * On macOS 15 and newer that option may be missing. Double-click it,
+#      let it be refused, then open System Settings > Privacy & Security,
+#      scroll to the bottom, and click "Open Anyway".
+#
+#  None of this happens if you install with `git clone` — a clone is never
+#  tagged, so the double-click just works. That is why the README puts the
+#  clone first for macOS.
+#
+#  ── If it opens in TextEdit instead of running ───────────────────────────
+#  A downloaded ZIP also strips the permission that makes a file runnable.
+#  In Terminal, type `chmod +x ` (with the space), drag this file in, and
+#  press Return.
 # ---------------------------------------------------------------------------
 
 # A double-clicked .command starts in your home folder, not this one.
+SELF="$0"
 cd "$(dirname "$0")" || exit 1
+HERE="$(pwd)"
 
 say() { printf '%s\n' "$1"; }
 hold() { say ""; read -n 1 -s -r -p "Press any key to close this window…"; say ""; }
@@ -35,6 +55,57 @@ say "  ┌───────────────────────�
 say "  │  WINDROSE                              │"
 say "  └────────────────────────────────────────┘"
 say ""
+
+# --- The download tag, which is what actually stops most people ------------
+# If this is running at all, the tag did not stop *this* launch — the user got
+# through with right-click > Open, or ran it from Terminal. But the tag is on
+# the whole folder, so the next plain double-click fails exactly the same way,
+# and Windrose.app and the other .command files stay blocked. So: say what it
+# is, show the command, and offer to run it. Clearing it touches nothing
+# outside this folder.
+tagged() {
+  command -v xattr >/dev/null 2>&1 || return 1
+  xattr "$1" 2>/dev/null | grep -q '^com\.apple\.quarantine$'
+}
+
+if tagged "$SELF" || tagged "$HERE"; then
+  say "  First, one thing about this folder."
+  say ""
+  say "  macOS has it tagged as downloaded from the internet. That tag is"
+  say "  why double-clicking gets refused, and it is on every file here —"
+  say "  the other launchers and the app bundle are blocked by it too."
+  say ""
+  say "  Clearing it affects nothing outside this folder:"
+  say ""
+  say "      xattr -dr com.apple.quarantine \"$HERE\""
+  say ""
+  if [ -t 0 ]; then
+    printf '  Clear it now, so double-clicking works from here on? [Y/n] '
+    # Note the `if read`: on end-of-input `read` fails and leaves reply empty,
+    # which would otherwise fall through to the default and clear the tag
+    # without anyone having said yes. A non-answer is not consent.
+    if ! read -r reply; then
+      say ""
+      say "  No answer — leaving it alone. Run the line above whenever you like."
+    else
+      case "$reply" in
+        [Nn]*)
+          say "  Left as it is. Run the line above whenever you like."
+          ;;
+        *)
+          if xattr -dr com.apple.quarantine "$HERE" 2>/dev/null; then
+            say "  Cleared. Double-clicking will work from now on."
+          else
+            say "  Could not clear it — run the line above in Terminal instead."
+          fi
+          ;;
+      esac
+    fi
+  else
+    say "  Run that line in Terminal and the double-click will work."
+  fi
+  say ""
+fi
 
 # --- Python, checked in plain language before anything can fail loudly -----
 # `command -v python3` is not enough on a clean Mac: python3 exists as a stub
