@@ -476,7 +476,72 @@ async function pollStatus() {
     const m = $("mkt");
     if (s.market.open) { m.className = "mkt open"; m.textContent = "● OPEN · " + s.market.et; }
     else { m.className = "mkt closed"; m.textContent = "○ CLOSED · " + s.market.et; }
+    SOURCES = s.sources || {};
+    const list = $("setsources");          // only exists while settings is open
+    if (list) list.innerHTML = sourceRows();
   } catch (e) {}
+}
+
+/* ---------- data source health ------------------------------------------- */
+
+let SOURCES = {};
+
+const SOURCE_LABELS = {
+  "alpaca-quotes": "Alpaca quotes",
+  "alpaca-stream": "Alpaca stream",
+  "yfinance-quotes": "Yahoo quotes",
+  "yfinance-chain": "Yahoo quotes (supply map)",
+  "yfinance-history": "Yahoo daily history",
+  "yfinance-futures": "Yahoo futures & indices",
+  "yfinance-strip": "Yahoo custom strip",
+  "yfinance-outlook": "Yahoo analyst outlook",
+  "yfinance-fundamentals": "Yahoo fundamentals",
+  "yfinance-statements": "Yahoo statements",
+  "yfinance-spark": "Yahoo 30-day spark",
+  "yfinance-dividends": "Yahoo dividends",
+  "finnhub-news": "Finnhub news",
+  "finnhub-peers": "Finnhub peers",
+};
+
+function agoText(ts) {
+  if (!ts) return "never";
+  const s = Math.max(0, Math.round(Date.now() / 1000 - ts));
+  // floor, not round — rounding renders "60m ago" and "24h ago" just under
+  // each boundary, which reads as a broken clock.
+  if (s < 60) return s + "s ago";
+  if (s < 3600) return Math.floor(s / 60) + "m ago";
+  if (s < 86400) return Math.floor(s / 3600) + "h ago";
+  return Math.floor(s / 86400) + "d ago";
+}
+
+// A source only appears once something has actually asked it for data. The
+// empty case used to say nothing had been requested yet — which is a claim
+// about the app's behaviour, and it was wrong on exactly the install where it
+// mattered: a broken yfinance reports nothing, so every fetch had already run
+// and failed. Say what is known instead, which is nothing.
+function sourceRows() {
+  const keys = Object.keys(SOURCES).sort();
+  if (!keys.length) {
+    return `<div class="srcnote">No source has reported yet.</div>`;
+  }
+  return keys.map(k => {
+    const r = SOURCES[k] || {};
+    const state = !r.ok ? "down" : (r.stale ? "stale" : "ok");
+    const word = state === "down" ? "failing" : (state === "stale" ? "stale" : "ok");
+    const when = r.last_success_ts
+      ? `last ok ${agoText(r.last_success_ts)}`
+      : "no success yet";
+    // last_error is an exception string from an outside API — esc() it.
+    const err = (!r.ok && r.last_error)
+      ? `<div class="srcerr">${esc(r.last_error)}</div>` : "";
+    return `<div class="srcrow">
+      <span class="dot ${state === "ok" ? "on" : (state === "stale" ? "warn" : "off")}"></span>
+      <span class="srcname">${esc(SOURCE_LABELS[k] || k)}</span>
+      <span class="srcstate ${state}">${word}</span>
+      <span class="srcwhen">${esc(when)}</span>
+      ${err}
+    </div>`;
+  }).join("");
 }
 
 /* ======================= live prices ===================================== */
@@ -3581,6 +3646,18 @@ function showSettings() {
           <button data-cb="0" class="${SET.cbsafe ? "" : "on"}">Green / red</button>
           <button data-cb="1" class="${SET.cbsafe ? "on" : ""}">Blue / orange</button>
         </div>
+      </div>
+
+      <div class="setrow col">
+        <div class="lab"><b>Data sources</b>
+          <span>What each outside source last did. A source that has stopped
+                answering shows here rather than only in the terminal — the
+                panels it feeds go quiet, which on its own looks like nothing
+                happening. "ok" means the source answered, not that the answer
+                had anything in it, so a panel can be empty while its source
+                reads ok. Sources fetched on demand show when they were last
+                asked; a while ago is not a fault.</span></div>
+        <div class="srclist" id="setsources">${sourceRows()}</div>
       </div>
 
       <div class="setrow">

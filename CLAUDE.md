@@ -23,6 +23,7 @@ to. It does not tell anyone what to buy.
 | `extras.py` | Supply-chain loading, journal, dividends, misc. |
 | `chokepoints.py` | Shared-dependency analysis over the supply graph. |
 | `alerts.py` | Alert rules and evaluation loop. |
+| `pipeline.py` | Per-source health: what answered, what failed, what's stale. |
 | `notify.py` | Desktop notifications, per OS. |
 | `updater.py` / `update.sh` | Version check. Notify-only — never applies. |
 | `selftest.py` | User-facing install diagnosis. |
@@ -47,6 +48,17 @@ regex must accept `^VIX`, `BRK-B` and `ES=F` — the first attempt broke indices
 
 **Keys are loopback-only.** `/api/setup/savekeys` and `/api/setup/testkeys`
 refuse any request not from 127.0.0.1, so keys cannot be set over LAN access.
+
+**Never surface a raw exception message from a keyed API.** Finnhub
+authenticates by query string, and urllib3 puts the entire URL — token and all
+— into the message of a connection or timeout error. Printing that to a console
+was survivable; the source-health panel briefly stored it, served it from
+`/api/status` and painted it on screen, which in `--lan` mode hands the key to
+any device holding the PIN, and puts it in any screenshot attached to a bug
+report. `pipeline._redact()` strips credential-shaped query params on the way
+in, and `tests/sources.py` asserts it against a real `requests` exception. The
+older precedent is `app.py`'s key test, which keeps `type(e).__name__` and
+throws the message away. Do one or the other; never pass the message through.
 
 **Placeholders are not keys.** `.env.example` values like `your_alpaca_key_here`
 must read as *unset* (`market._clean()`), or the app believes it has credentials
@@ -217,6 +229,7 @@ rule (`min` in `_reachable`) is the one line to revisit.
     python3 tests/final47.py             # 13 checks — needs a server already up
     python3 tests/walk.py                # 62 checks: the advanced walkthrough
     python3 tests/layout.py              # 50 checks: columns, density, charts
+    python3 tests/sources.py             # 51 checks: source health, redaction
     git diff --stat                      # read it
 
 The suites restore your holdings, journal, alerts, settings and `.env` when they

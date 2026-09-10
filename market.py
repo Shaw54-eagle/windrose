@@ -10,13 +10,17 @@ Sources, and why each:
   • Outlook       -> yfinance analyst targets/ratings/earnings. Cached ~30 min.
 
 Nothing here can crash the app: every fetch is wrapped, and a dead source just
-returns empty so the rest of the dashboard keeps working.
+returns empty so the rest of the dashboard keeps working. Every wrap also
+reports to pipeline.py, so "returns empty" is visible in the UI rather than
+only in the console.
 """
 
 from __future__ import annotations
 import os, time, threading, datetime as dt
 import requests
 import pandas as pd
+
+import pipeline as P
 
 try:
     import yfinance as yf
@@ -86,6 +90,20 @@ def have_finnhub() -> bool:
     return bool(_finnhub_key())
 
 
+def _finnhub_get(url: str, params: dict):
+    """One Finnhub call, where a non-2xx counts as a failure.
+
+    requests does not raise on 401 or 429, so a revoked key and a tripped rate
+    limit both arrive as an ordinary response with an empty body. Reading that
+    as "the source answered" reported a dead key as healthy — which is the one
+    failure this panel exists to show.
+    """
+    r = P.with_retry(lambda: requests.get(url, params=params, timeout=8))
+    if not r.ok:
+        raise RuntimeError(f"Finnhub returned HTTP {r.status_code}")
+    return r
+
+
 # --------------------------------------------------------------------------- #
 #  LIVE PRICES — background poller
 # --------------------------------------------------------------------------- #
@@ -121,12 +139,18 @@ def _alpaca_snapshots(symbols: list[str]) -> dict:
     return out
 
 
-def _yf_quotes(symbols: list[str]) -> dict:
+def _yf_quotes(symbols: list[str], source: str = "yfinance-quotes") -> dict:
     """Delayed quotes for a list of symbols.
 
     One batched download instead of a request per symbol — the supply-chain
     map asks for ~300 at once and serial calls took well over a minute.
     Falls back to the per-symbol path if the batch comes back empty.
+
+    `source` exists because two very different callers share this code: the
+    2s live poller asking about a handful of holdings, and the supply-chain
+    map asking about ~300 tickers at once. Reporting both under one name let
+    the poller's next success paper over a map-wide failure two seconds later,
+    so the blank map had no explanation anywhere.
     """
     if not symbols or yf is None:
         return {}
@@ -157,8 +181,9 @@ def _yf_quotes(symbols: list[str]) -> dict:
                 except Exception:
                     continue
         except Exception as e:
-            print(f"[chain quotes batch] {type(e).__name__}: {e}")
+            P.record_fail(source, e)
         if out:
+            P.record_ok(source)
             return out
 
     for sym in symbols:
@@ -179,6 +204,15 @@ def _yf_quotes(symbols: list[str]) -> dict:
             }
         except Exception:
             continue
+    # Every symbol failing is a dead source, but each one failed inside its own
+    # "except: continue", so nothing raised and there was no record at all —
+    # the row simply never appeared, which reads as "never asked" rather than
+    # "asked, and got nothing".
+    if out:
+        P.record_ok(source)
+    else:
+        P.record_fail(source, RuntimeError(
+            f"no quotes returned for any of {len(symbols)} symbol(s)"))
     return out
 
 
@@ -189,12 +223,15 @@ def start_live_poller(get_symbols, interval: float = 2.0):
     def loop():
         global _LIVE_SRC
         while True:
+            tried_alpaca = False
             try:
                 symbols = sorted(set(get_symbols()))
                 if symbols:
-                    snap = _alpaca_snapshots(symbols) if have_alpaca() else {}
+                    tried_alpaca = have_alpaca()
+                    snap = _alpaca_snapshots(symbols) if tried_alpaca else {}
                     if snap:
                         _LIVE_SRC = "alpaca-ws" if ws_healthy() else "alpaca-iex"
+                        P.record_ok("alpaca-quotes")
                     else:
                         snap = _yf_quotes(symbols)
                         _LIVE_SRC = "yfinance-delayed" if snap else "none"
@@ -214,6 +251,11 @@ def start_live_poller(get_symbols, interval: float = 2.0):
                 # 401 every couple of seconds for the life of the process.
                 # Say it once, fall back to delayed quotes, stop asking.
                 global _ALPACA_DISABLED, _AUTH_FAILS
+                # Only blame Alpaca if Alpaca was actually called. Anything
+                # else in this loop failing would otherwise raise a phantom
+                # "Alpaca quotes failing" row for someone who has no keys.
+                if tried_alpaca:
+                    P.record_fail("alpaca-quotes", e)
                 status = getattr(getattr(e, "response", None), "status_code", None)
                 if status in (401, 403):
                     _AUTH_FAILS += 1
@@ -225,8 +267,9 @@ def start_live_poller(get_symbols, interval: float = 2.0):
                               "then restart. Everything else keeps working.\n")
                     elif _AUTH_FAILS < 3:
                         print(f"[live poller] auth rejected ({status}) — retrying")
-                else:
-                    print(f"[live poller] {type(e).__name__}: {e}")
+                # Anything else is recorded above and shown in the UI's data
+                # sources list. Printing it here every 2s buried the one
+                # message that mattered — see the auth notice above.
             # streaming healthy -> poll is just the safety net + prev_close refresh
             time.sleep(15.0 if ws_healthy() else interval)
 
@@ -259,6 +302,11 @@ def get_history(symbols: list[str], bench: str = "SPY", period: str = "1y") -> d
         raw = yf.download(want, period=period, interval="1d",
                           progress=False, auto_adjust=True, group_by="column")
         if raw.empty:
+            # yfinance returns an empty frame rather than raising when it is
+            # rate-limiting. Without this the whole dashboard goes blank while
+            # the panel reports nothing at all about its main source.
+            P.record_fail("yfinance-history",
+                          RuntimeError("yfinance returned no rows"))
             return {"close": pd.DataFrame(), "frames": {}}
         # Normalise to MultiIndex (field, symbol) even for a single symbol
         if not isinstance(raw.columns, pd.MultiIndex):
@@ -275,9 +323,10 @@ def get_history(symbols: list[str], bench: str = "SPY", period: str = "1y") -> d
                 pass
         result = {"close": close, "frames": frames}
         _cache_put(key, result, ttl=600)
+        P.record_ok("yfinance-history")
         return result
     except Exception as e:
-        print(f"[history] {type(e).__name__}: {e}")
+        P.record_fail("yfinance-history", e)
         return {"close": pd.DataFrame(), "frames": {}}
 
 
@@ -314,8 +363,13 @@ def get_futures() -> list[dict]:
                 })
             except Exception:
                 continue
+        if out:
+            P.record_ok("yfinance-futures")
+        else:
+            P.record_fail("yfinance-futures",
+                          RuntimeError("no futures rows parsed"))
     except Exception as e:
-        print(f"[futures] {type(e).__name__}: {e}")
+        P.record_fail("yfinance-futures", e)
     _cache_put(key, out, ttl=20)
     return out
 
@@ -334,9 +388,9 @@ def get_news(symbols: list[str], limit: int = 25) -> list[dict]:
     items, seen = [], set()
     try:
         # General market news
-        r = requests.get("https://finnhub.io/api/v1/news",
-                         params={"category": "general", "token": _finnhub_key()}, timeout=8)
-        for n in (r.json() if r.ok else [])[:15]:
+        r = _finnhub_get("https://finnhub.io/api/v1/news",
+                         {"category": "general", "token": _finnhub_key()})
+        for n in r.json()[:15]:
             h = n.get("headline", "")
             if h and h not in seen:
                 seen.add(h)
@@ -345,16 +399,17 @@ def get_news(symbols: list[str], limit: int = 25) -> list[dict]:
         today = dt.date.today()
         frm = (today - dt.timedelta(days=7)).isoformat()
         for sym in symbols[:6]:
-            r = requests.get("https://finnhub.io/api/v1/company-news",
-                             params={"symbol": sym, "from": frm, "to": today.isoformat(),
-                                     "token": _finnhub_key()}, timeout=8)
-            for n in (r.json() if r.ok else [])[:6]:
+            r = _finnhub_get("https://finnhub.io/api/v1/company-news",
+                             {"symbol": sym, "from": frm, "to": today.isoformat(),
+                              "token": _finnhub_key()})
+            for n in r.json()[:6]:
                 h = n.get("headline", "")
                 if h and h not in seen:
                     seen.add(h)
                     items.append(_news_row(n, sym))
+        P.record_ok("finnhub-news")
     except Exception as e:
-        print(f"[news] {type(e).__name__}: {e}")
+        P.record_fail("finnhub-news", e)
     items.sort(key=lambda x: x.get("ts", 0), reverse=True)
     items = items[:limit]
     _cache_put(key, items, ttl=180)
@@ -425,8 +480,9 @@ def get_outlook(symbol: str) -> dict:
             "next_earnings": next_earn,
         }
         _cache_put(key, out, ttl=1800)
+        P.record_ok("yfinance-outlook")
     except Exception as e:
-        print(f"[outlook {symbol}] {type(e).__name__}: {e}")
+        P.record_fail("yfinance-outlook", e)
     return out
 
 
@@ -492,8 +548,9 @@ def get_fundamentals(symbol: str) -> dict:
             "fcf_history": fcf_hist,
         }
         _cache_put(key, out, ttl=3600)
+        P.record_ok("yfinance-fundamentals")
     except Exception as e:
-        print(f"[fundamentals {symbol}] {type(e).__name__}: {e}")
+        P.record_fail("yfinance-fundamentals", e)
     return out
 
 
@@ -510,8 +567,9 @@ def get_statements(symbol: str) -> dict:
         t = yf.Ticker(symbol)
         out = {"income": t.financials, "balance": t.balance_sheet, "cashflow": t.cashflow}
         _cache_put(key, out, ttl=3600)
+        P.record_ok("yfinance-statements")
     except Exception as e:
-        print(f"[statements {symbol}] {type(e).__name__}: {e}")
+        P.record_fail("yfinance-statements", e)
     return out
 
 
@@ -524,13 +582,13 @@ def get_peers(symbol: str, limit: int = 8) -> list[str]:
     peers = []
     if have_finnhub():
         try:
-            r = requests.get("https://finnhub.io/api/v1/stock/peers",
-                             params={"symbol": symbol, "token": _finnhub_key()}, timeout=8)
-            if r.ok:
-                peers = [p for p in r.json()
-                         if p and p != symbol and "." not in p][:limit]
+            r = _finnhub_get("https://finnhub.io/api/v1/stock/peers",
+                             {"symbol": symbol, "token": _finnhub_key()})
+            peers = [p for p in r.json()
+                     if p and p != symbol and "." not in p][:limit]
+            P.record_ok("finnhub-peers")
         except Exception as e:
-            print(f"[peers {symbol}] {type(e).__name__}: {e}")
+            P.record_fail("finnhub-peers", e)
     _cache_put(key, peers, ttl=86400)
     return peers
 
@@ -588,6 +646,7 @@ def start_stream(get_symbols, on_update=None):
                         t = m.get("T")
                         if t == "success" and m.get("msg") == "authenticated":
                             _WS_HEALTHY = True
+                            P.record_ok("alpaca-stream")
                             syms = sorted(set(get_symbols()))
                             if syms:
                                 ws.send(_json.dumps({"action": "subscribe", "trades": syms}))
@@ -608,13 +667,15 @@ def start_stream(get_symbols, on_update=None):
                                     "src": "alpaca-ws", "ts": time.time(),
                                 }
                             _bump()
+                            P.record_ok("alpaca-stream")
                             if on_update:
                                 try:
                                     on_update(sym)
                                 except Exception:
                                     pass
                         elif t == "error":
-                            print(f"[stream] error: {m}")
+                            P.record_fail("alpaca-stream",
+                                          RuntimeError(str(m.get("msg") or m)))
 
                 def on_close(ws, *a):
                     global _WS_HEALTHY
@@ -650,7 +711,7 @@ def start_stream(get_symbols, on_update=None):
 
                 app.run_forever(ping_interval=20, ping_timeout=8)
             except Exception as e:
-                print(f"[stream] {type(e).__name__}: {e}")
+                P.record_fail("alpaca-stream", e)
             _WS_HEALTHY = False
             time.sleep(15)      # retry
 
@@ -678,9 +739,10 @@ def get_dividend_raw(symbol: str):
         except Exception:
             info = getattr(t, "info", {}) or {}
         _cache_put(key, (t, info), ttl=3600)
+        P.record_ok("yfinance-dividends")
         return t, info
     except Exception as e:
-        print(f"[dividends {symbol}] {type(e).__name__}: {e}")
+        P.record_fail("yfinance-dividends", e)
         return None, {}
 
 
@@ -697,7 +759,7 @@ def get_chain_quotes(symbols: list[str]) -> dict:
     live = get_live().get("quotes", {})
     need = [s for s in symbols if s not in live]
     q = {s: live[s] for s in symbols if s in live}
-    q.update(_yf_quotes(need))
+    q.update(_yf_quotes(need, source="yfinance-chain"))
     _cache_put(key, q, ttl=60)
     return q
 
@@ -741,8 +803,13 @@ def get_strip(symbols: list[str]) -> list[dict]:
             except Exception:
                 continue
         _cache_put(key, out, ttl=20)
+        if out:
+            P.record_ok("yfinance-strip")
+        else:
+            P.record_fail("yfinance-strip",
+                          RuntimeError("no strip rows parsed"))
     except Exception as e:
-        print(f"[strip] {type(e).__name__}: {e}")
+        P.record_fail("yfinance-strip", e)
     return out
 
 
@@ -760,26 +827,27 @@ def get_symbol_news(symbol: str, limit: int = 8) -> list[dict]:
     items = []
     try:
         if symbol == "MARKET":
-            r = requests.get("https://finnhub.io/api/v1/news",
-                             params={"category": "general", "token": _finnhub_key()}, timeout=8)
-            for n in (r.json() if r.ok else [])[:limit]:
+            r = _finnhub_get("https://finnhub.io/api/v1/news",
+                             {"category": "general", "token": _finnhub_key()})
+            for n in r.json()[:limit]:
                 items.append(_news_row(n, "Market"))
         else:
             today = dt.date.today()
             frm = (today - dt.timedelta(days=10)).isoformat()
-            r = requests.get("https://finnhub.io/api/v1/company-news",
-                             params={"symbol": symbol, "from": frm, "to": today.isoformat(),
-                                     "token": _finnhub_key()}, timeout=8)
+            r = _finnhub_get("https://finnhub.io/api/v1/company-news",
+                             {"symbol": symbol, "from": frm, "to": today.isoformat(),
+                              "token": _finnhub_key()})
             seen = set()
-            for n in (r.json() if r.ok else []):
+            for n in r.json():
                 h = n.get("headline", "")
                 if h and h not in seen:
                     seen.add(h)
                     items.append(_news_row(n, symbol))
                 if len(items) >= limit:
                     break
+        P.record_ok("finnhub-news")
     except Exception as e:
-        print(f"[symnews {symbol}] {type(e).__name__}: {e}")
+        P.record_fail("finnhub-news", e)
     _cache_put(key, items, ttl=180)
     return items
 
@@ -804,6 +872,7 @@ def get_card_spark(symbol: str) -> list[float]:
         ser = ser.dropna()
         out = [round(float(x), 2) for x in ser.tolist()][-30:]
         _cache_put(key, out, ttl=1800)
+        P.record_ok("yfinance-spark")
     except Exception as e:
-        print(f"[spark30 {symbol}] {type(e).__name__}: {e}")
+        P.record_fail("yfinance-spark", e)
     return out

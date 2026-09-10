@@ -57,6 +57,7 @@ import models as MD           # noqa: E402
 import strategies as ST       # noqa: E402
 import extras as X            # noqa: E402
 import alerts as AL           # noqa: E402
+import pipeline as PIPE       # noqa: E402
 
 app = Flask(__name__, static_folder=str(BASE / "static"), static_url_path="/static")
 BENCH = "SPY"
@@ -253,6 +254,7 @@ def api_status():
         "version": APP_VERSION,
         "app_name": APP_NAME,
         "settings": load_settings(),
+        "sources": PIPE.snapshot(),
     })
 
 
